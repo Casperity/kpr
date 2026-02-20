@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>I luv u boo</title>
+  <meta property="og:title" content="Kspr" />
+  <meta property="og:description" content="@Cachethesehands. on cord | .gg/chudmaxxing" />
+  
+  <link rel="preload" href="songshit/morgue/plz excuse my proper.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="bg.mp4" as="video" type="video/mp4">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="blur-overlay" id="blur-overlay">Click</div>
+  
+  <div id="blur-content" class="blurred">
+  <div class="video-wrapper">
+    <video muted loop playsinline id="bg-video" preload="auto">
+      <source src="bg.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <div class="main-content"></div>
+
+  <div class="sidebar">
+    <div class="player">
+      <div class="cover">
+        <img id="current-cover" src="" alt="Album cover" />
+      </div>
+      <div class="song-title" id="current-title">Select a song</div>
+      <div class="song-artist" id="current-artist"></div>
+
+      <div class="controls">
+        <button class="btn" id="prev"><i class="fas fa-backward"></i></button>
+        <button class="btn" id="play"><i class="fas fa-play"></i></button>
+        <button class="btn" id="next"><i class="fas fa-forward"></i></button>
+      </div>
+
+      <div class="progress-container" id="progress-container">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <div class="time">
+        <span id="current-time">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+    </div>
+
+    <ul class="playlist" id="playlist"></ul>
+  </div>
+
+  <audio id="audio" preload="metadata"></audio>
+  
+  </div>
+
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('play');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const progress = document.getElementById('progress');
+    const progressContainer = document.getElementById('progress-container');
+    const currentTitle = document.getElementById('current-title');
+    const currentArtist = document.getElementById('current-artist');
+    const currentCover = document.getElementById('current-cover');
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+
+    const songs = [
+      {
+        title: "plz excuse my proper",
+        artist: "backw666s, morgue",
+        src: "songshit/morgue/plz excuse my proper.mp3",
+        cover: "songshit/morgue/excuseme.png"
+      },
+      {
+        title: "plz excuse my proper",
+        artist: "blair, morgue, backw666s",
+        src: "songshit/morgue/teach me how 2 swag.mp3",
+        cover: "songshit/morgue/swag.png"
+      }
+    ];
+
+    let currentSongIndex = 0;
+
+    function loadSong(song) {
+      currentTitle.textContent = song.title;
+      currentArtist.textContent = song.artist;
+      currentCover.src = song.cover || '';
+      audio.src = song.src;
+    }
+
+    function playSong() {
+      playBtn.querySelector('i').classList.remove('fa-play');
+      playBtn.querySelector('i').classList.add('fa-pause');
+      audio.play();
+    }
+
+    function pauseSong() {
+      playBtn.querySelector('i').classList.remove('fa-pause');
+      playBtn.querySelector('i').classList.add('fa-play');
+      audio.pause();
+    }
+
+    function playPause() {
+      if (audio.paused) {
+        playSong();
+      } else {
+        pauseSong();
+      }
+    }
+
+    function nextSong() {
+      currentSongIndex = (currentSongIndex + 1) % songs.length;
+      loadSong(songs[currentSongIndex]);
+      playSong();
+      highlightPlaying();
+    }
+
+    function prevSong() {
+      currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+      loadSong(songs[currentSongIndex]);
+      playSong();
+      highlightPlaying();
+    }
+
+    function updateProgress(e) {
+      const {duration, currentTime} = e.srcElement;
+      if (duration) {
+        const percent = (currentTime / duration) * 100;
+        progress.style.width = percent + '%';
+
+        const curMin = Math.floor(currentTime / 60);
+        const curSec = Math.floor(currentTime % 60).toString().padStart(2,'0');
+        currentTimeEl.textContent = `${curMin}:${curSec}`;
+
+        const durMin = Math.floor(duration / 60);
+        const durSec = Math.floor(duration % 60).toString().padStart(2,'0');
+        durationEl.textContent = `${durMin}:${durSec}`;
+      }
+    }
+
+    function setProgress(e) {
+      const width = this.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+      audio.currentTime = (clickX / width) * duration;
+    }
+
+    function highlightPlaying() {
+      document.querySelectorAll('.playlist li').forEach((li, i) => {
+        li.classList.toggle('playing', i === currentSongIndex);
+      });
+    }
+
+    const playlistEl = document.getElementById('playlist');
+    songs.forEach((song, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <img src="${song.cover || ''}" alt="cover">
+        <div class="playlist-info">
+          <div class="playlist-title">${song.title}</div>
+          <div class="playlist-artist">${song.artist}</div>
+        </div>
+      `;
+      li.addEventListener('click', () => {
+        currentSongIndex = index;
+        loadSong(song);
+        playSong();
+        highlightPlaying();
+      });
+      playlistEl.appendChild(li);
+    });
+
+    playBtn.addEventListener('click', playPause);
+    nextBtn.addEventListener('click', nextSong);
+    prevBtn.addEventListener('click', prevSong);
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', nextSong);
+    progressContainer.addEventListener('click', setProgress);
+
+    loadSong(songs[0]);
+    highlightPlaying();
+    audio.addEventListener('loadedmetadata', () => {
+      playSong();
+    });
+	
+	
+	const overlay = document.getElementById('blur-overlay');
+	const blurContent = document.getElementById('blur-content');
+	const bgVideo = document.getElementById('bg-video');
+
+	overlay.addEventListener('click', () => {
+ 	 blurContent.classList.remove('blurred');
+ 	 overlay.style.display = 'none';
+ 	 audio.play();
+	 bgVideo.play();
+	});
+  </script>
+</body>
+</html>
