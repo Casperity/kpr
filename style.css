@@ -213,7 +213,6 @@ body {
   opacity: 0.75;
 }
 
-/* Optional: highlight currently playing track title a bit more */
 .playlist li.playing .playlist-title {
   color: #ffffff;
 }
