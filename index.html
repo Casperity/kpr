@@ -21,12 +21,16 @@
   <div class="blur-overlay" id="blur-overlay">Click</div>
   
   <div id="blur-content" class="blurred">
-  <div class="video-wrapper">
-    <video muted loop playsinline id="bg-video" preload="auto">
-      <source src="bg.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
+    <div class="bg-image-wrapper">
+      <img src="hon.png" alt="background" id="bg-image">
+    </div>
+  
+  <div class="discord-widget">
+      <iframe src="https://discord.com/widget?id=1467396562639392864&theme=dark" 
+              width="350" height="500" 
+              allowtransparency="true" frameborder="0" 
+              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+    </div>
 
   <div class="main-content"></div>
 
@@ -57,6 +61,7 @@
     <ul class="playlist" id="playlist"></ul>
   </div>
 
+
   <audio id="audio" preload="metadata"></audio>
   
   </div>
@@ -75,6 +80,12 @@
     const durationEl = document.getElementById('duration');
 
     const songs = [
+      {
+        title: "My Jealousy",
+        artist: "vivi baby, ovg!",
+        src: "songshit/MY JEALOUSY.mp3",
+        cover: "songshit/fat.png"
+      },
       {
         title: "plz excuse my proper",
         artist: "backw666s, morgue",
