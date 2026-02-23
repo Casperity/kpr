@@ -231,7 +231,7 @@ body {
     display: none !important;
   }
   body::before {
-    content: "fuck off mobile user";
+    content: "rotate your screen to view";
     font-size: 2rem;
     text-align: center;
     color: red;
