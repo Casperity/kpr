@@ -213,19 +213,17 @@
     loadSong(songs[0]);
     highlightPlaying();
     audio.addEventListener('loadedmetadata', () => {
-      playSong();
+-->      playSong();
     });
 	
 	
 	const overlay = document.getElementById('blur-overlay');
 	const blurContent = document.getElementById('blur-content');
-	const bgVideo = document.getElementById('bg-video');
 
 	overlay.addEventListener('click', () => {
  	 blurContent.classList.remove('blurred');
  	 overlay.style.display = 'none';
  	 audio.play();
-	 bgVideo.play();
 	});
   </script>
 </body>
