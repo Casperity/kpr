@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — kpr.lol</title>
+  <meta name="description" content="Sign in to your kpr.lol account — premium bio-link platform" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta property="og:title" content="Login — kpr.lol" />
+  <meta property="og:description" content="Sign in to your kpr.lol account" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kpr.lol/login" />
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Auth Styles -->
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+
+  <!-- ── Animated Background ──────────────────────────── -->
+  <div class="auth-bg">
+    <div class="noise"></div>
+  </div>
+
+  <!-- ── Floating Particles ───────────────────────────── -->
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- ── Auth Card ────────────────────────────────────── -->
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <!-- Brand -->
+      <div class="auth-brand">
+        <span class="logo-text">kpr<span class="logo-dot">.lol</span></span>
+      </div>
+
+      <!-- Heading -->
+      <div class="auth-heading">
+        <h1>Welcome back</h1>
+        <p>Sign in to your account</p>
+      </div>
+
+      <!-- Form -->
+      <form id="login-form" autocomplete="on" novalidate>
+
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              autocomplete="username"
+              spellcheck="false"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="toggle-password" aria-label="Toggle password visibility" tabindex="-1">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="auth-btn" id="login-btn">
+          <span class="btn-text">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            Sign In
+          </span>
+          <span class="btn-spinner">
+            <span class="spinner"></span>
+            Signing in…
+          </span>
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        Don't have an account? <a href="/signup">Sign up</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Scripts ──────────────────────────────────────── -->
+  <script src="api.js"></script>
+  <script>
+    (function() {
+      'use strict';
+
+      /* ── Redirect if already logged in ───────────────── */
+      if (API.isLoggedIn()) {
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      /* ── DOM refs ────────────────────────────────────── */
+      const form      = document.getElementById('login-form');
+      const btn       = document.getElementById('login-btn');
+      const userInput = document.getElementById('username');
+      const passInput = document.getElementById('password');
+      const toggleBtn = document.querySelector('.toggle-password');
+
+      /* ── Password visibility toggle ──────────────────── */
+      toggleBtn.addEventListener('click', () => {
+        const isPassword = passInput.type === 'password';
+        passInput.type = isPassword ? 'text' : 'password';
+        toggleBtn.querySelector('i').className =
+          isPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+      });
+
+      /* ── Set loading state ───────────────────────────── */
+      function setLoading(loading) {
+        btn.classList.toggle('loading', loading);
+        btn.disabled = loading;
+        userInput.disabled = loading;
+        passInput.disabled = loading;
+      }
+
+      /* ── Form submit ─────────────────────────────────── */
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = userInput.value.trim();
+        const password = passInput.value;
+
+        /* Client-side validation */
+        if (!username) {
+          Toast.show('Please enter your username.', 'error');
+          userInput.focus();
+          return;
+        }
+        if (!password) {
+          Toast.show('Please enter your password.', 'error');
+          passInput.focus();
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          const data = await API.login(username, password);
+
+          /* Store auth data */
+          if (data.token) API.setToken(data.token);
+          if (data.user)  API.setUser(data.user);
+
+          Toast.show('Welcome back!', 'success', 2000);
+
+          /* Redirect after brief delay for toast visibility */
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 600);
+
+        } catch (err) {
+          setLoading(false);
+          const msg = err.message || err.error || 'Login failed. Please try again.';
+          Toast.show(msg, 'error');
+
+          /* Shake the card on error */
+          const card = document.querySelector('.auth-card');
+          card.style.animation = 'none';
+          card.offsetHeight; /* trigger reflow */
+          card.style.animation = 'shake 0.5s ease';
+        }
+      });
+
+      /* ── Enter key on username → focus password ──────── */
+      userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          passInput.focus();
+        }
+      });
+
+      /* Auto-focus username */
+      userInput.focus();
+
+    })();
+  </script>
+
+  <!-- Shake animation for errors -->
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+  </style>
+
+</body>
+</html>

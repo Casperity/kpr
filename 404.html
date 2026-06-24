@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kpr.lol</title>
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta property="og:site_name" content="kpr.lol" />
+  <meta property="og:title" content="kpr.lol" />
+  <meta property="og:description" content="Bio link platform" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body class="profile-page" id="body">
+
+  <!-- Loading State -->
+  <div id="state-loading" class="profile-loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading</div>
+  </div>
+
+  <!-- Profile State (hidden by default) -->
+  <div id="state-profile" class="profile-container" style="display:none;"></div>
+
+  <!-- 404 State (hidden by default) -->
+  <div id="state-404" style="display:none;">
+    <div class="profile-404">
+      <div class="profile-404-code">404</div>
+      <div class="profile-404-msg">User not found</div>
+      <a href="/" class="profile-404-link">Back to kpr.lol</a>
+    </div>
+  </div>
+
+  <!-- Error State (hidden by default) -->
+  <div id="state-error" style="display:none;">
+    <div class="profile-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div class="profile-error-msg">Something went wrong</div>
+      <a href="/" class="profile-error-link">Back to kpr.lol</a>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    /* =============================================
+       kpr.lol — Profile Renderer / 404 Handler
+       ============================================= */
+
+    const KNOWN_PATHS = ['/', '/index.html', '/login', '/login.html', '/signup', '/signup.html', '/dashboard', '/dashboard.html', '/admin', '/admin.html'];
+
+    const PLATFORM_ICONS = {
+      discord:    'fa-brands fa-discord',
+      twitter:    'fa-brands fa-x-twitter',
+      x:          'fa-brands fa-x-twitter',
+      instagram:  'fa-brands fa-instagram',
+      youtube:    'fa-brands fa-youtube',
+      github:     'fa-brands fa-github',
+      telegram:   'fa-brands fa-telegram',
+      spotify:    'fa-brands fa-spotify',
+      soundcloud: 'fa-brands fa-soundcloud',
+      twitch:     'fa-brands fa-twitch',
+      tiktok:     'fa-brands fa-tiktok',
+      steam:      'fa-brands fa-steam',
+      reddit:     'fa-brands fa-reddit',
+      linkedin:   'fa-brands fa-linkedin',
+      snapchat:   'fa-brands fa-snapchat',
+      pinterest:  'fa-brands fa-pinterest',
+      website:    'fa-solid fa-globe',
+      email:      'fa-solid fa-envelope',
+      other:      'fa-solid fa-link'
+    };
+
+    const PLATFORM_LABELS = {
+      discord: 'Discord', twitter: 'Twitter / X', x: 'X', instagram: 'Instagram',
+      youtube: 'YouTube', github: 'GitHub', telegram: 'Telegram', spotify: 'Spotify',
+      soundcloud: 'SoundCloud', twitch: 'Twitch', tiktok: 'TikTok', steam: 'Steam',
+      reddit: 'Reddit', linkedin: 'LinkedIn', snapchat: 'Snapchat', pinterest: 'Pinterest',
+      website: 'Website', email: 'Email', other: 'Link'
+    };
+
+    // --- Utility: hex to RGB for CSS var ---
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const num = parseInt(hex, 16);
+      return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+    }
+
+    // --- Escape HTML ---
+    function esc(str) {
+      const d = document.createElement('div');
+      d.textContent = str || '';
+      return d.innerHTML;
+    }
+
+    // --- State management ---
+    function showState(id) {
+      ['state-loading', 'state-profile', 'state-404', 'state-error'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? '' : 'none';
+      });
+    }
+
+    // --- Render profile ---
+    function renderProfile(data) {
+      const body = document.getElementById('body');
+      const container = document.getElementById('state-profile');
+
+      // -- Background --
+      const bgColor = data.settings?.bg_color || data.bg_color || '#0a0a0f';
+      body.style.setProperty('--bg-color', bgColor);
+      body.style.backgroundColor = bgColor;
+
+      const bgImage = data.settings?.bg_image_url || data.bg_image_url;
+      if (bgImage) {
+        body.style.backgroundImage = `url(${bgImage})`;
+        body.classList.add('has-bg-image');
+      }
+
+      // -- Accent --
+      const accent = data.settings?.accent_color || data.accent_color || '#a78bfa';
+      container.style.setProperty('--accent', accent);
+      container.style.setProperty('--accent-rgb', hexToRgb(accent));
+
+      // -- OG tags --
+      document.title = `${data.display_name || data.username} — kpr.lol`;
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.content = data.display_name || data.username;
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc) ogDesc.content = data.bio || 'Check out my profile on kpr.lol';
+      if (data.avatar_url) {
+        const ogImg = document.querySelector('meta[property="og:image"]');
+        if (ogImg) ogImg.content = data.avatar_url;
+      }
+
+      // -- Avatar --
+      const avatarUrl = data.avatar_url || 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect fill="#1a1a24" width="128" height="128"/><circle cx="64" cy="48" r="24" fill="#2a2a3a"/><ellipse cx="64" cy="110" rx="40" ry="30" fill="#2a2a3a"/></svg>'
+      );
+
+      // -- Social links --
+      let linksHtml = '';
+      const links = data.social_links || data.socials || [];
+      links.forEach(link => {
+        const platform = (link.platform || 'other').toLowerCase();
+        const icon = PLATFORM_ICONS[platform] || PLATFORM_ICONS.other;
+        const label = link.label || link.title || PLATFORM_LABELS[platform] || platform;
+        const url = link.url || '#';
+        linksHtml += `
+          <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="social-link">
+            <i class="${icon}"></i>
+            <span>${esc(label)}</span>
+          </a>`;
+      });
+
+      // -- Music player --
+      let musicHtml = '';
+      const musicUrl = data.settings?.music_url || data.music_url;
+      if (musicUrl) {
+        const musicTitle = data.settings?.music_title || data.music_title || 'Now Playing';
+        const musicArtist = data.settings?.music_artist || data.music_artist || '';
+        musicHtml = `
+          <div class="profile-music" id="music-player">
+            <button class="profile-music-btn" id="music-toggle" title="Play / Pause">
+              <i class="fas fa-play"></i>
+            </button>
+            <div class="profile-music-info">
+              <div class="profile-music-title">${esc(musicTitle)}</div>
+              ${musicArtist ? `<div class="profile-music-artist">${esc(musicArtist)}</div>` : ''}
+            </div>
+            <div class="profile-music-progress" id="music-progress">
+              <div class="profile-music-progress-bar" id="music-progress-bar"></div>
+            </div>
+            <audio id="profile-audio" src="${esc(musicUrl)}" preload="metadata" loop></audio>
+          </div>`;
+      }
+
+      // -- Views --
+      let viewsHtml = '';
+      if (data.views != null || data.profile_views != null) {
+        const views = data.views ?? data.profile_views ?? 0;
+        viewsHtml = `
+          <div class="profile-views">
+            <i class="fas fa-eye"></i>
+            <span>${Number(views).toLocaleString()} views</span>
+          </div>`;
+      }
+
+      // -- Build card --
+      container.innerHTML = `
+        <div class="profile-card">
+          <img class="profile-avatar" src="${esc(avatarUrl)}" alt="${esc(data.display_name || data.username)}" onerror="this.style.display='none'" />
+          <h1 class="profile-name">${esc(data.display_name || data.username)}</h1>
+          ${data.bio ? `<p class="profile-bio">${esc(data.bio)}</p>` : ''}
+          ${linksHtml ? `<div class="profile-links">${linksHtml}</div>` : ''}
+          ${musicHtml}
+          ${viewsHtml}
+        </div>
+        <div class="profile-footer">
+          <a href="/">kpr.lol</a>
+        </div>`;
+
+      showState('state-profile');
+
+      // -- Init music player --
+      if (musicUrl) initMusicPlayer();
+    }
+
+    // --- Music player ---
+    function initMusicPlayer() {
+      const audio = document.getElementById('profile-audio');
+      const btn = document.getElementById('music-toggle');
+      const progressWrap = document.getElementById('music-progress');
+      const progressBar = document.getElementById('music-progress-bar');
+      if (!audio || !btn) return;
+
+      btn.addEventListener('click', () => {
+        if (audio.paused) {
+          audio.play().catch(() => {});
+          btn.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+          audio.pause();
+          btn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+          progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        }
+      });
+
+      if (progressWrap) {
+        progressWrap.addEventListener('click', (e) => {
+          const rect = progressWrap.getBoundingClientRect();
+          const pct = (e.clientX - rect.left) / rect.width;
+          if (audio.duration) audio.currentTime = pct * audio.duration;
+        });
+      }
+    }
+
+    // --- Main entry ---
+    async function init() {
+      const path = window.location.pathname.replace(/\/+$/, '') || '/';
+
+      // Check known paths
+      if (KNOWN_PATHS.includes(path) || KNOWN_PATHS.includes(path + '.html')) {
+        // If we're on a known path and this 404 page loaded, something went wrong
+        showState('state-404');
+        return;
+      }
+
+      // Extract username (first segment after /)
+      const segments = path.split('/').filter(Boolean);
+      const username = segments[0];
+
+      if (!username || username.length > 40) {
+        showState('state-404');
+        return;
+      }
+
+      try {
+        const res = await API.getProfile(username);
+        if (res && (res.success !== false)) {
+          const profile = res.data || res.profile || res.user || res;
+          renderProfile(profile);
+        } else {
+          showState('state-404');
+        }
+      } catch (err) {
+        if (err.status === 404 || (err.response && err.response.status === 404)) {
+          showState('state-404');
+        } else {
+          console.error('Profile load error:', err);
+          showState('state-error');
+        }
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

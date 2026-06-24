@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — kpr.lol</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/dashboard.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="dash-nav">
+    <a href="/" class="dash-nav-brand">kpr<span>.lol</span></a>
+    <div class="dash-nav-actions">
+      <a href="/dashboard" class="dash-nav-link">Dashboard</a>
+      <a href="/admin" class="dash-nav-link active">Admin</a>
+      <button class="btn-logout" id="btn-logout">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="dash-content" style="max-width: 1000px; margin: 0 auto; display: block;">
+    
+    <div class="dash-section" id="section-invites" style="margin-bottom: 2rem;">
+      <div class="dash-section-header collapsed">
+        <div class="dash-section-title">
+          <i class="fas fa-ticket-alt"></i> Invite Codes
+        </div>
+      </div>
+      <div class="dash-section-body" style="display: block;">
+        
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+          <input type="number" id="invite-count" class="form-input" value="5" min="1" max="50" style="width: 100px;">
+          <button id="btn-generate" class="btn-save" style="width: auto;">Generate Codes</button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <th style="padding: 1rem;">Code</th>
+                <th style="padding: 1rem;">Status</th>
+                <th style="padding: 1rem;">Used By</th>
+                <th style="padding: 1rem;">Created</th>
+                <th style="padding: 1rem;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invites-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/api.js"></script>
+  <script>
+    if (!API.isLoggedIn()) {
+      window.location.href = '/login';
+    }
+
+    // Nav
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      API.logout();
+      window.location.href = '/login';
+    });
+
+    // Load invites
+    async function loadInvites() {
+      try {
+        const data = await API.getInvites();
+        const tbody = document.getElementById('invites-tbody');
+        tbody.innerHTML = '';
+
+        if (!data.invites || data.invites.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: rgba(255,255,255,0.5);">No invite codes found</td></tr>';
+          return;
+        }
+
+        data.invites.forEach(inv => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+          
+          const statusColor = inv.isUsed ? 'rgba(255,255,255,0.3)' : '#4ade80';
+          const statusText = inv.isUsed ? 'Used' : 'Available';
+
+          const usedBy = inv.usedBy ? `<a href="/${inv.usedBy}" target="_blank" style="color: var(--accent);">${inv.usedBy}</a>` : '-';
+          
+          const date = new Date(inv.createdAt).toLocaleDateString();
+
+          tr.innerHTML = `
+            <td style="padding: 1rem; font-family: monospace;">${inv.code}</td>
+            <td style="padding: 1rem;">
+              <span style="background: ${statusColor}; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+                ${statusText}
+              </span>
+            </td>
+            <td style="padding: 1rem;">${usedBy}</td>
+            <td style="padding: 1rem; color: rgba(255,255,255,0.5);">${date}</td>
+            <td style="padding: 1rem;">
+              <button onclick="copyCode('${inv.code}')" style="background: none; border: none; color: #fff; cursor: pointer; margin-right: 10px;" title="Copy">
+                <i class="fas fa-copy"></i>
+              </button>
+              ${!inv.isUsed ? `
+              <button onclick="deleteCode('${inv.code}')" style="background: none; border: none; color: #ef4444; cursor: pointer;" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+              ` : ''}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        if (err.status === 403) {
+          document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20vh;">Access Denied. Admins Only.</h1>';
+        } else {
+          console.error(err);
+        }
+      }
+    }
+
+    document.getElementById('btn-generate').addEventListener('click', async () => {
+      const count = parseInt(document.getElementById('invite-count').value) || 1;
+      try {
+        await API.createInvites(count);
+        loadInvites();
+        Toast.show(`Generated ${count} code(s)`, 'success');
+      } catch (err) {
+        console.error(err);
+        Toast.show('Failed to generate codes', 'error');
+      }
+    });
+
+    window.copyCode = (code) => {
+      navigator.clipboard.writeText(code);
+      Toast.show('Copied to clipboard', 'success');
+    };
+
+    window.deleteCode = async (code) => {
+      if (!confirm(`Delete code ${code}?`)) return;
+      try {
+        await API.deleteInvite(code);
+        loadInvites();
+        Toast.show('Code deleted', 'success');
+      } catch (err) {
+        console.error(err);
+        Toast.show('Failed to delete code', 'error');
+      }
+    };
+
+    loadInvites();
+  </script>
+</body>
+</html>

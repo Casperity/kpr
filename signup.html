@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up — kpr.lol</title>
+  <meta name="description" content="Create your kpr.lol account — premium bio-link platform" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta property="og:title" content="Sign Up — kpr.lol" />
+  <meta property="og:description" content="Join the platform — create your kpr.lol account" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kpr.lol/signup" />
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Auth Styles -->
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+
+  <!-- ── Animated Background ──────────────────────────── -->
+  <div class="auth-bg">
+    <div class="noise"></div>
+  </div>
+
+  <!-- ── Floating Particles ───────────────────────────── -->
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- ── Auth Card ────────────────────────────────────── -->
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <!-- Brand -->
+      <div class="auth-brand">
+        <span class="logo-text">kpr<span class="logo-dot">.lol</span></span>
+      </div>
+
+      <!-- Heading -->
+      <div class="auth-heading">
+        <h1>Create your account</h1>
+        <p>Join the platform</p>
+      </div>
+
+      <!-- Form -->
+      <form id="signup-form" autocomplete="on" novalidate>
+
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Choose a username"
+              autocomplete="username"
+              spellcheck="false"
+              maxlength="20"
+              required
+            />
+            <span class="input-validation" id="username-validation"></span>
+          </div>
+          <div class="validation-hint" id="username-hint">3–20 characters, lowercase letters, numbers & underscores</div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+            />
+            <button type="button" class="toggle-password" data-target="password" aria-label="Toggle password visibility" tabindex="-1">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <div class="password-strength" id="password-strength" style="display: none;">
+            <div class="strength-bars">
+              <div class="strength-bar" id="str-1"></div>
+              <div class="strength-bar" id="str-2"></div>
+              <div class="strength-bar" id="str-3"></div>
+              <div class="strength-bar" id="str-4"></div>
+            </div>
+            <span class="strength-label" id="strength-label"></span>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirm-password">Confirm Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-shield-halved input-icon"></i>
+            <input
+              type="password"
+              id="confirm-password"
+              name="confirm-password"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+              required
+            />
+            <button type="button" class="toggle-password" data-target="confirm-password" aria-label="Toggle password visibility" tabindex="-1">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <div class="validation-hint" id="confirm-hint" style="display: none;"></div>
+        </div>
+
+        <!-- Invite Code -->
+        <div class="form-group invite-group">
+          <label for="invite-code">
+            <i class="fa-solid fa-star" style="margin-right: 4px; font-size: 0.65rem;"></i>
+            Invite Code
+          </label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-ticket input-icon"></i>
+            <input
+              type="text"
+              id="invite-code"
+              name="invite-code"
+              placeholder="Enter your invite code"
+              autocomplete="off"
+              spellcheck="false"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="auth-btn" id="signup-btn">
+          <span class="btn-text">
+            <i class="fa-solid fa-rocket"></i>
+            Create Account
+          </span>
+          <span class="btn-spinner">
+            <span class="spinner"></span>
+            Creating account…
+          </span>
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        Already have an account? <a href="/login">Log in</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Scripts ──────────────────────────────────────── -->
+  <script src="api.js"></script>
+  <script>
+    (function() {
+      'use strict';
+
+      /* ── Redirect if already logged in ───────────────── */
+      if (API.isLoggedIn()) {
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      /* ── DOM refs ────────────────────────────────────── */
+      const form          = document.getElementById('signup-form');
+      const btn           = document.getElementById('signup-btn');
+      const userInput     = document.getElementById('username');
+      const passInput     = document.getElementById('password');
+      const confirmInput  = document.getElementById('confirm-password');
+      const inviteInput   = document.getElementById('invite-code');
+      const userValid     = document.getElementById('username-validation');
+      const userHint      = document.getElementById('username-hint');
+      const strengthWrap  = document.getElementById('password-strength');
+      const strengthLabel = document.getElementById('strength-label');
+      const confirmHint   = document.getElementById('confirm-hint');
+
+      const strengthBars = [
+        document.getElementById('str-1'),
+        document.getElementById('str-2'),
+        document.getElementById('str-3'),
+        document.getElementById('str-4')
+      ];
+
+      /* ── Password visibility toggles ─────────────────── */
+      document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = document.getElementById(btn.dataset.target);
+          const isPassword = target.type === 'password';
+          target.type = isPassword ? 'text' : 'password';
+          btn.querySelector('i').className =
+            isPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        });
+      });
+
+      /* ── Username validation (real-time) ─────────────── */
+      const usernameRegex = /^[a-z0-9_]{3,20}$/;
+
+      userInput.addEventListener('input', () => {
+        const val = userInput.value;
+        if (!val) {
+          userValid.innerHTML = '';
+          userValid.className = 'input-validation';
+          userHint.className = 'validation-hint';
+          userHint.textContent = '3–20 characters, lowercase letters, numbers & underscores';
+          return;
+        }
+
+        /* Force lowercase */
+        if (val !== val.toLowerCase()) {
+          userInput.value = val.toLowerCase();
+        }
+
+        const v = userInput.value;
+        const valid = usernameRegex.test(v);
+
+        if (valid) {
+          userValid.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+          userValid.className = 'input-validation valid';
+          userHint.textContent = 'Looks good!';
+          userHint.className = 'validation-hint success';
+        } else {
+          userValid.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+          userValid.className = 'input-validation invalid';
+          if (v.length < 3) {
+            userHint.textContent = 'At least 3 characters required';
+          } else if (v.length > 20) {
+            userHint.textContent = 'Maximum 20 characters';
+          } else if (/[^a-z0-9_]/.test(v)) {
+            userHint.textContent = 'Only lowercase letters, numbers & underscores';
+          } else {
+            userHint.textContent = '3–20 characters, lowercase letters, numbers & underscores';
+          }
+          userHint.className = 'validation-hint error';
+        }
+      });
+
+      /* ── Password strength meter ─────────────────────── */
+      function getPasswordStrength(pw) {
+        let score = 0;
+        if (pw.length >= 6)  score++;
+        if (pw.length >= 10) score++;
+        if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+        if (/\d/.test(pw)) score++;
+        if (/[^a-zA-Z\d]/.test(pw)) score++;
+        if (pw.length >= 14) score++;
+
+        if (score <= 1) return { level: 1, label: 'Weak',   cls: 'weak' };
+        if (score <= 2) return { level: 2, label: 'Fair',   cls: 'medium' };
+        if (score <= 4) return { level: 3, label: 'Strong', cls: 'strong' };
+        return              { level: 4, label: 'Solid',  cls: 'very-strong' };
+      }
+
+      passInput.addEventListener('input', () => {
+        const pw = passInput.value;
+
+        if (!pw) {
+          strengthWrap.style.display = 'none';
+          return;
+        }
+
+        strengthWrap.style.display = 'flex';
+        const s = getPasswordStrength(pw);
+
+        strengthBars.forEach((bar, i) => {
+          bar.className = 'strength-bar';
+          if (i < s.level) {
+            bar.classList.add('active', s.cls);
+          }
+        });
+
+        strengthLabel.textContent = s.label;
+        strengthLabel.className = 'strength-label ' + s.cls;
+
+        /* Also re-check confirm match */
+        checkConfirm();
+      });
+
+      /* ── Confirm password match ──────────────────────── */
+      function checkConfirm() {
+        const pw = passInput.value;
+        const conf = confirmInput.value;
+
+        if (!conf) {
+          confirmHint.style.display = 'none';
+          return;
+        }
+
+        confirmHint.style.display = 'block';
+
+        if (pw === conf) {
+          confirmHint.textContent = 'Passwords match';
+          confirmHint.className = 'validation-hint success';
+        } else {
+          confirmHint.textContent = 'Passwords do not match';
+          confirmHint.className = 'validation-hint error';
+        }
+      }
+
+      confirmInput.addEventListener('input', checkConfirm);
+
+      /* ── Set loading state ───────────────────────────── */
+      function setLoading(loading) {
+        btn.classList.toggle('loading', loading);
+        btn.disabled = loading;
+        userInput.disabled = loading;
+        passInput.disabled = loading;
+        confirmInput.disabled = loading;
+        inviteInput.disabled = loading;
+      }
+
+      /* ── Form submit ─────────────────────────────────── */
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username   = userInput.value.trim();
+        const password   = passInput.value;
+        const confirm    = confirmInput.value;
+        const inviteCode = inviteInput.value.trim();
+
+        /* ── Validation ───────────────── */
+        if (!username) {
+          Toast.show('Please choose a username.', 'error');
+          userInput.focus();
+          return;
+        }
+        if (!usernameRegex.test(username)) {
+          Toast.show('Username must be 3–20 chars: lowercase letters, numbers & underscores only.', 'error');
+          userInput.focus();
+          return;
+        }
+        if (!password) {
+          Toast.show('Please create a password.', 'error');
+          passInput.focus();
+          return;
+        }
+        if (password.length < 6) {
+          Toast.show('Password must be at least 6 characters.', 'error');
+          passInput.focus();
+          return;
+        }
+        if (password !== confirm) {
+          Toast.show('Passwords do not match.', 'error');
+          confirmInput.focus();
+          return;
+        }
+        if (!inviteCode) {
+          Toast.show('An invite code is required to sign up.', 'error');
+          inviteInput.focus();
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          const data = await API.signup(username, password, inviteCode);
+
+          /* Store auth data */
+          if (data.token) API.setToken(data.token);
+          if (data.user)  API.setUser(data.user);
+
+          Toast.show('Account created! Welcome to kpr.lol', 'success', 2500);
+
+          /* Redirect */
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 800);
+
+        } catch (err) {
+          setLoading(false);
+          const msg = err.message || err.error || 'Signup failed. Please try again.';
+          Toast.show(msg, 'error');
+
+          /* Shake card */
+          const card = document.querySelector('.auth-card');
+          card.style.animation = 'none';
+          card.offsetHeight;
+          card.style.animation = 'shake 0.5s ease';
+        }
+      });
+
+      /* Auto-focus username */
+      userInput.focus();
+
+    })();
+  </script>
+
+  <!-- Shake animation for errors -->
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+  </style>
+
+</body>
+</html>

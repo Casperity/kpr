@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — kpr.lol</title>
+  <meta name="theme-color" content="#0a0a0f" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="dash-nav">
+    <a href="/" class="dash-nav-brand">kpr<span>.lol</span></a>
+    <div class="dash-nav-actions">
+      <a href="/dashboard" class="dash-nav-link active">Dashboard</a>
+      <a href="#" id="nav-view-profile" class="dash-nav-link" target="_blank">
+        <i class="fas fa-external-link-alt" style="margin-right:4px;font-size:0.75rem;"></i> View Profile
+      </a>
+      <button class="btn-logout" id="btn-logout">
+        <i class="fas fa-sign-out-alt" style="margin-right:4px;"></i> Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="dash-content">
+
+    <!-- Left: Form -->
+    <div class="dash-form-area">
+
+      <!-- Basic Info -->
+      <div class="dash-section" id="section-basic">
+        <div class="dash-section-header" onclick="toggleSection('section-basic')">
+          <div class="dash-section-title">
+            <i class="fas fa-user"></i> Basic Info
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div class="form-group">
+            <label class="form-label">Display Name</label>
+            <input type="text" class="form-input" id="input-name" placeholder="Your display name" maxlength="40" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bio</label>
+            <textarea class="form-textarea" id="input-bio" placeholder="Tell the world about yourself..." maxlength="500" rows="3"></textarea>
+            <div class="char-counter" id="bio-counter">0 / 500</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Avatar URL</label>
+            <div class="avatar-preview-row">
+              <img class="avatar-preview-img" id="avatar-preview" src="" alt="" />
+              <input type="url" class="form-input" id="input-avatar" placeholder="https://example.com/avatar.png" />
+            </div>
+            <div class="form-hint">Paste a direct link to your profile picture</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Links -->
+      <div class="dash-section" id="section-links">
+        <div class="dash-section-header" onclick="toggleSection('section-links')">
+          <div class="dash-section-title">
+            <i class="fas fa-link"></i> Social Links
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div id="links-list"></div>
+          <button class="btn-add-link" id="btn-add-link">
+            <i class="fas fa-plus"></i> Add Link
+          </button>
+          <div class="links-limit" id="links-limit">0 / 15 links</div>
+        </div>
+      </div>
+
+      <!-- Theme Settings -->
+      <div class="dash-section" id="section-theme">
+        <div class="dash-section-header" onclick="toggleSection('section-theme')">
+          <div class="dash-section-title">
+            <i class="fas fa-palette"></i> Theme Settings
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div class="form-group">
+            <label class="form-label">Accent Color</label>
+            <div class="color-picker-row">
+              <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;">
+                <input type="color" id="input-accent-picker" value="#a78bfa" />
+              </div>
+              <input type="text" class="form-input" id="input-accent" value="#a78bfa" placeholder="#a78bfa" maxlength="7" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Background Color</label>
+            <div class="color-picker-row">
+              <div class="color-swatch" id="swatch-bg" style="background:#0a0a0f;">
+                <input type="color" id="input-bg-picker" value="#0a0a0f" />
+              </div>
+              <input type="text" class="form-input" id="input-bg" value="#0a0a0f" placeholder="#0a0a0f" maxlength="7" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Background Image URL</label>
+            <input type="url" class="form-input" id="input-bg-image" placeholder="https://example.com/background.jpg" />
+            <div class="form-hint">Leave empty for solid background color</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Music URL <span style="opacity:0.4;">(optional)</span></label>
+            <input type="url" class="form-input" id="input-music-url" placeholder="https://example.com/song.mp3" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Music Title</label>
+            <input type="text" class="form-input" id="input-music-title" placeholder="Song title" maxlength="80" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Music Artist</label>
+            <input type="text" class="form-input" id="input-music-artist" placeholder="Artist name" maxlength="80" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <div class="dash-save-area">
+        <button class="btn-save" id="btn-save">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Right: Live Preview -->
+    <div class="dash-preview-area">
+      <div class="preview-label">Live Preview</div>
+      <div class="preview-phone" id="preview-phone">
+        <div class="preview-phone-notch"></div>
+        <div class="preview-phone-screen" id="preview-screen">
+          <img class="preview-avatar" id="preview-avatar" src="" alt="" />
+          <div class="preview-name" id="preview-name">Your Name</div>
+          <div class="preview-bio" id="preview-bio"></div>
+          <div class="preview-links" id="preview-links"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    /* =============================================
+       kpr.lol — Dashboard
+       ============================================= */
+
+    const PLATFORMS = [
+      { value: 'discord',    label: 'Discord',    icon: 'fa-brands fa-discord' },
+      { value: 'twitter',    label: 'Twitter / X', icon: 'fa-brands fa-x-twitter' },
+      { value: 'instagram',  label: 'Instagram',  icon: 'fa-brands fa-instagram' },
+      { value: 'youtube',    label: 'YouTube',    icon: 'fa-brands fa-youtube' },
+      { value: 'github',     label: 'GitHub',     icon: 'fa-brands fa-github' },
+      { value: 'telegram',   label: 'Telegram',   icon: 'fa-brands fa-telegram' },
+      { value: 'spotify',    label: 'Spotify',    icon: 'fa-brands fa-spotify' },
+      { value: 'soundcloud', label: 'SoundCloud', icon: 'fa-brands fa-soundcloud' },
+      { value: 'twitch',     label: 'Twitch',     icon: 'fa-brands fa-twitch' },
+      { value: 'tiktok',     label: 'TikTok',     icon: 'fa-brands fa-tiktok' },
+      { value: 'steam',      label: 'Steam',      icon: 'fa-brands fa-steam' },
+      { value: 'website',    label: 'Website',    icon: 'fa-solid fa-globe' },
+      { value: 'email',      label: 'Email',      icon: 'fa-solid fa-envelope' },
+      { value: 'other',      label: 'Other',      icon: 'fa-solid fa-link' }
+    ];
+
+    const MAX_LINKS = 15;
+    let socialLinks = [];
+    let currentUser = null;
+
+    // --- Auth check ---
+    if (!API.isLoggedIn()) {
+      window.location.href = '/login';
+    }
+
+    // --- DOM refs ---
+    const inputName = document.getElementById('input-name');
+    const inputBio = document.getElementById('input-bio');
+    const inputAvatar = document.getElementById('input-avatar');
+    const bioCounter = document.getElementById('bio-counter');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const linksList = document.getElementById('links-list');
+    const linksLimit = document.getElementById('links-limit');
+    const btnAddLink = document.getElementById('btn-add-link');
+    const inputAccent = document.getElementById('input-accent');
+    const inputAccentPicker = document.getElementById('input-accent-picker');
+    const swatchAccent = document.getElementById('swatch-accent');
+    const inputBg = document.getElementById('input-bg');
+    const inputBgPicker = document.getElementById('input-bg-picker');
+    const swatchBg = document.getElementById('swatch-bg');
+    const inputBgImage = document.getElementById('input-bg-image');
+    const inputMusicUrl = document.getElementById('input-music-url');
+    const inputMusicTitle = document.getElementById('input-music-title');
+    const inputMusicArtist = document.getElementById('input-music-artist');
+    const btnSave = document.getElementById('btn-save');
+    const btnLogout = document.getElementById('btn-logout');
+    const navViewProfile = document.getElementById('nav-view-profile');
+
+    // Preview refs
+    const previewPhone = document.getElementById('preview-phone');
+    const previewScreen = document.getElementById('preview-screen');
+    const previewAvatar = document.getElementById('preview-avatar');
+    const previewName = document.getElementById('preview-name');
+    const previewBio = document.getElementById('preview-bio');
+    const previewLinks = document.getElementById('preview-links');
+
+    // --- Section toggle ---
+    function toggleSection(id) {
+      document.getElementById(id).classList.toggle('collapsed');
+    }
+
+    // --- Load profile data ---
+    async function loadProfile() {
+      try {
+        const res = await API.getMe();
+        const user = res.data || res.user || res.profile || res;
+        currentUser = user;
+
+        // Populate nav
+        navViewProfile.href = '/' + (user.username || '');
+
+        // Basic info
+        inputName.value = user.display_name || '';
+        inputBio.value = user.bio || '';
+        inputAvatar.value = user.avatar_url || '';
+        updateBioCounter();
+        updateAvatarPreview();
+
+        // Social links
+        socialLinks = (user.social_links || user.socials || []).map(l => ({
+          platform: l.platform || 'other',
+          url: l.url || '',
+          label: l.label || l.title || ''
+        }));
+        renderLinksList();
+
+        // Theme
+        const settings = user.settings || {};
+        const accent = settings.accent_color || user.accent_color || '#a78bfa';
+        const bg = settings.bg_color || user.bg_color || '#0a0a0f';
+        inputAccent.value = accent;
+        inputAccentPicker.value = accent;
+        swatchAccent.style.background = accent;
+        inputBg.value = bg;
+        inputBgPicker.value = normalizeHex(bg);
+        swatchBg.style.background = bg;
+        inputBgImage.value = settings.bg_image_url || user.bg_image_url || '';
+        inputMusicUrl.value = settings.music_url || user.music_url || '';
+        inputMusicTitle.value = settings.music_title || user.music_title || '';
+        inputMusicArtist.value = settings.music_artist || user.music_artist || '';
+
+        updatePreview();
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+        Toast.show('Failed to load profile data', 'error');
+      }
+    }
+
+    function normalizeHex(hex) {
+      hex = (hex || '#000000').replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      if (hex.length < 6) hex = hex.padEnd(6, '0');
+      return '#' + hex.substring(0, 6);
+    }
+
+    // --- Bio counter ---
+    function updateBioCounter() {
+      const len = inputBio.value.length;
+      bioCounter.textContent = `${len} / 500`;
+      bioCounter.classList.toggle('over', len > 500);
+    }
+    inputBio.addEventListener('input', () => { updateBioCounter(); updatePreview(); });
+
+    // --- Avatar preview ---
+    function updateAvatarPreview() {
+      const url = inputAvatar.value.trim();
+      if (url) {
+        avatarPreview.src = url;
+        avatarPreview.style.display = '';
+      } else {
+        avatarPreview.style.display = 'none';
+      }
+    }
+    inputAvatar.addEventListener('input', () => { updateAvatarPreview(); updatePreview(); });
+    avatarPreview.addEventListener('error', () => { avatarPreview.style.display = 'none'; });
+
+    // --- Social links list ---
+    function renderLinksList() {
+      linksList.innerHTML = '';
+      socialLinks.forEach((link, idx) => {
+        const row = document.createElement('div');
+        row.className = 'social-link-row';
+        row.innerHTML = `
+          <select class="form-select" data-idx="${idx}" data-field="platform">
+            ${PLATFORMS.map(p => `<option value="${p.value}" ${p.value === link.platform ? 'selected' : ''}>${p.label}</option>`).join('')}
+          </select>
+          <input type="url" class="form-input" data-idx="${idx}" data-field="url" value="${escAttr(link.url)}" placeholder="https://..." />
+          <button class="social-link-delete" data-idx="${idx}" title="Remove link">
+            <i class="fas fa-trash-alt"></i>
+          </button>`;
+        linksList.appendChild(row);
+      });
+
+      // Events
+      linksList.querySelectorAll('[data-field="platform"]').forEach(el => {
+        el.addEventListener('change', e => {
+          socialLinks[+e.target.dataset.idx].platform = e.target.value;
+          updatePreview();
+        });
+      });
+      linksList.querySelectorAll('[data-field="url"]').forEach(el => {
+        el.addEventListener('input', e => {
+          socialLinks[+e.target.dataset.idx].url = e.target.value;
+          updatePreview();
+        });
+      });
+      linksList.querySelectorAll('.social-link-delete').forEach(el => {
+        el.addEventListener('click', e => {
+          const idx = +e.currentTarget.dataset.idx;
+          socialLinks.splice(idx, 1);
+          renderLinksList();
+          updatePreview();
+        });
+      });
+
+      linksLimit.textContent = `${socialLinks.length} / ${MAX_LINKS} links`;
+      btnAddLink.style.display = socialLinks.length >= MAX_LINKS ? 'none' : '';
+    }
+
+    btnAddLink.addEventListener('click', () => {
+      if (socialLinks.length >= MAX_LINKS) return;
+      socialLinks.push({ platform: 'website', url: '', label: '' });
+      renderLinksList();
+      // Focus the new URL input
+      const inputs = linksList.querySelectorAll('[data-field="url"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+
+    function escAttr(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+
+    // --- Color picker sync ---
+    function syncColor(picker, text, swatch) {
+      picker.addEventListener('input', () => {
+        text.value = picker.value;
+        swatch.style.background = picker.value;
+        updatePreview();
+      });
+      text.addEventListener('input', () => {
+        const v = text.value;
+        if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+          picker.value = v;
+          swatch.style.background = v;
+        }
+        updatePreview();
+      });
+    }
+    syncColor(inputAccentPicker, inputAccent, swatchAccent);
+    syncColor(inputBgPicker, inputBg, swatchBg);
+
+    // --- Name input -> preview ---
+    inputName.addEventListener('input', updatePreview);
+    inputBgImage.addEventListener('input', updatePreview);
+
+    // --- Live preview update ---
+    function updatePreview() {
+      // Avatar
+      const avatarUrl = inputAvatar.value.trim();
+      if (avatarUrl) {
+        previewAvatar.src = avatarUrl;
+        previewAvatar.style.display = '';
+      } else {
+        previewAvatar.style.display = 'none';
+      }
+
+      // Name & Bio
+      previewName.textContent = inputName.value || 'Your Name';
+      previewBio.textContent = inputBio.value || '';
+      previewBio.style.display = inputBio.value ? '' : 'none';
+
+      // Background
+      const bg = inputBg.value || '#0a0a0f';
+      const bgImg = inputBgImage.value.trim();
+      if (bgImg) {
+        previewScreen.style.background = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bgImg}) center/cover no-repeat`;
+      } else {
+        previewScreen.style.background = bg;
+      }
+
+      // Accent
+      const accent = inputAccent.value || '#a78bfa';
+
+      // Links
+      previewLinks.innerHTML = '';
+      socialLinks.forEach(link => {
+        if (!link.url) return;
+        const platform = link.platform || 'other';
+        const p = PLATFORMS.find(pp => pp.value === platform) || PLATFORMS[PLATFORMS.length - 1];
+        const div = document.createElement('div');
+        div.className = 'preview-link';
+        div.innerHTML = `<i class="${p.icon}"></i> <span>${p.label}</span>`;
+        previewLinks.appendChild(div);
+      });
+    }
+
+    // --- Save ---
+    btnSave.addEventListener('click', async () => {
+      btnSave.disabled = true;
+      btnSave.innerHTML = '<div class="spinner"></div> Saving...';
+
+      try {
+        // Profile data
+        await API.updateProfile({
+          display_name: inputName.value.trim(),
+          bio: inputBio.value.trim(),
+          avatar_url: inputAvatar.value.trim()
+        });
+
+        // Settings
+        await API.updateSettings({
+          accent_color: inputAccent.value.trim() || '#a78bfa',
+          bg_color: inputBg.value.trim() || '#0a0a0f',
+          bg_image_url: inputBgImage.value.trim(),
+          music_url: inputMusicUrl.value.trim(),
+          music_title: inputMusicTitle.value.trim(),
+          music_artist: inputMusicArtist.value.trim()
+        });
+
+        // Social links
+        const validLinks = socialLinks
+          .filter(l => l.url && l.url.trim())
+          .map(l => ({
+            platform: l.platform,
+            url: l.url.trim(),
+            label: l.label || ''
+          }));
+        await API.updateSocials(validLinks);
+
+        Toast.show('Profile saved successfully!', 'success');
+      } catch (err) {
+        console.error('Save error:', err);
+        Toast.show(err.message || 'Failed to save changes', 'error');
+      } finally {
+        btnSave.disabled = false;
+        btnSave.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      }
+    });
+
+    // --- Logout ---
+    btnLogout.addEventListener('click', () => {
+      API.logout();
+      window.location.href = '/login';
+    });
+
+    // --- Init ---
+    loadProfile();
+  </script>
+</body>
+</html>
