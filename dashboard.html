@@ -224,21 +224,21 @@
     async function loadProfile() {
       try {
         const res = await API.getMe();
-        const user = res.data || res.user || res.profile || res;
+        const user = res.user || res;
         currentUser = user;
 
         // Populate nav
         navViewProfile.href = '/' + (user.username || '');
 
         // Basic info
-        inputName.value = user.display_name || '';
+        inputName.value = user.displayName || '';
         inputBio.value = user.bio || '';
-        inputAvatar.value = user.avatar_url || '';
+        inputAvatar.value = user.avatarUrl || '';
         updateBioCounter();
         updateAvatarPreview();
 
         // Social links
-        socialLinks = (user.social_links || user.socials || []).map(l => ({
+        socialLinks = (res.socialLinks || []).map(l => ({
           platform: l.platform || 'other',
           url: l.url || '',
           label: l.label || l.title || ''
@@ -246,19 +246,19 @@
         renderLinksList();
 
         // Theme
-        const settings = user.settings || {};
-        const accent = settings.accent_color || user.accent_color || '#a78bfa';
-        const bg = settings.bg_color || user.bg_color || '#0a0a0f';
+        const settings = res.settings || {};
+        const accent = settings.accentColor || '#a78bfa';
+        const bg = settings.bgColor || '#0a0a0f';
         inputAccent.value = accent;
         inputAccentPicker.value = accent;
         swatchAccent.style.background = accent;
         inputBg.value = bg;
         inputBgPicker.value = normalizeHex(bg);
         swatchBg.style.background = bg;
-        inputBgImage.value = settings.bg_image_url || user.bg_image_url || '';
-        inputMusicUrl.value = settings.music_url || user.music_url || '';
-        inputMusicTitle.value = settings.music_title || user.music_title || '';
-        inputMusicArtist.value = settings.music_artist || user.music_artist || '';
+        inputBgImage.value = settings.bgImageUrl || '';
+        inputMusicUrl.value = settings.musicUrl || '';
+        inputMusicTitle.value = settings.musicTitle || '';
+        inputMusicArtist.value = settings.musicArtist || '';
 
         updatePreview();
       } catch (err) {
@@ -423,19 +423,19 @@
       try {
         // Profile data
         await API.updateProfile({
-          display_name: inputName.value.trim(),
+          displayName: inputName.value.trim(),
           bio: inputBio.value.trim(),
-          avatar_url: inputAvatar.value.trim()
+          avatarUrl: inputAvatar.value.trim()
         });
 
         // Settings
         await API.updateSettings({
-          accent_color: inputAccent.value.trim() || '#a78bfa',
-          bg_color: inputBg.value.trim() || '#0a0a0f',
-          bg_image_url: inputBgImage.value.trim(),
-          music_url: inputMusicUrl.value.trim(),
-          music_title: inputMusicTitle.value.trim(),
-          music_artist: inputMusicArtist.value.trim()
+          accentColor: inputAccent.value.trim() || '#a78bfa',
+          bgColor: inputBg.value.trim() || '#0a0a0f',
+          bgImageUrl: inputBgImage.value.trim(),
+          musicUrl: inputMusicUrl.value.trim(),
+          musicTitle: inputMusicTitle.value.trim(),
+          musicArtist: inputMusicArtist.value.trim()
         });
 
         // Social links
