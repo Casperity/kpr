@@ -111,40 +111,40 @@
       const container = document.getElementById('state-profile');
 
       // -- Background --
-      const bgColor = data.settings?.bg_color || data.bg_color || '#0a0a0f';
+      const bgColor = data.settings?.bgColor || data.settings?.bg_color || '#0a0a0f';
       body.style.setProperty('--bg-color', bgColor);
       body.style.backgroundColor = bgColor;
 
-      const bgImage = data.settings?.bg_image_url || data.bg_image_url;
+      const bgImage = data.settings?.bgImageUrl || data.settings?.bg_image_url || '';
       if (bgImage) {
         body.style.backgroundImage = `url(${bgImage})`;
         body.classList.add('has-bg-image');
       }
 
       // -- Accent --
-      const accent = data.settings?.accent_color || data.accent_color || '#a78bfa';
+      const accent = data.settings?.accentColor || data.settings?.accent_color || '#a78bfa';
       container.style.setProperty('--accent', accent);
       container.style.setProperty('--accent-rgb', hexToRgb(accent));
 
       // -- OG tags --
-      document.title = `${data.display_name || data.username} — kpr.lol`;
+      document.title = `${data.displayName || data.display_name || data.username} — kpr.lol`;
       const ogTitle = document.querySelector('meta[property="og:title"]');
-      if (ogTitle) ogTitle.content = data.display_name || data.username;
+      if (ogTitle) ogTitle.content = data.displayName || data.display_name || data.username;
       const ogDesc = document.querySelector('meta[property="og:description"]');
       if (ogDesc) ogDesc.content = data.bio || 'Check out my profile on kpr.lol';
-      if (data.avatar_url) {
+      if (data.avatarUrl || data.avatar_url) {
         const ogImg = document.querySelector('meta[property="og:image"]');
-        if (ogImg) ogImg.content = data.avatar_url;
+        if (ogImg) ogImg.content = data.avatarUrl || data.avatar_url;
       }
 
       // -- Avatar --
-      const avatarUrl = data.avatar_url || 'data:image/svg+xml,' + encodeURIComponent(
+      const avatarUrl = data.avatarUrl || data.avatar_url || 'data:image/svg+xml,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect fill="#1a1a24" width="128" height="128"/><circle cx="64" cy="48" r="24" fill="#2a2a3a"/><ellipse cx="64" cy="110" rx="40" ry="30" fill="#2a2a3a"/></svg>'
       );
 
       // -- Social links --
       let linksHtml = '';
-      const links = data.social_links || data.socials || [];
+      const links = data.socialLinks || data.social_links || data.socials || [];
       links.forEach(link => {
         const platform = (link.platform || 'other').toLowerCase();
         const icon = PLATFORM_ICONS[platform] || PLATFORM_ICONS.other;
@@ -159,10 +159,10 @@
 
       // -- Music player --
       let musicHtml = '';
-      const musicUrl = data.settings?.music_url || data.music_url;
+      const musicUrl = data.settings?.musicUrl || data.settings?.music_url || '';
       if (musicUrl) {
-        const musicTitle = data.settings?.music_title || data.music_title || 'Now Playing';
-        const musicArtist = data.settings?.music_artist || data.music_artist || '';
+        const musicTitle = data.settings?.musicTitle || data.settings?.music_title || 'Now Playing';
+        const musicArtist = data.settings?.musicArtist || data.settings?.music_artist || '';
         musicHtml = `
           <div class="profile-music" id="music-player">
             <button class="profile-music-btn" id="music-toggle" title="Play / Pause">
@@ -193,8 +193,8 @@
       // -- Build card --
       container.innerHTML = `
         <div class="profile-card">
-          <img class="profile-avatar" src="${esc(avatarUrl)}" alt="${esc(data.display_name || data.username)}" onerror="this.style.display='none'" />
-          <h1 class="profile-name">${esc(data.display_name || data.username)}</h1>
+          <img class="profile-avatar" src="${esc(avatarUrl)}" alt="${esc(data.displayName || data.display_name || data.username)}" onerror="this.style.display='none'" />
+          <h1 class="profile-name">${esc(data.displayName || data.display_name || data.username)}</h1>
           ${data.bio ? `<p class="profile-bio">${esc(data.bio)}</p>` : ''}
           ${linksHtml ? `<div class="profile-links">${linksHtml}</div>` : ''}
           ${musicHtml}
