@@ -20,8 +20,7 @@
 <body>
   
   <div id="intro-container">
-    <video id="intro-video" class="videobg" src="intro.mp4" preload="auto" playsinline style="opacity: 0.001; pointer-events: none;"></video>
-    <canvas id="container" width="1" height="1" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
+    <video id="intro-video" src="intro.mp4" preload="auto" playsinline></video>
     <div id="click-overlay">Click</div>
   </div>
 
@@ -69,7 +68,7 @@
       clickOverlay.style.opacity = '0';
       clickOverlay.style.pointerEvents = 'none';
       
-      document.getElementById('container').classList.add('unblurred');
+      introVideo.classList.add('unblurred');
       introVideo.play().catch(e => console.log('Playback failed:', e));
     });
 
@@ -188,6 +187,5 @@
 
     loadSong(songs[0]);
   </script>
-  <script src="raineffect-master/demo/js/index3.min.js"></script>
 </body>
 </html>
