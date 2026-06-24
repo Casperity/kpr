@@ -121,7 +121,9 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shine 2s linear infinite;
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin: 0 auto 12px auto;
 }
 
 @keyframes shine {
