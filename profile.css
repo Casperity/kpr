@@ -272,6 +272,24 @@ body.profile-page.has-bg-image::before {
   transition: width 0.1s linear;
 }
 
+.profile-music-volume {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+}
+
+.profile-music-volume i {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+}
+
+.profile-music-volume input[type="range"] {
+  width: 50px;
+  cursor: pointer;
+  accent-color: var(--accent, #a78bfa);
+}
+
 /* --- Views Badge --- */
 .profile-views {
   display: inline-flex;
