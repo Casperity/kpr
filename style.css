@@ -1,0 +1,229 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #000;
+  color: #eee;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #000;
+  transition: opacity 1.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#intro-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#container {
+  z-index: 1;
+  filter: blur(25px);
+  transition: filter 1s ease;
+}
+
+#container.unblurred {
+  filter: blur(0px);
+}
+
+#click-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  font-size: 2rem;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease;
+}
+
+#main-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  padding: 80px 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+  background: #0f0f11;
+  overflow-y: auto;
+}
+
+.bio-container {
+  max-width: 550px;
+  margin: 0 auto;
+  text-align: center;
+  background: rgba(20, 20, 25, 0.6);
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  backdrop-filter: blur(15px);
+  transform: translateY(20px);
+  animation: floatUp 1s ease forwards;
+}
+
+@keyframes floatUp {
+  to {
+    transform: translateY(0);
+  }
+}
+
+.bio-pfp {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 20px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  transition: transform 0.3s ease;
+}
+
+.bio-pfp:hover {
+  transform: scale(1.05);
+}
+
+.bio-username {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+.bio-details {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.bio-badge {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ddd;
+  letter-spacing: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bio-text {
+  font-size: 1.05rem;
+  color: #aaa;
+  line-height: 1.6;
+}
+
+.music-player {
+  margin-top: 30px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 15px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.music-player img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.music-info {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+}
+
+#music-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#music-artist {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.music-controls {
+  display: flex;
+  gap: 15px;
+  margin-left: 15px;
+}
+
+.music-controls button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.music-controls button:hover {
+  transform: scale(1.1);
+  color: #ddd;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 15px;
+}
+
+.volume-control i {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+#volume-slider {
+  width: 50px;
+  cursor: pointer;
+  accent-color: #fff;
+}
+
+@media (max-width: 768px) {
+  .bio-container {
+    padding: 30px 20px;
+  }
+  .bio-username {
+    font-size: 2rem;
+  }
+}
