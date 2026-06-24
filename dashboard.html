@@ -215,6 +215,15 @@
     const previewBio = document.getElementById('preview-bio');
     const previewLinks = document.getElementById('preview-links');
 
+    // --- Utils ---
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
     // --- Section toggle ---
     function toggleSection(id) {
       document.getElementById(id).classList.toggle('collapsed');
@@ -292,7 +301,8 @@
         avatarPreview.style.display = 'none';
       }
     }
-    inputAvatar.addEventListener('input', () => { updateAvatarPreview(); updatePreview(); });
+    const debouncedAvatarUpdate = debounce(() => { updateAvatarPreview(); updatePreview(); }, 600);
+    inputAvatar.addEventListener('input', debouncedAvatarUpdate);
     avatarPreview.addEventListener('error', () => { avatarPreview.style.display = 'none'; });
 
     // --- Social links list ---
@@ -372,7 +382,8 @@
 
     // --- Name input -> preview ---
     inputName.addEventListener('input', updatePreview);
-    inputBgImage.addEventListener('input', updatePreview);
+    const debouncedBgUpdate = debounce(updatePreview, 600);
+    inputBgImage.addEventListener('input', debouncedBgUpdate);
 
     // --- Live preview update ---
     function updatePreview() {
