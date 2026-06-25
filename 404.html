@@ -278,10 +278,8 @@
   //      bgVideoEl.play().catch(e => console.log("Video autoplay failed:", e));
         const muteBtn = document.createElement('button');
         muteBtn.id = 'video-mute-btn';
-        muteBtn.innerHTML = bgVideoEl.muted
-          ? '<i class="fas fa-volume-xmark"></i>'
-          : '<i class="fas fa-volume-up"></i>';
-        muteBtn.title = bgVideoEl.muted ? 'Unmute video' : 'Mute video';
+        muteBtn.innerHTML = '<i class="fas fa-volume-xmark"></i>';
+        muteBtn.title = 'Unmute video';
         document.body.appendChild(muteBtn);
         muteBtn.addEventListener('click', () => {
           bgVideoEl.muted = !bgVideoEl.muted;
@@ -483,6 +481,15 @@
             if (!isMuted) {
               bgVideoEl.muted = false;
             }
+
+            const muteBtn = document.getElementById('video-mute-btn');
+            if (muteBtn) {
+              muteBtn.innerHTML = bgVideoEl.muted
+                ? '<i class="fas fa-volume-xmark"></i>'
+                : '<i class="fas fa-volume-up"></i>';
+              muteBtn.title = bgVideoEl.muted ? 'Unmute video' : 'Mute video';
+            }
+
           }
           
           const autoplayEnabled = data.settings?.musicAutoplay ?? data.settings?.music_autoplay ?? false;
