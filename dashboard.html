@@ -11,6 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="dashboard.css" />
+  <style>
+    .preview-phone-screen {
+      position: relative !important;
+    }
+    .preview-phone-screen > *:not(.preview-bg-video) {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
 </head>
 <body>
 
@@ -150,6 +159,11 @@
             <div class="form-hint">Leave empty for solid background color</div>
           </div>
           <div class="form-group">
+            <label class="form-label">Background Video URL <span style="opacity:0.4;">(optional, mp4)</span></label>
+            <input type="url" class="form-input" id="input-bg-video" placeholder="https://example.com/background.mp4" />
+            <div class="form-hint">Direct link to a looping background video</div>
+          </div>
+          <div class="form-group">
             <label class="form-label">Music URL <span style="opacity:0.4;">(optional)</span></label>
             <input type="url" class="form-input" id="input-music-url" placeholder="https://example.com/song.mp3" />
           </div>
@@ -160,6 +174,10 @@
           <div class="form-group">
             <label class="form-label">Music Artist</label>
             <input type="text" class="form-input" id="input-music-artist" placeholder="Artist name" maxlength="80" />
+          </div>
+          <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
+            <input type="checkbox" id="input-music-autoplay" style="width: 18px; height: 18px; cursor: pointer;" />
+            <label for="input-music-autoplay" class="form-label" style="margin-bottom: 0; cursor: pointer; user-select: none; text-transform: none;">Auto-play Music</label>
           </div>
         </div>
       </div>
@@ -275,9 +293,11 @@
     const inputBgPicker = document.getElementById('input-bg-picker');
     const swatchBg = document.getElementById('swatch-bg');
     const inputBgImage = document.getElementById('input-bg-image');
+    const inputBgVideo = document.getElementById('input-bg-video');
     const inputMusicUrl = document.getElementById('input-music-url');
     const inputMusicTitle = document.getElementById('input-music-title');
     const inputMusicArtist = document.getElementById('input-music-artist');
+    const inputMusicAutoplay = document.getElementById('input-music-autoplay');
     const btnSave = document.getElementById('btn-save');
     const btnLogout = document.getElementById('btn-logout');
     const navViewProfile = document.getElementById('nav-view-profile');
@@ -375,9 +395,11 @@
         inputBgPicker.value = normalizeHex(bg);
         swatchBg.style.background = bg;
         inputBgImage.value = settings.bgImageUrl || '';
+        inputBgVideo.value = settings.bgVideoUrl || settings.bg_video_url || '';
         inputMusicUrl.value = settings.musicUrl || '';
         inputMusicTitle.value = settings.musicTitle || '';
         inputMusicArtist.value = settings.musicArtist || '';
+        inputMusicAutoplay.checked = !!(settings.musicAutoplay || settings.music_autoplay);
 
         updatePreview();
       } catch (err) {
@@ -570,6 +592,7 @@
     inputAliases.addEventListener('input', updatePreview);
     const debouncedBgUpdate = debounce(updatePreview, 600);
     inputBgImage.addEventListener('input', debouncedBgUpdate);
+    inputBgVideo.addEventListener('input', debouncedBgUpdate);
 
     // --- Live preview update ---
     function updatePreview() {
@@ -597,13 +620,36 @@
       previewBio.textContent = inputBio.value || '';
       previewBio.style.display = inputBio.value ? '' : 'none';
 
-      // Background
-      const bg = inputBg.value || '#0a0a0f';
-      const bgImg = inputBgImage.value.trim();
-      if (bgImg) {
-        previewScreen.style.background = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bgImg}) center/cover no-repeat`;
+      // Background Video preview
+      const bgVideo = inputBgVideo.value.trim();
+      let previewVideo = previewScreen.querySelector('.preview-bg-video');
+      if (bgVideo) {
+        if (!previewVideo) {
+          previewVideo = document.createElement('video');
+          previewVideo.className = 'preview-bg-video';
+          previewVideo.autoplay = true;
+          previewVideo.loop = true;
+          previewVideo.muted = true;
+          previewVideo.playsInline = true;
+          previewVideo.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;';
+          previewScreen.insertBefore(previewVideo, previewScreen.firstChild);
+        }
+        if (previewVideo.src !== bgVideo) {
+          previewVideo.src = bgVideo;
+        }
+        previewScreen.style.background = 'transparent';
       } else {
-        previewScreen.style.background = bg;
+        if (previewVideo) {
+          previewVideo.remove();
+        }
+        // Background Image / Color
+        const bg = inputBg.value || '#0a0a0f';
+        const bgImg = inputBgImage.value.trim();
+        if (bgImg) {
+          previewScreen.style.background = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bgImg}) center/cover no-repeat`;
+        } else {
+          previewScreen.style.background = bg;
+        }
       }
 
       // Accent
@@ -642,6 +688,8 @@
           accentColor: inputAccent.value.trim() || '#a78bfa',
           bgColor: inputBg.value.trim() || '#0a0a0f',
           bgImageUrl: inputBgImage.value.trim(),
+          bgVideoUrl: inputBgVideo.value.trim(),
+          musicAutoplay: inputMusicAutoplay.checked,
           musicUrl: inputMusicUrl.value.trim(),
           musicTitle: inputMusicTitle.value.trim(),
           musicArtist: inputMusicArtist.value.trim()

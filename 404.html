@@ -15,6 +15,82 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="profile.css" />
+  <style>
+    /* --- Enter Overlay --- */
+    #enter-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+    }
+
+    #enter-overlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #enter-click-text {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 4px;
+      animation: pulse 2s infinite;
+      text-shadow: 0 0 15px rgba(255,255,255,0.4);
+      user-select: none;
+      text-transform: uppercase;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.6; }
+    }
+
+    /* Background video styling */
+    .profile-bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+      transition: filter 1s ease;
+    }
+
+    /* Blur transition when overlay is active */
+    .profile-container.blurred,
+    .profile-bg-video.blurred {
+      filter: blur(20px);
+    }
+
+    .profile-container {
+      transition: filter 1s ease;
+    }
+
+    body.profile-page.has-bg-video::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      z-index: 1;
+    }
+    
+    /* Make sure profile elements sit above background video and overlay */
+    .profile-container {
+      position: relative;
+      z-index: 2;
+    }
+  </style>
 </head>
 <body class="profile-page" id="body">
 
@@ -151,10 +227,34 @@
       body.style.setProperty('--bg-color', bgColor);
       body.style.backgroundColor = bgColor;
 
-      const bgImage = data.settings?.bgImageUrl || data.settings?.bg_image_url || '';
-      if (bgImage) {
-        body.style.backgroundImage = `url(${bgImage})`;
-        body.classList.add('has-bg-image');
+      // Check for video background
+      const bgVideo = data.settings?.bgVideoUrl || data.settings?.bg_video_url || '';
+      let bgVideoEl = document.getElementById('bg-video');
+      if (bgVideoEl) bgVideoEl.remove();
+
+      if (bgVideo) {
+        bgVideoEl = document.createElement('video');
+        bgVideoEl.id = 'bg-video';
+        bgVideoEl.src = bgVideo;
+        bgVideoEl.loop = true;
+        bgVideoEl.muted = true;
+        bgVideoEl.playsInline = true;
+        bgVideoEl.className = 'profile-bg-video';
+        body.appendChild(bgVideoEl);
+        bgVideoEl.play().catch(e => console.log("Video autoplay failed:", e));
+        body.classList.add('has-bg-video');
+        body.classList.remove('has-bg-image');
+        body.style.backgroundImage = '';
+      } else {
+        body.classList.remove('has-bg-video');
+        const bgImage = data.settings?.bgImageUrl || data.settings?.bg_image_url || '';
+        if (bgImage) {
+          body.style.backgroundImage = `url(${bgImage})`;
+          body.classList.add('has-bg-image');
+        } else {
+          body.style.backgroundImage = '';
+          body.classList.remove('has-bg-image');
+        }
       }
 
       // -- Accent --
@@ -295,6 +395,44 @@
       // -- Init music player --
       const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
       if (hasMusic) initMusicPlayer(data);
+
+      // -- Enter Overlay and Blur flow --
+      const hasVideo = !!bgVideo;
+      const shouldShowOverlay = hasMusic || hasVideo;
+
+      if (shouldShowOverlay) {
+        let overlay = document.getElementById('enter-overlay');
+        if (!overlay) {
+          overlay = document.createElement('div');
+          overlay.id = 'enter-overlay';
+          overlay.innerHTML = '<div id="enter-click-text">Click</div>';
+          document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'flex';
+        overlay.classList.remove('fade-out');
+
+        container.classList.add('blurred');
+        if (bgVideoEl) bgVideoEl.classList.add('blurred');
+
+        overlay.onclick = () => {
+          overlay.classList.add('fade-out');
+          container.classList.remove('blurred');
+          if (bgVideoEl) bgVideoEl.classList.remove('blurred');
+          
+          const autoplayEnabled = data.settings?.musicAutoplay ?? data.settings?.music_autoplay ?? false;
+          if (autoplayEnabled && window.playProfileMusic) {
+            window.playProfileMusic();
+          }
+          
+          setTimeout(() => {
+            overlay.style.display = 'none';
+          }, 800);
+        };
+      } else {
+        const overlay = document.getElementById('enter-overlay');
+        if (overlay) overlay.style.display = 'none';
+        container.classList.remove('blurred');
+      }
     }
 
     // --- Music player ---
@@ -344,6 +482,10 @@
       }
 
       btn.addEventListener('click', () => audio.paused ? playSong() : pauseSong());
+
+      window.playProfileMusic = function() {
+        playSong();
+      };
 
       if (prevBtn) {
         prevBtn.addEventListener('click', () => {
