@@ -677,16 +677,9 @@
           previewVideo.src = bgVideo;
         }
         
-        // Mute or unmute preview video
-        if (!inputBgVideoMuted.checked) {
-          previewVideo.muted = false;
-          previewVideo.play().catch(() => {
-            previewVideo.muted = true;
-            previewVideo.play().catch(() => {});
-          });
-        } else {
-          previewVideo.muted = true;
-        }
+
+        previewVideo.muted = true;
+
 
         // Apply blur based on blur setting
         if (inputBgBlur.checked) {
