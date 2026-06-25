@@ -450,7 +450,7 @@ input, select, textarea, button {
 }
 
 /* ===========================
-   Live Preview — matches real profile card
+   Live Preview (Phone Frame)
    =========================== */
 .dash-preview-area {
   position: sticky;
@@ -459,221 +459,117 @@ input, select, textarea, button {
 }
 
 .preview-label {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
   text-align: center;
 }
 
-.preview-card-wrap {
-  position: relative;
-  min-height: 300px;
-  border-radius: 20px;
+.preview-phone {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  border-radius: 32px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  background: #0a0a0f;
   overflow: hidden;
-  padding: 32px 20px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  position: relative;
+}
+
+.preview-phone-notch {
+  width: 120px;
+  height: 24px;
+  background: #0a0a0f;
+  border-radius: 0 0 16px 16px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.preview-phone-screen {
+  padding: 0 16px 24px;
+  min-height: 480px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #0a0a0f;
-}
-
-#preview-bg-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.preview-card-wrap > *:not(#preview-bg-layer) {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-}
-
-.preview-card {
-  width: 100%;
-  max-width: 440px;
-  margin: 0 auto;
-  background: rgba(18,18,24,0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 24px;
-  padding: 32px 28px;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03);
+  overflow-y: auto;
+  max-height: 580px;
 }
-
-/* Avatar */
-.preview-avatar-wrap { margin-bottom: 18px; }
 
 .preview-avatar {
-  width: 100px;
-  height: 100px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid rgba(255,255,255,0.08);
-  box-shadow:
-    0 0 20px rgba(var(--preview-accent-rgb, 167,139,250), 0.25),
-    0 0 60px rgba(var(--preview-accent-rgb, 167,139,250), 0.1),
-    0 8px 32px rgba(0,0,0,0.4);
-  display: block;
-  margin: 0 auto;
-}
-
-.preview-avatar-placeholder {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.05);
-  border: 3px solid rgba(255,255,255,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-}
-.preview-avatar-placeholder svg { opacity: 0.25; }
-
-/* Name shimmer */
-.preview-name {
-  font-size: 1.8rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin-bottom: 10px;
-  background-image: linear-gradient(120deg, #b0b0b0 0%, #b0b0b0 30%, #fff 50%, #b0b0b0 70%, #b0b0b0 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 2.5s linear infinite;
-  display: inline-block;
-}
-@keyframes shimmer {
-  0%   { background-position: 150% center; }
-  100% { background-position: -50% center; }
-}
-
-/* Icon badge circles */
-.preview-icon-badges {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 12px;
-}
-.preview-icon-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* Pronouns / aliases pills */
-.preview-pill-badges {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
+.preview-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
 }
-.preview-pill-badge {
-  background: rgba(255,255,255,0.08);
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #ddd;
-  border: 1px solid rgba(255,255,255,0.05);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.preview-pill-badge i { opacity: 0.5; font-size: 0.75rem; }
 
-/* Bio */
 .preview-bio {
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.5);
-  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
   margin-bottom: 20px;
 }
 
-/* Links */
+.preview-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.preview-badges .bio-badge {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #ddd;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .preview-links {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
+
 .preview-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 13px;
-  color: rgba(255,255,255,0.75);
-  font-size: 0.85rem;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
   font-weight: 500;
 }
-.preview-link i { color: rgba(255,255,255,0.35); font-size: 1rem; }
 
-/* Music player */
-.preview-music {
-  margin-top: 18px;
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 14px;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.preview-music-cover {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-  flex-shrink: 0;
-}
-.preview-music-info { flex: 1; text-align: left; overflow: hidden; }
-.preview-music-title {
+.preview-link i {
+  color: rgba(255, 255, 255, 0.4);
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.preview-music-artist { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
-.preview-music-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1rem;
-  cursor: default;
-  padding: 4px;
-  flex-shrink: 0;
-}
-
-/* Footer */
-.preview-footer {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.2);
-  position: relative;
-  z-index: 1;
-}
-.preview-footer span { color: rgba(255,255,255,0.1); }
 
 /* ===========================
    Admin Panel
