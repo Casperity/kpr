@@ -19,6 +19,10 @@
       position: relative;
       z-index: 1;
     }
+    .url-invalid {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+    }
   </style>
 </head>
 <body>
@@ -88,9 +92,9 @@
             <label class="form-label">Avatar URL</label>
             <div class="avatar-preview-row">
               <img class="avatar-preview-img" id="avatar-preview" src="" alt="" />
-              <input type="url" class="form-input" id="input-avatar" placeholder="https://example.com/avatar.png" />
+              <input type="url" class="form-input" id="input-avatar" placeholder="https://raw.githubusercontent.com/..." />
             </div>
-            <div class="form-hint">Paste a direct link to your profile picture</div>
+            <div class="form-hint">Only GitHub URLs allowed (e.g., raw.githubusercontent.com)</div>
           </div>
         </div>
       </div>
@@ -155,17 +159,17 @@
           </div>
           <div class="form-group">
             <label class="form-label">Background Image URL</label>
-            <input type="url" class="form-input" id="input-bg-image" placeholder="https://example.com/background.jpg" />
-            <div class="form-hint">Leave empty for solid background color</div>
+            <input type="url" class="form-input" id="input-bg-image" placeholder="https://raw.githubusercontent.com/..." />
+            <div class="form-hint">Only GitHub URLs allowed — leave empty for solid background color</div>
           </div>
           <div class="form-group">
             <label class="form-label">Background Video URL <span style="opacity:0.4;">(optional, mp4)</span></label>
-            <input type="url" class="form-input" id="input-bg-video" placeholder="https://example.com/background.mp4" />
-            <div class="form-hint">Direct link to a looping background video</div>
+            <input type="url" class="form-input" id="input-bg-video" placeholder="https://raw.githubusercontent.com/..." />
+            <div class="form-hint">Only GitHub URLs allowed — direct link to a looping background video</div>
           </div>
           <div class="form-group">
             <label class="form-label">Music URL <span style="opacity:0.4;">(optional)</span></label>
-            <input type="url" class="form-input" id="input-music-url" placeholder="https://example.com/song.mp3" />
+            <input type="url" class="form-input" id="input-music-url" placeholder="https://raw.githubusercontent.com/..." />
           </div>
           <div class="form-group">
             <label class="form-label">Music Title</label>
@@ -345,6 +349,29 @@
     const previewLinks = document.getElementById('preview-links');
 
     // --- Utils ---
+    const GITHUB_DOMAIN_REGEX = /^(?:[a-zA-Z0-9-]+\.)*(?:github\.com|githubusercontent\.com|githubassets\.com|github\.io)$/;
+
+    function isGitHubUrl(url) {
+      if (!url || !url.trim()) return true; // empty is allowed (optional fields)
+      try {
+        const u = new URL(url.trim());
+        return GITHUB_DOMAIN_REGEX.test(u.hostname);
+      } catch {
+        return false;
+      }
+    }
+
+    function validateUrlInput(el, allowEmpty = true) {
+      const url = el.value.trim();
+      if (!url && allowEmpty) {
+        el.classList.remove('url-invalid');
+        return true;
+      }
+      const valid = isGitHubUrl(url);
+      el.classList.toggle('url-invalid', !valid);
+      return valid;
+    }
+
     function debounce(func, wait) {
       let timeout;
       return function(...args) {
@@ -505,7 +532,10 @@
       }
     }
     const debouncedAvatarUpdate = debounce(() => { updateAvatarPreview(); updatePreview(); }, 600);
-    inputAvatar.addEventListener('input', debouncedAvatarUpdate);
+    inputAvatar.addEventListener('input', () => {
+      validateUrlInput(inputAvatar);
+      debouncedAvatarUpdate();
+    });
     avatarPreview.addEventListener('error', () => { avatarPreview.style.display = 'none'; });
 
     // --- Render playlist (admin only) ---
@@ -517,16 +547,19 @@
         const row = document.createElement('div');
         row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;';
         row.innerHTML = `
-          <input type="url" class="form-input" placeholder="Audio URL (mp3/ogg)" value="${escAttr(song.url || '')}" data-sidx="${idx}" data-sfield="url" />
+          <input type="url" class="form-input" placeholder="GitHub Audio URL (mp3/ogg)" value="${escAttr(song.url || '')}" data-sidx="${idx}" data-sfield="url" />
           <input type="text" class="form-input" placeholder="Title" maxlength="100" value="${escAttr(song.title || '')}" data-sidx="${idx}" data-sfield="title" />
           <input type="text" class="form-input" placeholder="Artist" maxlength="100" value="${escAttr(song.artist || '')}" data-sidx="${idx}" data-sfield="artist" />
-          <input type="url" class="form-input" placeholder="Cover image URL" value="${escAttr(song.cover || '')}" data-sidx="${idx}" data-sfield="cover" />
+          <input type="url" class="form-input" placeholder="GitHub Cover image URL" value="${escAttr(song.cover || '')}" data-sidx="${idx}" data-sfield="cover" />
           <button class="social-link-delete" data-sidx="${idx}" title="Remove"><i class="fas fa-trash-alt"></i></button>`;
         list.appendChild(row);
       });
 
       list.querySelectorAll('[data-sfield]').forEach(el => {
         el.addEventListener('input', e => {
+          if (e.target.dataset.sfield === 'url' || e.target.dataset.sfield === 'cover') {
+            validateUrlInput(e.target);
+          }
           playlist[+e.target.dataset.sidx][e.target.dataset.sfield] = e.target.value;
         });
       });
@@ -629,8 +662,15 @@
     inputPronouns.addEventListener('input', updatePreview);
     inputAliases.addEventListener('input', updatePreview);
     const debouncedBgUpdate = debounce(updatePreview, 600);
-    inputBgImage.addEventListener('input', debouncedBgUpdate);
-    inputBgVideo.addEventListener('input', debouncedBgUpdate);
+    inputBgImage.addEventListener('input', () => {
+      validateUrlInput(inputBgImage);
+      debouncedBgUpdate();
+    });
+    inputBgVideo.addEventListener('input', () => {
+      validateUrlInput(inputBgVideo);
+      debouncedBgUpdate();
+    });
+    inputMusicUrl.addEventListener('input', () => validateUrlInput(inputMusicUrl));
     inputBgBlur.addEventListener('change', updatePreview);
     inputBgVideoMuted.addEventListener('change', updatePreview);
 
@@ -744,6 +784,47 @@
 
     // --- Save ---
     btnSave.addEventListener('click', async () => {
+      // Clear previous invalid classes
+      document.querySelectorAll('.url-invalid').forEach(el => el.classList.remove('url-invalid'));
+
+      // Validate all GitHub-only URL inputs before saving
+      const urlInputs = [
+        inputAvatar, inputBgImage, inputBgVideo, inputMusicUrl
+      ];
+      let allValid = true;
+      let firstInvalid = null;
+      urlInputs.forEach(el => {
+        if (el.value && !isGitHubUrl(el.value)) {
+          el.classList.add('url-invalid');
+          allValid = false;
+          if (!firstInvalid) firstInvalid = el;
+        }
+      });
+      // Also validate playlist items
+      const playlistInputs = document.querySelectorAll('#playlist-list input[data-sfield="url"], #playlist-list input[data-sfield="cover"]');
+      playlistInputs.forEach(el => {
+        if (el.value && !isGitHubUrl(el.value)) {
+          el.classList.add('url-invalid');
+          allValid = false;
+          if (!firstInvalid) firstInvalid = el;
+        }
+      });
+      // Also validate social links
+      const socialInputs = document.querySelectorAll('#links-list input[data-field="url"]');
+      socialInputs.forEach(el => {
+        if (el.value && !isGitHubUrl(el.value)) {
+          el.classList.add('url-invalid');
+          allValid = false;
+          if (!firstInvalid) firstInvalid = el;
+        }
+      });
+
+      if (!allValid) {
+        Toast.show('Only GitHub URLs are allowed for all fields (e.g. github.com, raw.githubusercontent.com)', 'error');
+        firstInvalid?.focus();
+        return;
+      }
+
       btnSave.disabled = true;
       btnSave.innerHTML = '<div class="spinner"></div> Saving...';
 
