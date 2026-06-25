@@ -214,23 +214,76 @@
           return `<button class="badge-pill ${active ? 'active' : ''}" data-user="${u.id}" data-badge="${id}" style="--badge-color: ${b.color};" title="${b.label}"><i class="${b.icon}"></i></button>`;
         }).join('');
 
+        const banBtnLabel = u.isBanned ? 'Unban' : 'Ban';
+        const banBtnColor = u.isBanned ? '#4ade80' : '#ef4444';
+        const banBtnIcon = u.isBanned ? 'fa-lock-open' : 'fa-ban';
+        const banInfo = u.isBanned
+          ? `<span style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 600; margin-left: 6px;" title="Reason: ${u.banReason || 'N/A'}">BANNED</span>`
+          : '';
+
         return `
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px 18px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-              <div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid ${u.isBanned ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.06)'}; border-radius: 14px; padding: 14px 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                 <a href="/${u.username}" target="_blank" style="color: #fff; text-decoration: none; font-weight: 600;">${u.username}</a>
-                ${u.displayName ? `<span style="color: rgba(255,255,255,0.35); margin-left: 8px;">${u.displayName}</span>` : ''}
-                ${u.isAdmin ? '<span style="background: #fb923c; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600; margin-left: 6px;">ADMIN</span>' : ''}
+                ${u.displayName ? `<span style="color: rgba(255,255,255,0.35);">${u.displayName}</span>` : ''}
+                ${u.isAdmin ? '<span style="background: #fb923c; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;">ADMIN</span>' : ''}
+                ${banInfo}
               </div>
-              <span style="color: rgba(255,255,255,0.25); font-size: 0.75rem;">ID: ${u.id}</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="color: rgba(255,255,255,0.2); font-size: 0.72rem;">ID: ${u.id}</span>
+                ${!u.isAdmin ? `<button class="ban-btn" data-user="${u.id}" data-banned="${u.isBanned}" style="background: rgba(255,255,255,0.05); border: 1px solid ${banBtnColor}33; color: ${banBtnColor}; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;"><i class="fas ${banBtnIcon}" style="margin-right:4px;"></i>${banBtnLabel}</button>` : ''}
+              </div>
             </div>
+            ${u.isBanned && u.banReason ? `<div style="font-size:0.75rem; color: rgba(239,68,68,0.7); margin-bottom:8px;"><i class="fas fa-circle-exclamation" style="margin-right:4px;"></i>Reason: ${u.banReason}</div>` : ''}
+            ${!u.isBanned && !u.isAdmin ? `
+            <div class="ban-reason-row" id="ban-reason-row-${u.id}" style="display:none; margin-bottom:10px;">
+              <div style="display:flex; gap:8px;">
+                <input type="text" placeholder="Ban reason (optional)" maxlength="200" id="ban-reason-input-${u.id}" style="flex:1; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 0.8rem; font-family: inherit;">
+                <button class="confirm-ban-btn" data-user="${u.id}" style="background: #ef4444; border: none; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">Confirm</button>
+                <button class="cancel-ban-btn" data-user="${u.id}" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #aaa; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;">Cancel</button>
+              </div>
+            </div>` : ''}
             <div style="display: flex; flex-wrap: wrap; gap: 6px;">
               ${badgePills}
             </div>
           </div>`;
       }).join('');
 
-      // Bind click events
+      // --- Ban button: show reason row or unban directly ---
+      container.querySelectorAll('.ban-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.user;
+          const isBanned = btn.dataset.banned === 'true';
+          if (isBanned) {
+            // Unban directly
+            if (!confirm('Unban this user?')) return;
+            await doBan(userId, false, '');
+          } else {
+            // Show reason input
+            const row = document.getElementById('ban-reason-row-' + userId);
+            if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
+          }
+        });
+      });
+
+      container.querySelectorAll('.confirm-ban-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.user;
+          const reason = document.getElementById('ban-reason-input-' + userId)?.value.trim() || '';
+          await doBan(userId, true, reason);
+        });
+      });
+
+      container.querySelectorAll('.cancel-ban-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const userId = btn.dataset.user;
+          const row = document.getElementById('ban-reason-row-' + userId);
+          if (row) row.style.display = 'none';
+        });
+      });
+
+      // --- Badge pills ---
       container.querySelectorAll('.badge-pill').forEach(btn => {
         btn.addEventListener('click', async () => {
           const userId = btn.dataset.user;
@@ -259,6 +312,25 @@
           }
         });
       });
+    }
+
+    async function doBan(userId, banned, reason) {
+      const user = allUsers.find(u => u.id == userId);
+      try {
+        await API.request('/api/admin/users/' + userId + '/ban', {
+          method: 'PUT',
+          body: JSON.stringify({ banned, reason })
+        });
+        if (user) {
+          user.isBanned = banned;
+          user.banReason = banned ? reason || 'No reason provided.' : '';
+        }
+        renderUsers();
+        Toast.show(`User ${banned ? 'banned' : 'unbanned'} successfully`, banned ? 'error' : 'success');
+      } catch (err) {
+        console.error(err);
+        Toast.show(err.error || 'Failed to update ban status', 'error');
+      }
     }
 
     loadUsers();

@@ -36,6 +36,16 @@
     </div>
   </div>
 
+  <!-- Banned State (hidden by default) -->
+  <div id="state-banned" style="display:none;">
+    <div class="profile-404">
+      <div style="font-size:3rem; margin-bottom:12px;">🔨</div>
+      <div class="profile-404-code" style="font-size:2rem;">Banned</div>
+      <div class="profile-404-msg" id="banned-reason">This user has been banned.</div>
+      <a href="/" class="profile-404-link">Back to kpr.lol</a>
+    </div>
+  </div>
+
   <!-- Error State (hidden by default) -->
   <div id="state-error" style="display:none;">
     <div class="profile-error">
@@ -119,13 +129,20 @@
 
     // --- State management ---
     function showState(id) {
-      ['state-loading', 'state-profile', 'state-404', 'state-error'].forEach(s => {
+      ['state-loading', 'state-profile', 'state-404', 'state-error', 'state-banned'].forEach(s => {
         document.getElementById(s).style.display = s === id ? '' : 'none';
       });
     }
 
     // --- Render profile ---
     function renderProfile(data) {
+      // Handle banned users
+      if (data.banned) {
+        document.getElementById('banned-reason').textContent = data.banReason || 'This user has been banned.';
+        showState('state-banned');
+        return;
+      }
+
       const body = document.getElementById('body');
       const container = document.getElementById('state-profile');
 
