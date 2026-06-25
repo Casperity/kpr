@@ -2,190 +2,452 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>kpr.lol</title>
-  <meta property="og:title" content="Kspr" />
-  <meta property="og:description" content="@ya_wns on cord | greetings" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kpr.lol — your link, your vibe</title>
+  <meta name="description" content="kpr.lol — a premium invite-only bio-link platform. Your profile, your way." />
+  <meta name="theme-color" content="#03050f" />
+  <meta property="og:title" content="kpr.lol — your link, your vibe" />
+  <meta property="og:description" content="A premium invite-only bio-link platform. Your profile, your way." />
   <meta property="og:image" content="/signal.png" />
-  <meta name="theme-color" content="#0f0f11" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kpr.lol" />
   <meta name="twitter:card" content="summary_large_image" />
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #03050f;
+      color: #c9d6f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── BG ─────────────────────────────── */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
+    .bg-layer::before {
+      content: '';
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background:
+        radial-gradient(ellipse 700px 700px at 15% 25%, rgba(14,42,140,0.22) 0%, transparent 70%),
+        radial-gradient(ellipse 600px 600px at 85% 15%, rgba(20,60,180,0.16) 0%, transparent 70%),
+        radial-gradient(ellipse 800px 800px at 60% 85%, rgba(8,28,100,0.14) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 500px at 5%  80%, rgba(30,80,200,0.12) 0%, transparent 70%);
+      animation: meshDrift 20s ease-in-out infinite alternate;
+    }
+    .bg-layer::after {
+      content: '';
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background:
+        radial-gradient(ellipse 600px 600px at 75% 60%, rgba(14,42,120,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 500px at 25% 70%, rgba(20,60,160,0.08) 0%, transparent 70%);
+      animation: meshDrift 25s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes meshDrift {
+      0%   { transform: translate(0,0) rotate(0deg); }
+      33%  { transform: translate(3%,-2%) rotate(1deg); }
+      66%  { transform: translate(-2%,3%) rotate(-1deg); }
+      100% { transform: translate(1%,-1%) rotate(0.5deg); }
+    }
+
+    .bg-noise {
+      position: fixed; inset: 0; z-index: 0; opacity: 0.035; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute; border-radius: 50%;
+      background: rgba(99,102,241,0.35);
+      animation: floatUp linear infinite;
+    }
+    .particle:nth-child(1)  { width:3px; height:3px; left:10%; animation-duration:18s; animation-delay:0s; }
+    .particle:nth-child(2)  { width:2px; height:2px; left:25%; animation-duration:22s; animation-delay:-4s; }
+    .particle:nth-child(3)  { width:4px; height:4px; left:40%; animation-duration:16s; animation-delay:-8s; }
+    .particle:nth-child(4)  { width:2px; height:2px; left:55%; animation-duration:20s; animation-delay:-2s; }
+    .particle:nth-child(5)  { width:3px; height:3px; left:70%; animation-duration:24s; animation-delay:-6s; }
+    .particle:nth-child(6)  { width:2px; height:2px; left:85%; animation-duration:19s; animation-delay:-10s; }
+    .particle:nth-child(7)  { width:4px; height:4px; left:15%; animation-duration:21s; animation-delay:-14s; }
+    .particle:nth-child(8)  { width:2px; height:2px; left:60%; animation-duration:17s; animation-delay:-3s; }
+    .particle:nth-child(9)  { width:3px; height:3px; left:32%; animation-duration:23s; animation-delay:-7s; }
+    .particle:nth-child(10) { width:2px; height:2px; left:78%; animation-duration:26s; animation-delay:-11s; }
+    @keyframes floatUp {
+      0%   { transform:translateY(110vh) scale(0); opacity:0; }
+      5%   { opacity:1; }
+      95%  { opacity:1; }
+      100% { transform:translateY(-10vh) scale(1.2); opacity:0; }
+    }
+
+    /* ── Nav ─────────────────────────────── */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(3,5,15,0.6);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .nav-brand {
+      font-size: 1.3rem; font-weight: 700; color: #fff;
+      text-decoration: none; letter-spacing: -0.02em;
+    }
+    .nav-brand span {
+      background: linear-gradient(135deg,#818cf8,#a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .nav-actions { display:flex; align-items:center; gap:12px; }
+    .nav-link {
+      font-size:0.875rem; font-weight:500; color:rgba(255,255,255,0.6);
+      text-decoration:none; padding:8px 16px; border-radius:10px;
+      transition:color 0.2s,background 0.2s;
+    }
+    .nav-link:hover { color:#fff; background:rgba(255,255,255,0.07); }
+    .nav-btn {
+      font-size:0.875rem; font-weight:600; color:#fff; text-decoration:none;
+      padding:9px 22px; border-radius:10px;
+      background:linear-gradient(135deg,#6366f1,#8b5cf6);
+      transition:opacity 0.2s,transform 0.15s,box-shadow 0.2s;
+      box-shadow:0 4px 14px rgba(99,102,241,0.3);
+    }
+    .nav-btn:hover { opacity:0.9; transform:translateY(-1px); box-shadow:0 6px 20px rgba(99,102,241,0.45); }
+
+    /* ── Hero ─────────────────────────────── */
+    main { position:relative; z-index:1; }
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px;
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25);
+      border-radius:100px; padding:6px 16px;
+      font-size:0.78rem; font-weight:600; color:#a78bfa;
+      letter-spacing:0.04em; text-transform:uppercase;
+      margin-bottom:32px; animation:fadeSlideUp 0.6s ease both;
+    }
+    .hero-badge i { font-size:0.7rem; animation:pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .hero-title {
+      font-size:clamp(2.8rem,7vw,5.5rem); font-weight:800; line-height:1.08;
+      letter-spacing:-0.03em; color:#fff; margin-bottom:24px;
+      animation:fadeSlideUp 0.6s 0.1s ease both;
+    }
+    .hero-title .grad {
+      background:linear-gradient(135deg,#818cf8 0%,#a78bfa 50%,#c084fc 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .hero-sub {
+      font-size:clamp(1rem,2.5vw,1.2rem); color:rgba(201,214,240,0.6);
+      max-width:540px; line-height:1.7; margin-bottom:48px;
+      animation:fadeSlideUp 0.6s 0.2s ease both;
+    }
+    .hero-actions {
+      display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center;
+      animation:fadeSlideUp 0.6s 0.3s ease both;
+    }
+    .btn-primary {
+      display:inline-flex; align-items:center; gap:10px;
+      font-family:'Poppins',sans-serif; font-size:0.95rem; font-weight:600;
+      color:#fff; text-decoration:none; padding:14px 32px; border-radius:14px;
+      background:linear-gradient(135deg,#6366f1,#8b5cf6);
+      box-shadow:0 8px 24px rgba(99,102,241,0.35);
+      transition:transform 0.2s,box-shadow 0.2s;
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(99,102,241,0.5); }
+    .btn-secondary {
+      display:inline-flex; align-items:center; gap:10px;
+      font-family:'Poppins',sans-serif; font-size:0.95rem; font-weight:500;
+      color:rgba(255,255,255,0.75); text-decoration:none; padding:14px 28px; border-radius:14px;
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+      transition:background 0.2s,color 0.2s,transform 0.2s;
+    }
+    .btn-secondary:hover { background:rgba(255,255,255,0.1); color:#fff; transform:translateY(-2px); }
+
+    .hero-stats {
+      display:flex; align-items:center; gap:40px;
+      margin-top:64px; padding-top:48px;
+      border-top:1px solid rgba(255,255,255,0.06);
+      animation:fadeSlideUp 0.6s 0.4s ease both;
+    }
+    .stat { text-align:center; }
+    .stat-value { font-size:1.6rem; font-weight:700; color:#fff; letter-spacing:-0.02em; }
+    .stat-label { font-size:0.78rem; color:rgba(255,255,255,0.38); margin-top:2px; font-weight:500; text-transform:uppercase; letter-spacing:0.08em; }
+    .stat-sep { width:1px; height:36px; background:rgba(255,255,255,0.1); }
+
+    /* ── Features ─────────────────────────── */
+    .features { padding:80px 24px 120px; }
+    .section-label { text-align:center; font-size:0.75rem; font-weight:600; color:#818cf8; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px; }
+    .section-title { text-align:center; font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; letter-spacing:-0.02em; margin-bottom:14px; line-height:1.15; }
+    .section-sub { text-align:center; font-size:1rem; color:rgba(201,214,240,0.5); max-width:480px; margin:0 auto 60px; line-height:1.7; }
+    .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; max-width:1100px; margin:0 auto; }
+    .feature-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:20px; padding:32px 28px;
+      transition:background 0.25s,border-color 0.25s,transform 0.25s;
+      position:relative; overflow:hidden;
+    }
+    .feature-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(99,102,241,0.3),transparent);
+      opacity:0; transition:opacity 0.3s;
+    }
+    .feature-card:hover { background:rgba(255,255,255,0.055); border-color:rgba(99,102,241,0.2); transform:translateY(-4px); }
+    .feature-card:hover::before { opacity:1; }
+    .feature-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.15rem; margin-bottom:20px; }
+    .feature-title { font-size:1rem; font-weight:600; color:#fff; margin-bottom:8px; }
+    .feature-desc { font-size:0.875rem; color:rgba(201,214,240,0.5); line-height:1.65; }
+
+    /* ── CTA ──────────────────────────────── */
+    .cta-section { padding:80px 24px 120px; }
+    .cta-card {
+      max-width:720px; margin:0 auto;
+      background:rgba(99,102,241,0.07); border:1px solid rgba(99,102,241,0.2);
+      border-radius:28px; padding:64px 48px; text-align:center; position:relative; overflow:hidden;
+    }
+    .cta-glow {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-60%);
+      width:500px; height:300px;
+      background:radial-gradient(ellipse,rgba(99,102,241,0.12) 0%,transparent 70%);
+      pointer-events:none;
+    }
+    .cta-title { font-size:clamp(1.6rem,4vw,2.4rem); font-weight:700; color:#fff; margin-bottom:14px; letter-spacing:-0.02em; }
+    .cta-sub { font-size:1rem; color:rgba(201,214,240,0.55); line-height:1.7; margin-bottom:36px; max-width:420px; margin-left:auto; margin-right:auto; }
+    .cta-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .cta-note { margin-top:20px; font-size:0.8rem; color:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; gap:6px; }
+
+    /* ── Footer ───────────────────────────── */
+    footer {
+      position:relative; z-index:1;
+      border-top:1px solid rgba(255,255,255,0.06); padding:32px 48px;
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+    }
+    .footer-brand { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.6); text-decoration:none; }
+    .footer-brand span { color:#818cf8; }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:0.82rem; color:rgba(255,255,255,0.35); text-decoration:none; transition:color 0.2s; }
+    .footer-links a:hover { color:rgba(255,255,255,0.7); }
+
+    /* ── Animations ───────────────────────── */
+    @keyframes fadeSlideUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .animate-in { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease,transform 0.6s ease; }
+    .animate-in.visible { opacity:1; transform:translateY(0); }
+
+    /* ── Responsive ───────────────────────── */
+    @media (max-width:640px) {
+      nav { padding:16px 20px; }
+      .nav-brand { font-size:1.1rem; }
+      .hero-stats { gap:24px; }
+      .cta-card { padding:40px 24px; }
+      footer { padding:24px 20px; }
+    }
+    @media (max-width:480px) {
+      .hero-stats { flex-direction:column; gap:16px; }
+      .stat-sep { width:60px; height:1px; }
+    }
+  </style>
 </head>
 <body>
-  
-  <div id="intro-container">
-    <video id="intro-video" src="intro.mp4" preload="auto" playsinline></video>
-    <div id="click-overlay">Click</div>
+
+  <div class="bg-layer"></div>
+  <div class="bg-noise"></div>
+  <div class="particles">
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div>
   </div>
 
-  <div id="main-page">
-    <div class="bio-container">
-      <img src="pfp.jpg" alt="Profile Picture" class="bio-pfp">
-      <h1 class="bio-username">Yawns</h1>
-      
-      <div class="bio-details">
-        <span class="bio-badge" data-tooltip="Pronouns"><i class="fas fa-id-card" style="margin-right: 5px; color: #888;"></i> he/him</span>
-        <span class="bio-badge" data-tooltip="Aliases"><i class="fas fa-user-tag" style="margin-right: 5px; color: #888;"></i> Kspr, Josh</span>
+  <nav>
+    <a href="/" class="nav-brand">kpr<span>.lol</span></a>
+    <div class="nav-actions">
+      <a href="/login" class="nav-link" id="nav-login">Log in</a>
+      <a href="/signup" class="nav-btn" id="nav-signup">Get Started</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-badge">
+        <i class="fas fa-circle"></i>
+        Invite only &mdash; apply within
       </div>
-      
-      <p class="bio-text">
-        Jarvis make me fable 5 no mistakes.
+
+      <h1 class="hero-title">
+        Your link.<br/>
+        <span class="grad">Your vibe.</span>
+      </h1>
+
+      <p class="hero-sub">
+        A premium bio-link platform built for people who actually care about how their profile looks. Fully customizable. Invite-only. No noise.
       </p>
 
-      <div class="music-player">
-        <img id="music-cover" src="" alt="Album Cover">
-        <div class="music-info">
-          <div id="music-title">Select a song</div>
-          <div id="music-artist"></div>
-        </div>
-        <div class="music-controls">
-          <button id="prev-btn"><i class="fas fa-backward"></i></button>
-          <button id="play-btn"><i class="fas fa-play"></i></button>
-          <button id="next-btn"><i class="fas fa-forward"></i></button>
-        </div>
-        <div class="volume-control">
-          <i class="fas fa-volume-up"></i>
-          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
-        </div>
-        <audio id="audio" preload="metadata"></audio>
+      <div class="hero-actions">
+        <a href="/signup" class="btn-primary" id="hero-cta-main">
+          <i class="fas fa-user-plus"></i>
+          Create your profile
+        </a>
+        <a href="/login" class="btn-secondary" id="hero-cta-sub">
+          <i class="fas fa-arrow-right-to-bracket"></i>
+          Sign in
+        </a>
       </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Customizable</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <div class="stat-value">Invite</div>
+          <div class="stat-label">Only access</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <div class="stat-value">0 ads</div>
+          <div class="stat-label">Ever</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <p class="section-label animate-in">What you get</p>
+      <h2 class="section-title animate-in">Everything your bio link<br/>should be</h2>
+      <p class="section-sub animate-in">Built different from the start. No templates, no limitations.</p>
+
+      <div class="features-grid">
+        <div class="feature-card animate-in">
+          <div class="feature-icon" style="background:rgba(99,102,241,0.15);">
+            <i class="fas fa-palette" style="color:#818cf8;"></i>
+          </div>
+          <div class="feature-title">Full Visual Control</div>
+          <div class="feature-desc">Custom accent colors, background images, background videos, and CSS. Your profile, exactly how you want it.</div>
+        </div>
+
+        <div class="feature-card animate-in">
+          <div class="feature-icon" style="background:rgba(167,139,250,0.15);">
+            <i class="fas fa-music" style="color:#a78bfa;"></i>
+          </div>
+          <div class="feature-title">Built-in Music Player</div>
+          <div class="feature-desc">Embed a song or full playlist on your profile. Visitors get a click-to-enter screen that kicks off your vibe automatically.</div>
+        </div>
+
+        <div class="feature-card animate-in">
+          <div class="feature-icon" style="background:rgba(244,114,182,0.15);">
+            <i class="fas fa-link" style="color:#f472b6;"></i>
+          </div>
+          <div class="feature-title">Smart Social Links</div>
+          <div class="feature-desc">Add up to 15 links across any platform. Discord, GitHub, Twitter, Instagram — all in one clean, beautiful card.</div>
+        </div>
+
+        <div class="feature-card animate-in">
+          <div class="feature-icon" style="background:rgba(52,211,153,0.15);">
+            <i class="fas fa-certificate" style="color:#34d399;"></i>
+          </div>
+          <div class="feature-title">Profile Badges</div>
+          <div class="feature-desc">Earn and display badges like OG, Developer, Supporter, and more. Show off your status in style.</div>
+        </div>
+
+        <div class="feature-card animate-in">
+          <div class="feature-icon" style="background:rgba(56,189,248,0.15);">
+            <i class="fas fa-video" style="color:#38bdf8;"></i>
+          </div>
+          <div class="feature-title">Background Video</div>
+          <div class="feature-desc">Drop in a looping mp4 as your profile background. Optionally unmute it for full immersion — no other platform does this.</div>
+        </div>
+
+        <div class="feature-card animate-in">
+          <div class="feature-icon" style="background:rgba(251,146,60,0.15);">
+            <i class="fas fa-ticket" style="color:#fb923c;"></i>
+          </div>
+          <div class="feature-title">Invite-Only Access</div>
+          <div class="feature-desc">Not everyone gets in. You need a code from someone already on the platform. Exclusivity matters here.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="cta-card animate-in">
+        <div class="cta-glow"></div>
+        <h2 class="cta-title">Ready to set up your profile?</h2>
+        <p class="cta-sub">Got an invite code? You're already in. Create your account and make it yours.</p>
+        <div class="cta-actions">
+          <a href="/signup" class="btn-primary" id="cta-main">
+            <i class="fas fa-user-plus"></i>
+            Create account
+          </a>
+          <a href="/login" class="btn-secondary" id="cta-sub">
+            <i class="fas fa-arrow-right-to-bracket"></i>
+            Already have one
+          </a>
+        </div>
+        <p class="cta-note">
+          <i class="fas fa-lock" style="font-size:0.7rem;"></i>
+          Need an invite code to sign up
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/" class="footer-brand">kpr<span>.lol</span></a>
+    <div class="footer-links">
+      <a href="/login">Login</a>
+      <a href="/signup">Sign Up</a>
     </div>
-  </div>
+  </footer>
 
+  <script src="api.js"></script>
   <script>
-    const introContainer = document.getElementById('intro-container');
-    const introVideo = document.getElementById('intro-video');
-    const clickOverlay = document.getElementById('click-overlay');
-    const mainPage = document.getElementById('main-page');
+    // If already logged in, redirect CTAs to dashboard
+    if (typeof API !== 'undefined' && API.isLoggedIn()) {
+      const user = API.getUser();
 
-    clickOverlay.addEventListener('click', () => {
-      clickOverlay.style.opacity = '0';
-      clickOverlay.style.pointerEvents = 'none';
-      
-      introVideo.classList.add('unblurred');
-      introVideo.play().catch(e => console.log('Playback failed:', e));
-    });
+      document.getElementById('nav-login').textContent = 'Dashboard';
+      document.getElementById('nav-login').href = '/dashboard';
+      document.getElementById('nav-signup').textContent = 'Go to Dashboard';
+      document.getElementById('nav-signup').href = '/dashboard';
 
-    function skipIntro() {
-      introVideo.pause();
-      introContainer.style.opacity = '0';
-      introContainer.style.pointerEvents = 'none';
-      mainPage.style.opacity = '1';
-      mainPage.style.pointerEvents = 'auto';
-      
-      setTimeout(() => {
-        introContainer.style.display = 'none';
-        playSong();
-      }, 1500);
+      document.getElementById('hero-cta-main').innerHTML = '<i class="fas fa-gauge-high"></i> Go to Dashboard';
+      document.getElementById('hero-cta-main').href = '/dashboard';
+      document.getElementById('hero-cta-sub').style.display = 'none';
+
+      document.getElementById('cta-main').innerHTML = '<i class="fas fa-gauge-high"></i> Go to Dashboard';
+      document.getElementById('cta-main').href = '/dashboard';
+      document.getElementById('cta-sub').style.display = 'none';
     }
 
-    introVideo.addEventListener('ended', skipIntro);
-    introContainer.addEventListener('dblclick', skipIntro);
+    // Scroll-in animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
 
-    const songs = [
-      {
-        title: "Duvet",
-        artist: "Bôa",
-        src: "songshit/Duvet/Duvet.mp3",
-        cover: "songshit/Duvet/duvet.png"
-      },
-      {
-        title: "My Jealousy",
-        artist: "vivi baby, ovg!",
-        src: "songshit/MY JEALOUSY.mp3",
-        cover: "songshit/fat.png"
-      },
-      {
-        title: "plz excuse my proper swag",
-        artist: "backw666s, morgue",
-        src: "songshit/morgue/plz excuse my proper.mp3",
-        cover: "songshit/morgue/excuseme.png"
-      },
-      {
-        title: "teach me how 2 swag",
-        artist: "blair, morgue, backw666s",
-        src: "songshit/morgue/teach me how 2 swag.mp3",
-        cover: "songshit/morgue/swag.png"
-      },
-      {
-        title: "love the way I lover",
-        artist: "never goodbye, nicosbands",
-        src: "songshit/nivo/love the way I lover.mp3",
-        cover: "songshit/nivo/ban.png"
-      },
-      {
-        title: "24h",
-        artist: "5L, safe 'n' sound",
-        src: "songshit/phsio/24h.mp3",
-        cover: "songshit/phsio/image.png"
-      }
-    ];
-
-    const audio = document.getElementById('audio');
-    const playBtn = document.getElementById('play-btn');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const musicTitle = document.getElementById('music-title');
-    const musicArtist = document.getElementById('music-artist');
-    const musicCover = document.getElementById('music-cover');
-    const volumeSlider = document.getElementById('volume-slider');
-
-    let currentSongIndex = 0;
-    audio.volume = 0.5;
-
-    volumeSlider.addEventListener('input', (e) => {
-      audio.volume = e.target.value;
-    });
-
-    function loadSong(song) {
-      musicTitle.textContent = song.title;
-      musicArtist.textContent = song.artist;
-      musicCover.src = song.cover || '';
-      audio.src = song.src;
-    }
-
-    function playSong() {
-      playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-      audio.play();
-    }
-
-    function pauseSong() {
-      playBtn.innerHTML = '<i class="fas fa-play"></i>';
-      audio.pause();
-    }
-
-    function playPause() {
-      if (audio.paused) {
-        playSong();
-      } else {
-        pauseSong();
-      }
-    }
-
-    function nextSong() {
-      currentSongIndex = (currentSongIndex + 1) % songs.length;
-      loadSong(songs[currentSongIndex]);
-      playSong();
-    }
-
-    function prevSong() {
-      currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-      loadSong(songs[currentSongIndex]);
-      playSong();
-    }
-
-    playBtn.addEventListener('click', playPause);
-    nextBtn.addEventListener('click', nextSong);
-    prevBtn.addEventListener('click', prevSong);
-    audio.addEventListener('ended', nextSong);
-
-    loadSong(songs[0]);
+    document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
   </script>
+
 </body>
 </html>
