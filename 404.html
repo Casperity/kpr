@@ -89,7 +89,7 @@
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
     }
-    
+
     body.profile-page.has-bg-video.no-bg-blur::before {
       background: transparent;
     }
@@ -98,6 +98,31 @@
     .profile-container {
       position: relative;
       z-index: 2;
+    }
+    #video-mute-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.75);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    #video-mute-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
     }
   </style>
 </head>
@@ -251,6 +276,16 @@
         bgVideoEl.className = 'profile-bg-video';
         body.appendChild(bgVideoEl);
         bgVideoEl.play().catch(e => console.log("Video autoplay failed:", e));
+        const muteBtn = document.createElement('button');
+        muteBtn.id = 'video-mute-btn';
+        muteBtn.innerHTML = '<i class="fas fa-volume-xmark"></i>';
+        muteBtn.title = 'Unmute video';
+        document.body.appendChild(muteBtn);
+        muteBtn.addEventListener('click', () => {
+          bgVideoEl.muted = !bgVideoEl.muted;
+          muteBtn.innerHTML = bgVideoEl.muted? '<i class="fas fa-volume-xmark"></i>' : '<i class="fas fa-volume-up"></i>';
+          muteBtn.title = bgVideoEl.muted ? 'Unmute video' : 'Mute video';
+        });
         body.classList.add('has-bg-video');
         body.classList.remove('has-bg-image');
         body.style.backgroundImage = '';
