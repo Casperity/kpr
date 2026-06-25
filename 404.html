@@ -474,6 +474,7 @@
           container.classList.remove('blurred');
           if (bgVideoEl) {
             bgVideoEl.classList.remove('blurred');
+            bgVideoEl.play().catch(() => {});
             
             // Unmute background video if configured
             const isMuted = data.settings?.bgVideoMuted ?? data.settings?.bg_video_muted ?? true;
