@@ -136,9 +136,9 @@
 
     // --- Render profile ---
     function renderProfile(data) {
-      // Handle banned users
+      // Handle banned users — show generic message, never leak ban reason to public
       if (data.banned) {
-        document.getElementById('banned-reason').textContent = data.banReason || 'This user has been banned.';
+        document.getElementById('banned-reason').textContent = 'This user has been banned.';
         showState('state-banned');
         return;
       }

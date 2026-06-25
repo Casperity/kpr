@@ -31,6 +31,18 @@
   <!-- Main Content -->
   <div class="dash-content">
 
+    <!-- Ban Notice (hidden by default) -->
+    <div id="ban-notice" style="display:none; grid-column: 1 / -1; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.35); border-radius: 16px; padding: 24px 28px; margin-bottom: 8px;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="font-size:2rem; flex-shrink:0;">🔨</div>
+        <div>
+          <div style="font-size:1.05rem; font-weight:700; color:#ef4444; margin-bottom:4px;">Your account has been banned</div>
+          <div style="font-size:0.88rem; color:rgba(255,255,255,0.55); line-height:1.5;">You cannot edit your profile while banned. Contact the site owner if you believe this is a mistake.</div>
+          <div id="ban-reason-display" style="margin-top:10px; font-size:0.82rem; color:rgba(239,68,68,0.75); background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:6px 12px; display:inline-block;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Left: Form -->
     <div class="dash-form-area">
 
@@ -288,6 +300,25 @@
         inputAvatar.value = user.avatarUrl || '';
         updateBioCounter();
         updateAvatarPreview();
+
+        // If banned — lock the whole dashboard
+        if (user.isBanned) {
+          const notice = document.getElementById('ban-notice');
+          const reasonEl = document.getElementById('ban-reason-display');
+          notice.style.display = '';
+          reasonEl.textContent = user.banReason ? `Reason: ${user.banReason}` : 'No reason provided.';
+
+          // Disable every input, textarea, select, and button except logout
+          document.querySelectorAll('input, textarea, select, button').forEach(el => {
+            if (el.id !== 'btn-logout') el.disabled = true;
+          });
+
+          // Hide the save button entirely
+          if (btnSave) btnSave.style.display = 'none';
+
+          updatePreview();
+          return; // stop loading the rest
+        }
 
         // Social links
         socialLinks = (res.socialLinks || []).map(l => ({
