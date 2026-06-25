@@ -176,6 +176,20 @@
     }
     .btn-secondary:hover { background:rgba(255,255,255,0.1); color:#fff; transform:translateY(-2px); }
 
+    .hero-login-link {
+      margin-top:18px;
+      font-size:0.875rem;
+      color:rgba(255,255,255,0.4);
+      animation:fadeSlideUp 0.6s 0.35s ease both;
+    }
+    .hero-login-link a {
+      color:#818cf8;
+      text-decoration:none;
+      font-weight:500;
+      transition:color 0.2s;
+    }
+    .hero-login-link a:hover { color:#a78bfa; }
+
     .hero-stats {
       display:flex; align-items:center; gap:40px;
       margin-top:64px; padding-top:48px;
@@ -301,13 +315,10 @@
       <div class="hero-actions">
         <a href="/signup" class="btn-primary" id="hero-cta-main">
           <i class="fas fa-user-plus"></i>
-          Create your profile
-        </a>
-        <a href="/login" class="btn-secondary" id="hero-cta-sub">
-          <i class="fas fa-arrow-right-to-bracket"></i>
-          Sign in
+          Sign up
         </a>
       </div>
+      <p class="hero-login-link">Already have an account? <a href="/login" id="hero-cta-sub">Log in</a></p>
 
       <div class="hero-stats">
         <div class="stat">
@@ -393,16 +404,11 @@
         <div class="cta-actions">
           <a href="/signup" class="btn-primary" id="cta-main">
             <i class="fas fa-user-plus"></i>
-            Create account
-          </a>
-          <a href="/login" class="btn-secondary" id="cta-sub">
-            <i class="fas fa-arrow-right-to-bracket"></i>
-            Already have one
+            Sign up
           </a>
         </div>
-        <p class="cta-note">
-          <i class="fas fa-lock" style="font-size:0.7rem;"></i>
-          Need an invite code to sign up
+        <p class="cta-note" id="cta-sub-note">
+          Already have an account? <a href="/login" id="cta-sub" style="color:#818cf8;text-decoration:none;">Log in</a>
         </p>
       </div>
     </section>
@@ -418,22 +424,12 @@
 
   <script src="api.js"></script>
   <script>
-    // If already logged in, redirect CTAs to dashboard
+    // If already logged in, update nav to point to dashboard
     if (typeof API !== 'undefined' && API.isLoggedIn()) {
-      const user = API.getUser();
-
       document.getElementById('nav-login').textContent = 'Dashboard';
       document.getElementById('nav-login').href = '/dashboard';
       document.getElementById('nav-signup').textContent = 'Go to Dashboard';
       document.getElementById('nav-signup').href = '/dashboard';
-
-      document.getElementById('hero-cta-main').innerHTML = '<i class="fas fa-gauge-high"></i> Go to Dashboard';
-      document.getElementById('hero-cta-main').href = '/dashboard';
-      document.getElementById('hero-cta-sub').style.display = 'none';
-
-      document.getElementById('cta-main').innerHTML = '<i class="fas fa-gauge-high"></i> Go to Dashboard';
-      document.getElementById('cta-main').href = '/dashboard';
-      document.getElementById('cta-sub').style.display = 'none';
     }
 
     // Scroll-in animation
