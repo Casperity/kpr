@@ -85,6 +85,11 @@
       z-index: 1;
     }
     
+    body.profile-page.no-bg-blur::before {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    
     /* Make sure profile elements sit above background video and overlay */
     .profile-container {
       position: relative;
@@ -396,6 +401,14 @@
       const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
       if (hasMusic) initMusicPlayer(data);
 
+      // Apply permanent background blur setting
+      const bgBlurEnabled = data.settings?.bgBlur ?? data.settings?.bg_blur ?? true;
+      if (bgBlurEnabled) {
+        body.classList.remove('no-bg-blur');
+      } else {
+        body.classList.add('no-bg-blur');
+      }
+
       // -- Enter Overlay and Blur flow --
       const hasVideo = !!bgVideo;
       const shouldShowOverlay = hasMusic || hasVideo;
@@ -411,18 +424,11 @@
         overlay.style.display = 'flex';
         overlay.classList.remove('fade-out');
 
-        const blurEnabled = data.settings?.bgBlur ?? data.settings?.bg_blur ?? true;
-        if (blurEnabled) {
-          overlay.style.backdropFilter = 'blur(25px)';
-          overlay.style.webkitBackdropFilter = 'blur(25px)';
-          container.classList.add('blurred');
-          if (bgVideoEl) bgVideoEl.classList.add('blurred');
-        } else {
-          overlay.style.backdropFilter = 'none';
-          overlay.style.webkitBackdropFilter = 'none';
-          container.classList.remove('blurred');
-          if (bgVideoEl) bgVideoEl.classList.remove('blurred');
-        }
+        // The click overlay itself always uses blur to hide background before clicking
+        overlay.style.backdropFilter = 'blur(25px)';
+        overlay.style.webkitBackdropFilter = 'blur(25px)';
+        container.classList.add('blurred');
+        if (bgVideoEl) bgVideoEl.classList.add('blurred');
 
         overlay.onclick = () => {
           overlay.classList.add('fade-out');

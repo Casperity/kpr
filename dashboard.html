@@ -189,8 +189,8 @@
 
           <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 16px; margin-top: 6px;">
             <div>
-              <div style="font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 2px;">Initial background blur</div>
-              <div style="font-size: 0.78rem; color: rgba(255,255,255,0.4);">Blur background until profile is clicked / entered</div>
+              <div style="font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 2px;">Blur background</div>
+              <div style="font-size: 0.78rem; color: rgba(255,255,255,0.4);">Apply a blur to the background image or video</div>
             </div>
             <label style="position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; cursor: pointer;">
               <input type="checkbox" id="input-bg-blur" style="opacity: 0; width: 0; height: 0; position: absolute;" />
@@ -690,11 +690,16 @@
 
         // Apply blur based on blur setting
         if (inputBgBlur.checked) {
-          previewVideo.style.filter = 'blur(10px)';
+          previewVideo.style.filter = 'blur(6px)';
         } else {
           previewVideo.style.filter = 'none';
         }
         
+        // Remove background image if any
+        const previewBgImg = previewScreen.querySelector('.preview-bg-image');
+        if (previewBgImg) {
+          previewBgImg.remove();
+        }
         previewScreen.style.background = 'transparent';
       } else {
         if (previewVideo) {
@@ -703,16 +708,28 @@
         // Background Image / Color
         const bg = inputBg.value || '#0a0a0f';
         const bgImg = inputBgImage.value.trim();
+        let previewBgImg = previewScreen.querySelector('.preview-bg-image');
+        
         if (bgImg) {
-          previewScreen.style.background = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bgImg}) center/cover no-repeat`;
-          if (inputBgBlur.checked) {
-            previewScreen.style.filter = 'blur(10px)';
-          } else {
-            previewScreen.style.filter = 'none';
+          if (!previewBgImg) {
+            previewBgImg = document.createElement('div');
+            previewBgImg.className = 'preview-bg-image';
+            previewBgImg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;z-index:0;pointer-events:none;transition:filter 0.3s;';
+            previewScreen.insertBefore(previewBgImg, previewScreen.firstChild);
           }
+          previewBgImg.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bgImg})`;
+          
+          if (inputBgBlur.checked) {
+            previewBgImg.style.filter = 'blur(6px)';
+          } else {
+            previewBgImg.style.filter = 'none';
+          }
+          previewScreen.style.background = 'transparent';
         } else {
+          if (previewBgImg) {
+            previewBgImg.remove();
+          }
           previewScreen.style.background = bg;
-          previewScreen.style.filter = 'none';
         }
       }
 
