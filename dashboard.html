@@ -240,6 +240,20 @@
 
     </div>
 
+    <!-- Right: Live Preview -->
+    <div class="dash-preview-area">
+      <div class="preview-label">Live Preview</div>
+      <div class="preview-phone" id="preview-phone">
+        <div class="preview-phone-notch"></div>
+        <div class="preview-phone-screen" id="preview-screen">
+          <img class="preview-avatar" id="preview-avatar" src="" alt="" />
+          <div class="preview-name" id="preview-name">Your Name</div>
+          <div class="preview-badges" id="preview-badges"></div>
+          <div class="preview-bio" id="preview-bio"></div>
+          <div class="preview-links" id="preview-links"></div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -382,7 +396,7 @@
           // Hide the save button entirely
           if (btnSave) btnSave.style.display = 'none';
 
-      //    updatePreview();
+          updatePreview();
           return; // stop loading the rest
         }
 
@@ -425,7 +439,7 @@
         syncToggle(inputBgBlur);
         syncToggle(inputBgVideoMuted);
 
-        //updatePreview();
+        updatePreview();
       } catch (err) {
         console.error('Failed to load profile:', err);
         Toast.show('Failed to load profile data', 'error');
@@ -466,7 +480,7 @@
             activeBadges = [...activeBadges, id];
           }
           renderBadgeToggles();
-          //updatePreview();
+          updatePreview();
         });
         list.appendChild(btn);
       });
@@ -478,7 +492,7 @@
       bioCounter.textContent = `${len} / 500`;
       bioCounter.classList.toggle('over', len > 500);
     }
-    //inputBio.addEventListener('input', () => { updateBioCounter(); updatePreview(); });
+    inputBio.addEventListener('input', () => { updateBioCounter(); updatePreview(); });
 
     // --- Avatar preview ---
     function updateAvatarPreview() {
@@ -490,7 +504,7 @@
         avatarPreview.style.display = 'none';
       }
     }
-    //const debouncedAvatarUpdate = debounce(() => { updateAvatarPreview(); updatePreview(); }, 600);
+    const debouncedAvatarUpdate = debounce(() => { updateAvatarPreview(); updatePreview(); }, 600);
     inputAvatar.addEventListener('input', debouncedAvatarUpdate);
     avatarPreview.addEventListener('error', () => { avatarPreview.style.display = 'none'; });
 
@@ -556,13 +570,13 @@
       linksList.querySelectorAll('[data-field="platform"]').forEach(el => {
         el.addEventListener('change', e => {
           socialLinks[+e.target.dataset.idx].platform = e.target.value;
-          //updatePreview();
+          updatePreview();
         });
       });
       linksList.querySelectorAll('[data-field="url"]').forEach(el => {
         el.addEventListener('input', e => {
           socialLinks[+e.target.dataset.idx].url = e.target.value;
-          //updatePreview();
+          updatePreview();
         });
       });
       linksList.querySelectorAll('.social-link-delete').forEach(el => {
@@ -570,7 +584,7 @@
           const idx = +e.currentTarget.dataset.idx;
           socialLinks.splice(idx, 1);
           renderLinksList();
-          //updatePreview();
+          updatePreview();
         });
       });
 
@@ -596,7 +610,7 @@
       picker.addEventListener('input', () => {
         text.value = picker.value;
         swatch.style.background = picker.value;
-        //updatePreview();
+        updatePreview();
       });
       text.addEventListener('input', () => {
         const v = text.value;
@@ -604,21 +618,21 @@
           picker.value = v;
           swatch.style.background = v;
         }
-        //updatePreview();
+        updatePreview();
       });
     }
     syncColor(inputAccentPicker, inputAccent, swatchAccent);
     syncColor(inputBgPicker, inputBg, swatchBg);
 
     // --- Name input -> preview ---
-    //inputName.addEventListener('input', updatePreview);
-    //inputPronouns.addEventListener('input', updatePreview);
-    //inputAliases.addEventListener('input', updatePreview);
-    //const debouncedBgUpdate = debounce(updatePreview, 600);
+    inputName.addEventListener('input', updatePreview);
+    inputPronouns.addEventListener('input', updatePreview);
+    inputAliases.addEventListener('input', updatePreview);
+    const debouncedBgUpdate = debounce(updatePreview, 600);
     inputBgImage.addEventListener('input', debouncedBgUpdate);
     inputBgVideo.addEventListener('input', debouncedBgUpdate);
-    //inputBgBlur.addEventListener('change', updatePreview);
-    //inputBgVideoMuted.addEventListener('change', updatePreview);
+    inputBgBlur.addEventListener('change', updatePreview);
+    inputBgVideoMuted.addEventListener('change', updatePreview);
 
     // --- Live preview update ---
     function updatePreview() {

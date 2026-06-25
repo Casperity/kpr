@@ -888,12 +888,8 @@ input, select, textarea, button {
    =========================== */
 @media (max-width: 900px) {
   .dash-content {
-    display: grid;
-    grid-template-columns: 1fr;  /* was: 1fr 380px */
-    gap: 32px;
-    max-width: 860px;  /* tighten max-width since it's single column now */
-    margin: 0 auto;
-    padding: 32px;
+    grid-template-columns: 1fr;
+    padding: 20px 16px;
   }
 
   .dash-preview-area {
