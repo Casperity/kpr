@@ -787,40 +787,25 @@
       // Clear previous invalid classes
       document.querySelectorAll('.url-invalid').forEach(el => el.classList.remove('url-invalid'));
 
-      // Validate all GitHub-only URL inputs before saving
-      const urlInputs = [
-        inputAvatar, inputBgImage, inputBgVideo, inputMusicUrl
-      ];
       let allValid = true;
       let firstInvalid = null;
-      urlInputs.forEach(el => {
-        if (el.value && !isGitHubUrl(el.value)) {
-          el.classList.add('url-invalid');
-          allValid = false;
-          if (!firstInvalid) firstInvalid = el;
-        }
-      });
-      // Also validate playlist items
-      const playlistInputs = document.querySelectorAll('#playlist-list input[data-sfield="url"], #playlist-list input[data-sfield="cover"]');
-      playlistInputs.forEach(el => {
-        if (el.value && !isGitHubUrl(el.value)) {
-          el.classList.add('url-invalid');
-          allValid = false;
-          if (!firstInvalid) firstInvalid = el;
-        }
-      });
-      // Also validate social links
-      const socialInputs = document.querySelectorAll('#links-list input[data-field="url"]');
-      socialInputs.forEach(el => {
-        if (el.value && !isGitHubUrl(el.value)) {
-          el.classList.add('url-invalid');
-          allValid = false;
-          if (!firstInvalid) firstInvalid = el;
-        }
-      });
+
+      // Only check GitHub restriction if the user is not an admin
+      if (!currentUser?.isAdmin) {
+        const urlInputs = [
+          inputAvatar, inputBgImage, inputBgVideo, inputMusicUrl
+        ];
+        urlInputs.forEach(el => {
+          if (el.value && !isGitHubUrl(el.value)) {
+            el.classList.add('url-invalid');
+            allValid = false;
+            if (!firstInvalid) firstInvalid = el;
+          }
+        });
+      }
 
       if (!allValid) {
-        Toast.show('Only GitHub URLs are allowed for all fields (e.g. github.com, raw.githubusercontent.com)', 'error');
+        Toast.show('Only GitHub URLs are allowed (e.g. github.com, raw.githubusercontent.com)', 'error');
         firstInvalid?.focus();
         return;
       }
