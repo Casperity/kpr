@@ -351,27 +351,27 @@ body {
 .strength-label.very-strong { color: #4ade80; }
 
 .form-group.invite-group label {
-  color: rgba(160, 200, 255, 0.65);
+  color: rgba(251, 191, 36, 0.7);
 }
 
 .form-group.invite-group .input-wrapper input {
-  border-color: rgba(80, 140, 255, 0.15);
+  border-color: rgba(251, 191, 36, 0.12);
 }
 
 .form-group.invite-group .input-wrapper input:focus {
-  border-color: rgba(80, 140, 255, 0.4);
-  background: rgba(14, 30, 90, 0.5);
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.03);
   box-shadow:
-    0 0 0 3px rgba(60, 120, 255, 0.08),
-    0 0 20px rgba(60, 120, 255, 0.05);
+    0 0 0 3px rgba(251, 191, 36, 0.06),
+    0 0 20px rgba(251, 191, 36, 0.04);
 }
 
 .form-group.invite-group .input-wrapper .input-icon {
-  color: rgba(80, 140, 255, 0.35);
+  color: rgba(251, 191, 36, 0.35);
 }
 
 .form-group.invite-group .input-wrapper:focus-within .input-icon {
-  color: rgba(120, 170, 255, 0.7);
+  color: rgba(251, 191, 36, 0.7);
 }
 
 .auth-btn {
