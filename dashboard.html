@@ -410,7 +410,7 @@
 
         // Badges
         ownedBadges  = user.badges       || [];
-        activeBadges = user.activeBadges || [];
+        activeBadges = (user.activeBadges || []).filter(b => ownedBadges.includes(b));
         
         // Playlist (admin only)
         playlist = (res.settings?.musicPlaylist) || [];

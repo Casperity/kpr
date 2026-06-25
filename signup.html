@@ -77,7 +77,7 @@
             />
             <span class="input-validation" id="username-validation"></span>
           </div>
-          <div class="validation-hint" id="username-hint">3–20 characters, lowercase letters, numbers & underscores</div>
+          <div class="validation-hint" id="username-hint">2–20 characters, lowercase letters, numbers & underscores</div>
         </div>
 
         <!-- Password -->
@@ -214,7 +214,7 @@
       });
 
       /* ── Username validation (real-time) ─────────────── */
-      const usernameRegex = /^[a-z0-9_]{3,20}$/;
+      const usernameRegex = /^[a-z0-9_]{2,20}$/;
 
       userInput.addEventListener('input', () => {
         const val = userInput.value;
@@ -222,7 +222,7 @@
           userValid.innerHTML = '';
           userValid.className = 'input-validation';
           userHint.className = 'validation-hint';
-          userHint.textContent = '3–20 characters, lowercase letters, numbers & underscores';
+          userHint.textContent = '2–20 characters, lowercase letters, numbers & underscores';
           return;
         }
 
@@ -242,14 +242,14 @@
         } else {
           userValid.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
           userValid.className = 'input-validation invalid';
-          if (v.length < 3) {
-            userHint.textContent = 'At least 3 characters required';
+          if (v.length < 2) {
+            userHint.textContent = 'At least 2 characters required';
           } else if (v.length > 20) {
             userHint.textContent = 'Maximum 20 characters';
           } else if (/[^a-z0-9_]/.test(v)) {
             userHint.textContent = 'Only lowercase letters, numbers & underscores';
           } else {
-            userHint.textContent = '3–20 characters, lowercase letters, numbers & underscores';
+            userHint.textContent = '2–20 characters, lowercase letters, numbers & underscores';
           }
           userHint.className = 'validation-hint error';
         }
@@ -345,7 +345,7 @@
           return;
         }
         if (!usernameRegex.test(username)) {
-          Toast.show('Username must be 3–20 chars: lowercase letters, numbers & underscores only.', 'error');
+          Toast.show('Username must be 2–20 chars: lowercase letters, numbers & underscores only.', 'error');
           userInput.focus();
           return;
         }
