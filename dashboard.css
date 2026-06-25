@@ -415,7 +415,6 @@ input, select, textarea, button {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 24px rgba(167, 139, 250, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -424,7 +423,6 @@ input, select, textarea, button {
 
 .btn-save:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(167, 139, 250, 0.35);
 }
 
 .btn-save:active:not(:disabled) {
