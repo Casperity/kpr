@@ -186,6 +186,30 @@
               <span class="toggle-thumb" style="position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></span>
             </label>
           </div>
+
+          <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 16px; margin-top: 6px;">
+            <div>
+              <div style="font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 2px;">Initial background blur</div>
+              <div style="font-size: 0.78rem; color: rgba(255,255,255,0.4);">Blur background until profile is clicked / entered</div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; cursor: pointer;">
+              <input type="checkbox" id="input-bg-blur" style="opacity: 0; width: 0; height: 0; position: absolute;" />
+              <span class="toggle-track" style="position: absolute; inset: 0; background: rgba(255,255,255,0.12); border-radius: 12px; transition: background 0.2s;"></span>
+              <span class="toggle-thumb" style="position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></span>
+            </label>
+          </div>
+
+          <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 16px; margin-top: 6px;">
+            <div>
+              <div style="font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 2px;">Mute background video</div>
+              <div style="font-size: 0.78rem; color: rgba(255,255,255,0.4);">Keep background video muted (default)</div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; cursor: pointer;">
+              <input type="checkbox" id="input-bg-video-muted" style="opacity: 0; width: 0; height: 0; position: absolute;" />
+              <span class="toggle-track" style="position: absolute; inset: 0; background: rgba(255,255,255,0.12); border-radius: 12px; transition: background 0.2s;"></span>
+              <span class="toggle-thumb" style="position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -301,6 +325,8 @@
     const swatchBg = document.getElementById('swatch-bg');
     const inputBgImage = document.getElementById('input-bg-image');
     const inputBgVideo = document.getElementById('input-bg-video');
+    const inputBgBlur = document.getElementById('input-bg-blur');
+    const inputBgVideoMuted = document.getElementById('input-bg-video-muted');
     const inputMusicUrl = document.getElementById('input-music-url');
     const inputMusicTitle = document.getElementById('input-music-title');
     const inputMusicArtist = document.getElementById('input-music-artist');
@@ -403,11 +429,15 @@
         swatchBg.style.background = bg;
         inputBgImage.value = settings.bgImageUrl || '';
         inputBgVideo.value = settings.bgVideoUrl || settings.bg_video_url || '';
+        inputBgBlur.checked = settings.bgBlur !== false; // default true
+        inputBgVideoMuted.checked = settings.bgVideoMuted !== false; // default true
         inputMusicUrl.value = settings.musicUrl || '';
         inputMusicTitle.value = settings.musicTitle || '';
         inputMusicArtist.value = settings.musicArtist || '';
         inputMusicAutoplay.checked = !!(settings.musicAutoplay || settings.music_autoplay);
-        syncAutoplayToggle();
+        syncToggle(inputMusicAutoplay);
+        syncToggle(inputBgBlur);
+        syncToggle(inputBgVideoMuted);
 
         updatePreview();
       } catch (err) {
@@ -601,6 +631,8 @@
     const debouncedBgUpdate = debounce(updatePreview, 600);
     inputBgImage.addEventListener('input', debouncedBgUpdate);
     inputBgVideo.addEventListener('input', debouncedBgUpdate);
+    inputBgBlur.addEventListener('change', updatePreview);
+    inputBgVideoMuted.addEventListener('change', updatePreview);
 
     // --- Live preview update ---
     function updatePreview() {
@@ -637,14 +669,32 @@
           previewVideo.className = 'preview-bg-video';
           previewVideo.autoplay = true;
           previewVideo.loop = true;
-          previewVideo.muted = true;
           previewVideo.playsInline = true;
-          previewVideo.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;';
+          previewVideo.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;transition:filter 0.3s;';
           previewScreen.insertBefore(previewVideo, previewScreen.firstChild);
         }
         if (previewVideo.src !== bgVideo) {
           previewVideo.src = bgVideo;
         }
+        
+        // Mute or unmute preview video
+        if (!inputBgVideoMuted.checked) {
+          previewVideo.muted = false;
+          previewVideo.play().catch(() => {
+            previewVideo.muted = true;
+            previewVideo.play().catch(() => {});
+          });
+        } else {
+          previewVideo.muted = true;
+        }
+
+        // Apply blur based on blur setting
+        if (inputBgBlur.checked) {
+          previewVideo.style.filter = 'blur(10px)';
+        } else {
+          previewVideo.style.filter = 'none';
+        }
+        
         previewScreen.style.background = 'transparent';
       } else {
         if (previewVideo) {
@@ -655,8 +705,14 @@
         const bgImg = inputBgImage.value.trim();
         if (bgImg) {
           previewScreen.style.background = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bgImg}) center/cover no-repeat`;
+          if (inputBgBlur.checked) {
+            previewScreen.style.filter = 'blur(10px)';
+          } else {
+            previewScreen.style.filter = 'none';
+          }
         } else {
           previewScreen.style.background = bg;
+          previewScreen.style.filter = 'none';
         }
       }
 
@@ -697,6 +753,8 @@
           bgColor: inputBg.value.trim() || '#0a0a0f',
           bgImageUrl: inputBgImage.value.trim(),
           bgVideoUrl: inputBgVideo.value.trim(),
+          bgBlur: inputBgBlur.checked,
+          bgVideoMuted: inputBgVideoMuted.checked,
           musicAutoplay: inputMusicAutoplay.checked,
           musicUrl: inputMusicUrl.value.trim(),
           musicTitle: inputMusicTitle.value.trim(),
@@ -733,10 +791,11 @@
       }
     });
     
-    function syncAutoplayToggle() {
-      const track = inputMusicAutoplay.closest('label').querySelector('.toggle-track');
-      const thumb = inputMusicAutoplay.closest('label').querySelector('.toggle-thumb');
-      if (inputMusicAutoplay.checked) {
+    function syncToggle(el) {
+      if (!el) return;
+      const track = el.closest('label').querySelector('.toggle-track');
+      const thumb = el.closest('label').querySelector('.toggle-thumb');
+      if (el.checked) {
         track.style.background = '#a78bfa';
         thumb.style.transform = 'translateX(20px)';
       } else {
@@ -744,7 +803,9 @@
         thumb.style.transform = 'translateX(0)';
       }
     }
-    inputMusicAutoplay.addEventListener('change', syncAutoplayToggle);
+    inputMusicAutoplay.addEventListener('change', () => syncToggle(inputMusicAutoplay));
+    inputBgBlur.addEventListener('change', () => syncToggle(inputBgBlur));
+    inputBgVideoMuted.addEventListener('change', () => syncToggle(inputBgVideoMuted));
 
     // --- Logout --- yuh
     btnLogout.addEventListener('click', () => {

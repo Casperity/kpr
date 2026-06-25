@@ -411,13 +411,31 @@
         overlay.style.display = 'flex';
         overlay.classList.remove('fade-out');
 
-        container.classList.add('blurred');
-        if (bgVideoEl) bgVideoEl.classList.add('blurred');
+        const blurEnabled = data.settings?.bgBlur ?? data.settings?.bg_blur ?? true;
+        if (blurEnabled) {
+          overlay.style.backdropFilter = 'blur(25px)';
+          overlay.style.webkitBackdropFilter = 'blur(25px)';
+          container.classList.add('blurred');
+          if (bgVideoEl) bgVideoEl.classList.add('blurred');
+        } else {
+          overlay.style.backdropFilter = 'none';
+          overlay.style.webkitBackdropFilter = 'none';
+          container.classList.remove('blurred');
+          if (bgVideoEl) bgVideoEl.classList.remove('blurred');
+        }
 
         overlay.onclick = () => {
           overlay.classList.add('fade-out');
           container.classList.remove('blurred');
-          if (bgVideoEl) bgVideoEl.classList.remove('blurred');
+          if (bgVideoEl) {
+            bgVideoEl.classList.remove('blurred');
+            
+            // Unmute background video if configured
+            const isMuted = data.settings?.bgVideoMuted ?? data.settings?.bg_video_muted ?? true;
+            if (!isMuted) {
+              bgVideoEl.muted = false;
+            }
+          }
           
           const autoplayEnabled = data.settings?.musicAutoplay ?? data.settings?.music_autoplay ?? false;
           if (autoplayEnabled && window.playProfileMusic) {
@@ -432,6 +450,14 @@
         const overlay = document.getElementById('enter-overlay');
         if (overlay) overlay.style.display = 'none';
         container.classList.remove('blurred');
+        
+        // No overlay, apply video mute configuration immediately
+        if (bgVideoEl) {
+          const isMuted = data.settings?.bgVideoMuted ?? data.settings?.bg_video_muted ?? true;
+          if (!isMuted) {
+            bgVideoEl.muted = false;
+          }
+        }
       }
     }
 
