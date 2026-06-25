@@ -59,6 +59,17 @@
       </div>
     </div>
 
+    <div class="dash-section" id="section-users" style="margin-bottom: 2rem;">
+      <div class="dash-section-header">
+        <div class="dash-section-title">
+          <i class="fas fa-users"></i> Users & Badges
+        </div>
+      </div>
+      <div class="dash-section-body" style="display: block;">
+        <div id="users-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+    </div>
+
   </div>
 
   <script src="/api.js"></script>
@@ -72,6 +83,20 @@
       API.logout();
       window.location.href = '/login';
     });
+
+    /* ── Badge Catalog (matches backend + profile renderer) ── */
+    const BADGE_CATALOG = {
+      dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#a78bfa' },
+      og:          { icon: 'fas fa-crown',           label: 'OG',           color: '#facc15' },
+      supporter:   { icon: 'fas fa-heart',           label: 'Supporter',    color: '#f472b6' },
+      vip:         { icon: 'fas fa-gem',             label: 'VIP',          color: '#38bdf8' },
+      verified:    { icon: 'fas fa-circle-check',    label: 'Verified',     color: '#4ade80' },
+      staff:       { icon: 'fas fa-shield-halved',   label: 'Staff',        color: '#fb923c' },
+      beta:        { icon: 'fas fa-flask',           label: 'Beta Tester',  color: '#c084fc' },
+      contributor: { icon: 'fas fa-code-branch',     label: 'Contributor',  color: '#34d399' },
+      partner:     { icon: 'fas fa-handshake',       label: 'Partner',      color: '#fbbf24' },
+      donor:       { icon: 'fas fa-dollar-sign',     label: 'Donor',        color: '#22d3ee' },
+    };
 
     // Load invites
     async function loadInvites() {
@@ -158,6 +183,85 @@
     };
 
     loadInvites();
+
+    /* ── Users & Badges ──────────────────────────────── */
+    let allUsers = [];
+    let allowedBadges = Object.keys(BADGE_CATALOG);
+
+    async function loadUsers() {
+      try {
+        const data = await API.getUsers();
+        allUsers = data.users || [];
+        if (data.allowedBadges) allowedBadges = data.allowedBadges;
+        renderUsers();
+      } catch (err) {
+        if (err.status === 403) return;
+        console.error(err);
+      }
+    }
+
+    function renderUsers() {
+      const container = document.getElementById('users-list');
+      if (!allUsers.length) {
+        container.innerHTML = '<div style="color: rgba(255,255,255,0.4); text-align: center; padding: 1rem;">No users found</div>';
+        return;
+      }
+      container.innerHTML = allUsers.map(u => {
+        const userBadges = u.badges || [];
+        const badgePills = allowedBadges.map(id => {
+          const b = BADGE_CATALOG[id] || { icon: 'fas fa-certificate', label: id, color: '#888' };
+          const active = userBadges.includes(id);
+          return `<button class="badge-pill ${active ? 'active' : ''}" data-user="${u.id}" data-badge="${id}" style="--badge-color: ${b.color};" title="${b.label}"><i class="${b.icon}"></i></button>`;
+        }).join('');
+
+        return `
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div>
+                <a href="/${u.username}" target="_blank" style="color: #fff; text-decoration: none; font-weight: 600;">${u.username}</a>
+                ${u.displayName ? `<span style="color: rgba(255,255,255,0.35); margin-left: 8px;">${u.displayName}</span>` : ''}
+                ${u.isAdmin ? '<span style="background: #fb923c; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600; margin-left: 6px;">ADMIN</span>' : ''}
+              </div>
+              <span style="color: rgba(255,255,255,0.25); font-size: 0.75rem;">ID: ${u.id}</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              ${badgePills}
+            </div>
+          </div>`;
+      }).join('');
+
+      // Bind click events
+      container.querySelectorAll('.badge-pill').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.user;
+          const badgeId = btn.dataset.badge;
+          const user = allUsers.find(u => u.id == userId);
+          if (!user) return;
+
+          let badges = [...(user.badges || [])];
+          if (badges.includes(badgeId)) {
+            badges = badges.filter(b => b !== badgeId);
+          } else {
+            badges.push(badgeId);
+          }
+
+          try {
+            await API.request('/api/admin/users/' + userId + '/badges', {
+              method: 'PUT',
+              body: JSON.stringify({ badges })
+            });
+            user.badges = badges;
+            renderUsers();
+            Toast.show(`Badges updated for ${user.username}`, 'success');
+          } catch (err) {
+            console.error(err);
+            Toast.show(err.error || 'Failed to update badges', 'error');
+          }
+        });
+      });
+    }
+
+    loadUsers();
   </script>
 </body>
 </html>

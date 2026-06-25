@@ -944,3 +944,40 @@ input, select, textarea, button {
     border-radius: 12px;
   }
 }
+
+/* ── Admin Badge Pills ──────────────────────────────── */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+.badge-pill:hover {
+  border-color: var(--badge-color);
+  color: var(--badge-color);
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.15);
+}
+
+.badge-pill.active {
+  border-color: var(--badge-color);
+  color: var(--badge-color);
+  background: color-mix(in srgb, var(--badge-color) 15%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--badge-color) 40%, transparent);
+}
+
+.badge-pill.active:hover {
+  background: color-mix(in srgb, var(--badge-color) 22%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--badge-color) 55%, transparent);
+  transform: scale(1.15);
+}

@@ -83,6 +83,25 @@
       website: 'Website', email: 'Email', other: 'Link'
     };
 
+    /* ── Badge Catalog ─────────────────────────────────────
+     * To add a new badge, just add a new entry here.
+     * icon  = FontAwesome class
+     * label = tooltip text shown on hover
+     * color = icon color
+     */
+    const BADGE_CATALOG = {
+      dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#a78bfa' },
+      og:          { icon: 'fas fa-crown',           label: 'OG',           color: '#facc15' },
+      supporter:   { icon: 'fas fa-heart',           label: 'Supporter',    color: '#f472b6' },
+      vip:         { icon: 'fas fa-gem',             label: 'VIP',          color: '#38bdf8' },
+      verified:    { icon: 'fas fa-circle-check',    label: 'Verified',     color: '#4ade80' },
+      staff:       { icon: 'fas fa-shield-halved',   label: 'Staff',        color: '#fb923c' },
+      beta:        { icon: 'fas fa-flask',           label: 'Beta Tester',  color: '#c084fc' },
+      contributor: { icon: 'fas fa-code-branch',     label: 'Contributor',  color: '#34d399' },
+      partner:     { icon: 'fas fa-handshake',       label: 'Partner',      color: '#fbbf24' },
+      donor:       { icon: 'fas fa-dollar-sign',     label: 'Donor',        color: '#22d3ee' },
+    };
+
     // --- Utility: hex to RGB for CSS var ---
     function hexToRgb(hex) {
       hex = hex.replace('#', '');
@@ -194,7 +213,20 @@
           </div>`;
       }
 
-      // -- Badges --
+      // -- User Badges (icons) --
+      let userBadgesHtml = '';
+      const badgeList = data.badges || [];
+      if (badgeList.length > 0) {
+        userBadgesHtml += '<div class="profile-badges">';
+        badgeList.forEach(id => {
+          const b = BADGE_CATALOG[id];
+          if (!b) return;
+          userBadgesHtml += `<span class="profile-badge-icon" data-tooltip="${esc(b.label)}" style="color: ${b.color};"><i class="${b.icon}"></i></span>`;
+        });
+        userBadgesHtml += '</div>';
+      }
+
+      // -- Pronouns / Aliases --
       let badgesHtml = '';
       if (data.pronouns || data.aliases) {
         badgesHtml += '<div class="bio-details">';
@@ -208,6 +240,7 @@
         <div class="profile-card">
           <img class="profile-avatar" src="${esc(avatarUrl)}" alt="${esc(data.displayName || data.display_name || data.username)}" onerror="this.style.display='none'" />
           <h1 class="profile-name">${esc(data.displayName || data.display_name || data.username)}</h1>
+          ${userBadgesHtml}
           ${badgesHtml}
           ${data.bio ? `<p class="profile-bio">${esc(data.bio)}</p>` : ''}
           ${linksHtml ? `<div class="profile-links">${linksHtml}</div>` : ''}
