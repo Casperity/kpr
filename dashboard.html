@@ -243,15 +243,32 @@
     <!-- Right: Live Preview -->
     <div class="dash-preview-area">
       <div class="preview-label">Live Preview</div>
-      <div class="preview-phone" id="preview-phone">
-        <div class="preview-phone-notch"></div>
-        <div class="preview-phone-screen" id="preview-screen">
-          <img class="preview-avatar" id="preview-avatar" src="" alt="" />
+      <div class="preview-card-wrap" id="preview-screen">
+        <div id="preview-bg-layer"></div>
+        <div class="preview-card" id="preview-card">
+          <div class="preview-avatar-wrap">
+            <img class="preview-avatar" id="preview-avatar" src="" alt="" style="display:none;" />
+            <div class="preview-avatar-placeholder" id="preview-avatar-placeholder">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+            </div>
+          </div>
           <div class="preview-name" id="preview-name">Your Name</div>
-          <div class="preview-badges" id="preview-badges"></div>
+          <div class="preview-icon-badges" id="preview-icon-badges"></div>
+          <div class="preview-pill-badges" id="preview-pill-badges"></div>
           <div class="preview-bio" id="preview-bio"></div>
           <div class="preview-links" id="preview-links"></div>
+          <div class="preview-music" id="preview-music" style="display:none;">
+            <div class="preview-music-cover" id="preview-music-cover"></div>
+            <div class="preview-music-info">
+              <div class="preview-music-title" id="preview-music-title">Now Playing</div>
+              <div class="preview-music-artist" id="preview-music-artist"></div>
+            </div>
+            <button class="preview-music-btn"><i class="fas fa-play"></i></button>
+          </div>
         </div>
+        <div class="preview-footer">kpr<span>.lol</span></div>
       </div>
     </div>
 
@@ -636,110 +653,120 @@
 
     // --- Live preview update ---
     function updatePreview() {
+      const screen = document.getElementById('preview-screen');
+      const accent = inputAccent.value || '#a78bfa';
+
+      // Accent RGB for avatar glow
+      const rgb = hexToRgb(accent);
+      screen.style.setProperty('--preview-accent-rgb', rgb);
+
       // Avatar
       const avatarUrl = inputAvatar.value.trim();
+      const previewAvatar = document.getElementById('preview-avatar');
+      const previewAvatarPlaceholder = document.getElementById('preview-avatar-placeholder');
       if (avatarUrl) {
         previewAvatar.src = avatarUrl;
         previewAvatar.style.display = '';
+        previewAvatarPlaceholder.style.display = 'none';
       } else {
         previewAvatar.style.display = 'none';
+        previewAvatarPlaceholder.style.display = '';
       }
 
-      // Name, Badges & Bio
-      previewName.textContent = inputName.value || 'Your Name';
-      
-      const pronouns = inputPronouns.value.trim();
-      const aliases = inputAliases.value.trim();
-      let badgesHtml = '';
-      if (pronouns) badgesHtml += `<span class="bio-badge" data-tooltip="Pronouns"><i class="fas fa-id-card" style="margin-right: 5px; color: #888;"></i> ${escAttr(pronouns)}</span>`;
-      if (aliases) badgesHtml += `<span class="bio-badge" data-tooltip="Aliases"><i class="fas fa-user-tag" style="margin-right: 5px; color: #888;"></i> ${escAttr(aliases)}</span>`;
-      
-      previewBadges.innerHTML = badgesHtml;
-      previewBadges.style.display = badgesHtml ? 'flex' : 'none';
+      // Name shimmer
+      document.getElementById('preview-name').textContent = inputName.value || 'Your Name';
 
-      previewBio.textContent = inputBio.value || '';
-      previewBio.style.display = inputBio.value ? '' : 'none';
-
-      // Background Video preview
-      const bgVideo = inputBgVideo.value.trim();
-      let previewVideo = previewScreen.querySelector('.preview-bg-video');
-      if (bgVideo) {
-        if (!previewVideo) {
-          previewVideo = document.createElement('video');
-          previewVideo.className = 'preview-bg-video';
-          previewVideo.autoplay = true;
-          previewVideo.loop = true;
-          previewVideo.playsInline = true;
-          previewVideo.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;transition:filter 0.3s;';
-          previewScreen.insertBefore(previewVideo, previewScreen.firstChild);
-        }
-        if (previewVideo.src !== bgVideo) {
-          previewVideo.src = bgVideo;
-        }
-        
-
-        previewVideo.muted = true;
-
-
-        // Apply blur based on blur setting
-        if (inputBgBlur.checked) {
-          previewVideo.style.filter = 'blur(6px)';
-        } else {
-          previewVideo.style.filter = 'none';
-        }
-        
-        // Remove background image if any
-        const previewBgImg = previewScreen.querySelector('.preview-bg-image');
-        if (previewBgImg) {
-          previewBgImg.remove();
-        }
-        previewScreen.style.background = 'transparent';
+      // Icon badges (owned active badges)
+      const iconBadgesEl = document.getElementById('preview-icon-badges');
+      if (activeBadges.length > 0) {
+        iconBadgesEl.style.display = 'flex';
+        iconBadgesEl.innerHTML = activeBadges.map(id => {
+          const b = BADGE_CATALOG[id] || { icon: 'fas fa-certificate', color: '#888' };
+          return `<span class="preview-icon-badge" style="color:${b.color};"><i class="${b.icon}"></i></span>`;
+        }).join('');
       } else {
-        if (previewVideo) {
-          previewVideo.remove();
-        }
-        // Background Image / Color
-        const bg = inputBg.value || '#0a0a0f';
-        const bgImg = inputBgImage.value.trim();
-        let previewBgImg = previewScreen.querySelector('.preview-bg-image');
-        
-        if (bgImg) {
-          if (!previewBgImg) {
-            previewBgImg = document.createElement('div');
-            previewBgImg.className = 'preview-bg-image';
-            previewBgImg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;z-index:0;pointer-events:none;transition:filter 0.3s;';
-            previewScreen.insertBefore(previewBgImg, previewScreen.firstChild);
-          }
-          previewBgImg.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bgImg})`;
-          
-          if (inputBgBlur.checked) {
-            previewBgImg.style.filter = 'blur(6px)';
-          } else {
-            previewBgImg.style.filter = 'none';
-          }
-          previewScreen.style.background = 'transparent';
-        } else {
-          if (previewBgImg) {
-            previewBgImg.remove();
-          }
-          previewScreen.style.background = bg;
-        }
+        iconBadgesEl.style.display = 'none';
+        iconBadgesEl.innerHTML = '';
       }
 
-      // Accent
-      const accent = inputAccent.value || '#a78bfa';
+      // Pill badges (pronouns / aliases)
+      const pillBadgesEl = document.getElementById('preview-pill-badges');
+      let pillHtml = '';
+      if (inputPronouns.value.trim()) pillHtml += `<span class="preview-pill-badge"><i class="fas fa-id-card"></i>${escAttr(inputPronouns.value.trim())}</span>`;
+      if (inputAliases.value.trim())  pillHtml += `<span class="preview-pill-badge"><i class="fas fa-user-tag"></i>${escAttr(inputAliases.value.trim())}</span>`;
+      pillBadgesEl.innerHTML = pillHtml;
+      pillBadgesEl.style.display = pillHtml ? 'flex' : 'none';
 
-      // Links
-      previewLinks.innerHTML = '';
+      // Bio
+      const bioEl = document.getElementById('preview-bio');
+      bioEl.textContent = inputBio.value || '';
+      bioEl.style.display = inputBio.value ? '' : 'none';
+
+      // Social links
+      const linksEl = document.getElementById('preview-links');
+      linksEl.innerHTML = '';
       socialLinks.forEach(link => {
         if (!link.url) return;
-        const platform = link.platform || 'other';
-        const p = PLATFORMS.find(pp => pp.value === platform) || PLATFORMS[PLATFORMS.length - 1];
+        const p = PLATFORMS.find(pp => pp.value === link.platform) || PLATFORMS[PLATFORMS.length - 1];
         const div = document.createElement('div');
         div.className = 'preview-link';
-        div.innerHTML = `<i class="${p.icon}"></i> <span>${p.label}</span>`;
-        previewLinks.appendChild(div);
+        div.innerHTML = `<i class="${p.icon}"></i><span>${p.label}</span>`;
+        linksEl.appendChild(div);
       });
+
+      // Music player
+      const musicEl = document.getElementById('preview-music');
+      const hasMusicUrl = inputMusicUrl.value.trim();
+      if (hasMusicUrl) {
+        musicEl.style.display = 'flex';
+        document.getElementById('preview-music-title').textContent = inputMusicTitle.value.trim() || 'Now Playing';
+        document.getElementById('preview-music-artist').textContent = inputMusicArtist.value.trim() || '';
+      } else {
+        musicEl.style.display = 'none';
+      }
+
+      // Background
+      const bgLayer = document.getElementById('preview-bg-layer');
+      const bgVideo = inputBgVideo.value.trim();
+      const bgImg = inputBgImage.value.trim();
+      const bg = inputBg.value || '#0a0a0f';
+      const blur = inputBgBlur.checked;
+
+      // Remove old video
+      let vid = bgLayer.querySelector('video');
+
+      if (bgVideo) {
+        if (!vid) {
+          vid = document.createElement('video');
+          vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+          vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+          bgLayer.appendChild(vid);
+        }
+        if (vid.src !== bgVideo) vid.src = bgVideo;
+        vid.style.filter = blur ? 'blur(6px)' : 'none';
+        bgLayer.style.backgroundImage = '';
+        screen.style.background = '#0a0a0f';
+      } else {
+        if (vid) vid.remove();
+        if (bgImg) {
+          bgLayer.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url(${bgImg})`;
+          bgLayer.style.backgroundSize = 'cover';
+          bgLayer.style.backgroundPosition = 'center';
+          bgLayer.style.filter = blur ? 'blur(6px)' : 'none';
+          screen.style.background = 'transparent';
+        } else {
+          bgLayer.style.backgroundImage = '';
+          bgLayer.style.filter = '';
+          screen.style.background = bg;
+        }
+      }
+    }
+
+    function hexToRgb(hex) {
+      hex = (hex || '#a78bfa').replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+      const n = parseInt(hex, 16);
+      return `${(n>>16)&255}, ${(n>>8)&255}, ${n&255}`;
     }
 
     // --- Save ---
