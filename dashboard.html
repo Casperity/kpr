@@ -22,6 +22,9 @@
       <a href="#" id="nav-view-profile" class="dash-nav-link" target="_blank">
         <i class="fas fa-external-link-alt" style="margin-right:4px;font-size:0.75rem;"></i> View Profile
       </a>
+      <a href="/admin" id="nav-admin" class="dash-nav-link" style="display:none; color:#fb923c;">
+        <i class="fas fa-shield-halved" style="margin-right:4px;"></i> Admin Panel
+      </a>
       <button class="btn-logout" id="btn-logout">
         <i class="fas fa-sign-out-alt" style="margin-right:4px;"></i> Logout
       </button>
@@ -291,6 +294,9 @@
 
         // Populate nav
         navViewProfile.href = '/' + (user.username || '');
+        if (user.isAdmin) {
+          document.getElementById('nav-admin').style.display = '';
+        }
 
         // Basic info
         inputName.value = user.displayName || '';
