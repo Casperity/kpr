@@ -96,6 +96,13 @@ const API = {
     });
   },
 
+  updateActiveBadges(activeBadges) {
+    return this.request('/api/user/badges', {
+      method: 'PUT',
+      body: JSON.stringify({ activeBadges })
+    });
+  },
+
   /* ── Admin endpoints ──────────────────────────────────── */
   getInvites() {
     return this.request('/api/admin/invites');

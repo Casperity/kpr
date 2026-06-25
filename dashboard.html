@@ -71,6 +71,20 @@
         </div>
       </div>
 
+      <!-- Badges -->
+      <div class="dash-section" id="section-badges" style="display:none;">
+        <div class="dash-section-header" onclick="toggleSection('section-badges')">
+          <div class="dash-section-title">
+            <i class="fas fa-certificate"></i> My Badges
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div class="form-hint" style="margin-bottom:14px;">Click a badge to toggle whether it shows on your profile. You can only show badges you own.</div>
+          <div id="badge-toggle-list" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+        </div>
+      </div>
+
       <!-- Social Links -->
       <div class="dash-section" id="section-links">
         <div class="dash-section-header" onclick="toggleSection('section-links')">
@@ -184,9 +198,24 @@
       { value: 'other',      label: 'Other',      icon: 'fa-solid fa-link' }
     ];
 
+    const BADGE_CATALOG = {
+      dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#a78bfa' },
+      og:          { icon: 'fas fa-crown',           label: 'OG',           color: '#facc15' },
+      supporter:   { icon: 'fas fa-heart',           label: 'Supporter',    color: '#f472b6' },
+      vip:         { icon: 'fas fa-gem',             label: 'VIP',          color: '#38bdf8' },
+      verified:    { icon: 'fas fa-circle-check',    label: 'Verified',     color: '#4ade80' },
+      staff:       { icon: 'fas fa-shield-halved',   label: 'Staff',        color: '#fb923c' },
+      beta:        { icon: 'fas fa-flask',           label: 'Beta Tester',  color: '#c084fc' },
+      contributor: { icon: 'fas fa-code-branch',     label: 'Contributor',  color: '#34d399' },
+      partner:     { icon: 'fas fa-handshake',       label: 'Partner',      color: '#fbbf24' },
+      donor:       { icon: 'fas fa-dollar-sign',     label: 'Donor',        color: '#22d3ee' },
+    };
+
     const MAX_LINKS = 15;
     let socialLinks = [];
     let currentUser = null;
+    let ownedBadges = [];    // badges admin granted
+    let activeBadges = [];   // badges user chose to display
 
     // --- Auth check ---
     if (!API.isLoggedIn()) {
@@ -268,6 +297,11 @@
         }));
         renderLinksList();
 
+        // Badges
+        ownedBadges  = user.badges       || [];
+        activeBadges = user.activeBadges || [...ownedBadges];
+        renderBadgeToggles();
+
         // Theme
         const settings = res.settings || {};
         const accent = settings.accentColor || '#a78bfa';
@@ -295,6 +329,39 @@
       if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
       if (hex.length < 6) hex = hex.padEnd(6, '0');
       return '#' + hex.substring(0, 6);
+    }
+
+    // --- Badge toggles ---
+    function renderBadgeToggles() {
+      const section = document.getElementById('section-badges');
+      const list = document.getElementById('badge-toggle-list');
+
+      if (ownedBadges.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+      section.style.display = '';
+      list.innerHTML = '';
+
+      ownedBadges.forEach(id => {
+        const b = BADGE_CATALOG[id] || { icon: 'fas fa-certificate', label: id, color: '#888' };
+        const isActive = activeBadges.includes(id);
+        const btn = document.createElement('button');
+        btn.className = 'badge-pill' + (isActive ? ' active' : '');
+        btn.style.setProperty('--badge-color', b.color);
+        btn.title = b.label;
+        btn.innerHTML = `<i class="${b.icon}"></i>`;
+        btn.addEventListener('click', () => {
+          if (activeBadges.includes(id)) {
+            activeBadges = activeBadges.filter(x => x !== id);
+          } else {
+            activeBadges = [...activeBadges, id];
+          }
+          renderBadgeToggles();
+          updatePreview();
+        });
+        list.appendChild(btn);
+      });
     }
 
     // --- Bio counter ---
@@ -486,6 +553,9 @@
             label: l.label || ''
           }));
         await API.updateSocials(validLinks);
+
+        // Active badges
+        await API.updateActiveBadges(activeBadges);
 
         Toast.show('Profile saved successfully!', 'success');
       } catch (err) {
