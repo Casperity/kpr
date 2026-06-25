@@ -407,7 +407,7 @@ input, select, textarea, button {
 .btn-save {
   width: 100%;
   padding: 16px 32px;
-  background: linear-gradient(135deg, #a78bfa 0%, #818cf8 100%);
+  background: linear-gradient(135deg, #1a3fa8, #2d5fd4);
   border: none;
   border-radius: 14px;
   color: #fff;
