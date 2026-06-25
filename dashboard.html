@@ -53,6 +53,14 @@
             <div class="char-counter" id="bio-counter">0 / 500</div>
           </div>
           <div class="form-group">
+            <label class="form-label">Pronouns <span style="opacity:0.4;">(optional)</span></label>
+            <input type="text" class="form-input" id="input-pronouns" placeholder="e.g. he/him" maxlength="30" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Aliases <span style="opacity:0.4;">(optional)</span></label>
+            <input type="text" class="form-input" id="input-aliases" placeholder="e.g. Kspr, Josh" maxlength="60" />
+          </div>
+          <div class="form-group">
             <label class="form-label">Avatar URL</label>
             <div class="avatar-preview-row">
               <img class="avatar-preview-img" id="avatar-preview" src="" alt="" />
@@ -144,6 +152,7 @@
         <div class="preview-phone-screen" id="preview-screen">
           <img class="preview-avatar" id="preview-avatar" src="" alt="" />
           <div class="preview-name" id="preview-name">Your Name</div>
+          <div class="preview-badges" id="preview-badges"></div>
           <div class="preview-bio" id="preview-bio"></div>
           <div class="preview-links" id="preview-links"></div>
         </div>
@@ -187,6 +196,8 @@
     // --- DOM refs ---
     const inputName = document.getElementById('input-name');
     const inputBio = document.getElementById('input-bio');
+    const inputPronouns = document.getElementById('input-pronouns');
+    const inputAliases = document.getElementById('input-aliases');
     const inputAvatar = document.getElementById('input-avatar');
     const bioCounter = document.getElementById('bio-counter');
     const avatarPreview = document.getElementById('avatar-preview');
@@ -212,6 +223,7 @@
     const previewScreen = document.getElementById('preview-screen');
     const previewAvatar = document.getElementById('preview-avatar');
     const previewName = document.getElementById('preview-name');
+    const previewBadges = document.getElementById('preview-badges');
     const previewBio = document.getElementById('preview-bio');
     const previewLinks = document.getElementById('preview-links');
 
@@ -242,6 +254,8 @@
         // Basic info
         inputName.value = user.displayName || '';
         inputBio.value = user.bio || '';
+        inputPronouns.value = user.pronouns || '';
+        inputAliases.value = user.aliases || '';
         inputAvatar.value = user.avatarUrl || '';
         updateBioCounter();
         updateAvatarPreview();
@@ -382,6 +396,8 @@
 
     // --- Name input -> preview ---
     inputName.addEventListener('input', updatePreview);
+    inputPronouns.addEventListener('input', updatePreview);
+    inputAliases.addEventListener('input', updatePreview);
     const debouncedBgUpdate = debounce(updatePreview, 600);
     inputBgImage.addEventListener('input', debouncedBgUpdate);
 
@@ -396,8 +412,18 @@
         previewAvatar.style.display = 'none';
       }
 
-      // Name & Bio
+      // Name, Badges & Bio
       previewName.textContent = inputName.value || 'Your Name';
+      
+      const pronouns = inputPronouns.value.trim();
+      const aliases = inputAliases.value.trim();
+      let badgesHtml = '';
+      if (pronouns) badgesHtml += `<span class="bio-badge" data-tooltip="Pronouns"><i class="fas fa-id-card" style="margin-right: 5px; color: #888;"></i> ${escAttr(pronouns)}</span>`;
+      if (aliases) badgesHtml += `<span class="bio-badge" data-tooltip="Aliases"><i class="fas fa-user-tag" style="margin-right: 5px; color: #888;"></i> ${escAttr(aliases)}</span>`;
+      
+      previewBadges.innerHTML = badgesHtml;
+      previewBadges.style.display = badgesHtml ? 'flex' : 'none';
+
       previewBio.textContent = inputBio.value || '';
       previewBio.style.display = inputBio.value ? '' : 'none';
 
@@ -436,6 +462,8 @@
         await API.updateProfile({
           displayName: inputName.value.trim(),
           bio: inputBio.value.trim(),
+          pronouns: inputPronouns.value.trim() || null,
+          aliases: inputAliases.value.trim() || null,
           avatarUrl: inputAvatar.value.trim()
         });
 

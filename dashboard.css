@@ -521,11 +521,28 @@ input, select, textarea, button {
 }
 
 .preview-bio {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.5;
-  margin-bottom: 16px;
-  max-width: 280px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.preview-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.preview-badges .bio-badge {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #ddd;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .preview-links {
