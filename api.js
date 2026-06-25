@@ -7,8 +7,16 @@ const API = {
 
   /* ── Token management ─────────────────────────────────── */
   getToken()  { return localStorage.getItem('kpr_token'); },
-  setToken(t) { localStorage.setItem('kpr_token', t); },
-  clearToken() { localStorage.removeItem('kpr_token'); },
+  setToken(t) {
+    localStorage.setItem('kpr_token', t);
+    // Cookie lets the dashboard worker verify auth server-side (Secure, SameSite=Strict)
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `kpr_token=${encodeURIComponent(t)}; expires=${expires}; path=/; SameSite=Strict; Secure`;
+  },
+  clearToken() {
+    localStorage.removeItem('kpr_token');
+    document.cookie = 'kpr_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict; Secure';
+  },
   isLoggedIn() { return !!this.getToken(); },
 
   /* ── User info cache ──────────────────────────────────── */
