@@ -164,6 +164,24 @@
         </div>
       </div>
 
+      <!-- Admin Playlist (shown only for admins) -->
+      <div class="dash-section" id="section-playlist" style="display:none;">
+        <div class="dash-section-header" onclick="toggleSection('section-playlist')">
+          <div class="dash-section-title">
+            <i class="fas fa-music"></i> Playlist
+            <span style="font-size:0.7rem;background:rgba(251,146,60,0.15);color:#fb923c;border:1px solid rgba(251,146,60,0.3);border-radius:6px;padding:2px 8px;margin-left:6px;font-weight:600;">Admin</span>
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div class="form-hint" style="margin-bottom:14px;">Add multiple songs — overrides the single Music URL above. Each song needs at minimum an Audio URL.</div>
+          <div id="playlist-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+          <button class="btn-add-link" id="btn-add-song" style="margin-top:10px;">
+            <i class="fas fa-plus"></i> Add Song
+          </button>
+        </div>
+      </div>
+
       <!-- Save -->
       <div class="dash-save-area">
         <button class="btn-save" id="btn-save">
@@ -227,10 +245,12 @@
     };
 
     const MAX_LINKS = 15;
+    const MAX_SONGS = 20;
     let socialLinks = [];
     let currentUser = null;
     let ownedBadges = [];    // badges admin granted
     let activeBadges = [];   // badges user chose to display
+    let playlist = [];       // admin playlist [{url,title,artist,cover}]
 
     // --- Auth check ---
     if (!API.isLoggedIn()) {
@@ -296,6 +316,7 @@
         navViewProfile.href = '/' + (user.username || '');
         if (user.isAdmin) {
           document.getElementById('nav-admin').style.display = '';
+          document.getElementById('section-playlist').style.display = '';
         }
 
         // Basic info
@@ -336,7 +357,11 @@
 
         // Badges
         ownedBadges  = user.badges       || [];
-        activeBadges = user.activeBadges || [...ownedBadges];
+        activeBadges = user.activeBadges || [];
+        
+        // Playlist (admin only)
+        playlist = (res.settings?.musicPlaylist) || [];
+        if (user.isAdmin) renderPlaylist();
         renderBadgeToggles();
 
         // Theme
@@ -423,7 +448,48 @@
     inputAvatar.addEventListener('input', debouncedAvatarUpdate);
     avatarPreview.addEventListener('error', () => { avatarPreview.style.display = 'none'; });
 
-    // --- Social links list ---
+    // --- Render playlist (admin only) ---
+    function renderPlaylist() {
+      const list = document.getElementById('playlist-list');
+      if (!list) return;
+      list.innerHTML = '';
+      playlist.forEach((song, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;';
+        row.innerHTML = `
+          <input type="url" class="form-input" placeholder="Audio URL (mp3/ogg)" value="${escAttr(song.url || '')}" data-sidx="${idx}" data-sfield="url" />
+          <input type="text" class="form-input" placeholder="Title" maxlength="100" value="${escAttr(song.title || '')}" data-sidx="${idx}" data-sfield="title" />
+          <input type="text" class="form-input" placeholder="Artist" maxlength="100" value="${escAttr(song.artist || '')}" data-sidx="${idx}" data-sfield="artist" />
+          <input type="url" class="form-input" placeholder="Cover image URL" value="${escAttr(song.cover || '')}" data-sidx="${idx}" data-sfield="cover" />
+          <button class="social-link-delete" data-sidx="${idx}" title="Remove"><i class="fas fa-trash-alt"></i></button>`;
+        list.appendChild(row);
+      });
+
+      list.querySelectorAll('[data-sfield]').forEach(el => {
+        el.addEventListener('input', e => {
+          playlist[+e.target.dataset.sidx][e.target.dataset.sfield] = e.target.value;
+        });
+      });
+      list.querySelectorAll('[data-sidx].social-link-delete').forEach(el => {
+        el.addEventListener('click', e => {
+          playlist.splice(+e.currentTarget.dataset.sidx, 1);
+          renderPlaylist();
+        });
+      });
+
+      const addBtn = document.getElementById('btn-add-song');
+      if (addBtn) addBtn.style.display = playlist.length >= MAX_SONGS ? 'none' : '';
+    }
+
+    document.getElementById('btn-add-song')?.addEventListener('click', () => {
+      if (playlist.length >= MAX_SONGS) return;
+      playlist.push({ url: '', title: '', artist: '', cover: '' });
+      renderPlaylist();
+      const inputs = document.querySelectorAll('#playlist-list [data-sfield="url"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+
+    // --- Render social links ---
     function renderLinksList() {
       linksList.innerHTML = '';
       socialLinks.forEach((link, idx) => {
@@ -572,14 +638,21 @@
         });
 
         // Settings
-        await API.updateSettings({
+        const settingsPayload = {
           accentColor: inputAccent.value.trim() || '#a78bfa',
           bgColor: inputBg.value.trim() || '#0a0a0f',
           bgImageUrl: inputBgImage.value.trim(),
           musicUrl: inputMusicUrl.value.trim(),
           musicTitle: inputMusicTitle.value.trim(),
           musicArtist: inputMusicArtist.value.trim()
-        });
+        };
+        // Admin playlist — send even if empty (null clears it)
+        if (currentUser?.isAdmin) {
+          settingsPayload.musicPlaylist = playlist.filter(s => s.url && s.url.trim()).map(s => ({
+            url: s.url.trim(), title: s.title?.trim() || '', artist: s.artist?.trim() || '', cover: s.cover?.trim() || ''
+          }));
+        }
+        await API.updateSettings(settingsPayload);
 
         // Social links
         const validLinks = socialLinks

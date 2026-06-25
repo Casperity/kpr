@@ -195,21 +195,43 @@
 
       // -- Music player --
       let musicHtml = '';
-      const musicUrl = data.settings?.musicUrl || data.settings?.music_url || '';
-      if (musicUrl) {
-        const musicTitle = data.settings?.musicTitle || data.settings?.music_title || 'Now Playing';
+      const playlist = data.settings?.musicPlaylist;
+      const hasSingleSong = !!(data.settings?.musicUrl || data.settings?.music_url);
+
+      if (playlist && playlist.length > 0) {
+        // Admin playlist — full player with cover, prev/next
+        const first = playlist[0];
+        musicHtml = `
+          <div class="profile-music" id="music-player">
+            <img class="profile-music-cover" id="music-cover" src="${esc(first.cover || '')}" alt="Cover" onerror="this.style.opacity='0'" />
+            <div class="profile-music-info">
+              <div class="profile-music-title" id="music-title">${esc(first.title || 'Now Playing')}</div>
+              ${first.artist ? `<div class="profile-music-artist" id="music-artist">${esc(first.artist)}</div>` : '<div class="profile-music-artist" id="music-artist"></div>'}
+            </div>
+            <div class="profile-music-controls">
+              <button class="profile-music-btn" id="music-prev" title="Previous"><i class="fas fa-backward"></i></button>
+              <button class="profile-music-btn" id="music-toggle" title="Play / Pause"><i class="fas fa-play"></i></button>
+              <button class="profile-music-btn" id="music-next" title="Next"><i class="fas fa-forward"></i></button>
+            </div>
+            <div class="profile-music-volume">
+              <i class="fas fa-volume-up"></i>
+              <input type="range" id="music-volume" min="0" max="1" step="0.01" value="0.5">
+            </div>
+            <audio id="profile-audio" preload="metadata"></audio>
+          </div>`;
+      } else if (hasSingleSong) {
+        const musicUrl    = data.settings?.musicUrl    || data.settings?.music_url    || '';
+        const musicTitle  = data.settings?.musicTitle  || data.settings?.music_title  || 'Now Playing';
         const musicArtist = data.settings?.musicArtist || data.settings?.music_artist || '';
         musicHtml = `
           <div class="profile-music" id="music-player">
-            <button class="profile-music-btn" id="music-toggle" title="Play / Pause">
-              <i class="fas fa-play"></i>
-            </button>
+            <img class="profile-music-cover" id="music-cover" src="" alt="Cover" style="opacity:0;" />
             <div class="profile-music-info">
-              <div class="profile-music-title">${esc(musicTitle)}</div>
-              ${musicArtist ? `<div class="profile-music-artist">${esc(musicArtist)}</div>` : ''}
+              <div class="profile-music-title" id="music-title">${esc(musicTitle)}</div>
+              ${musicArtist ? `<div class="profile-music-artist" id="music-artist">${esc(musicArtist)}</div>` : '<div class="profile-music-artist" id="music-artist"></div>'}
             </div>
-            <div class="profile-music-progress" id="music-progress">
-              <div class="profile-music-progress-bar" id="music-progress-bar"></div>
+            <div class="profile-music-controls">
+              <button class="profile-music-btn" id="music-toggle" title="Play / Pause"><i class="fas fa-play"></i></button>
             </div>
             <div class="profile-music-volume">
               <i class="fas fa-volume-up"></i>
@@ -271,48 +293,90 @@
       showState('state-profile');
 
       // -- Init music player --
-      if (musicUrl) initMusicPlayer();
+      const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
+      if (hasMusic) initMusicPlayer(data);
     }
 
     // --- Music player ---
-    function initMusicPlayer() {
-      const audio = document.getElementById('profile-audio');
-      const btn = document.getElementById('music-toggle');
-      const progressWrap = document.getElementById('music-progress');
-      const progressBar = document.getElementById('music-progress-bar');
-      const volumeSlider = document.getElementById('music-volume');
+    function initMusicPlayer(data) {
+      const settings  = data.settings || {};
+      const playlist  = settings.musicPlaylist;
+      const songs     = (playlist && playlist.length > 0)
+        ? playlist
+        : (settings.musicUrl || settings.music_url)
+          ? [{ url: settings.musicUrl || settings.music_url, title: settings.musicTitle || settings.music_title || 'Now Playing', artist: settings.musicArtist || settings.music_artist || '', cover: '' }]
+          : [];
+
+      if (!songs.length) return;
+
+      const audio  = document.getElementById('profile-audio');
+      const btn    = document.getElementById('music-toggle');
+      const prevBtn = document.getElementById('music-prev');
+      const nextBtn = document.getElementById('music-next');
+      const cover  = document.getElementById('music-cover');
+      const titleEl  = document.getElementById('music-title');
+      const artistEl = document.getElementById('music-artist');
+      const volSlider = document.getElementById('music-volume');
       if (!audio || !btn) return;
 
+      let idx = 0;
       audio.volume = 0.5;
-      if (volumeSlider) {
-        volumeSlider.addEventListener('input', (e) => {
-          audio.volume = e.target.value;
+
+      function loadSong(i) {
+        const s = songs[i];
+        audio.src = s.url || '';
+        if (titleEl)  titleEl.textContent  = s.title  || 'Now Playing';
+        if (artistEl) artistEl.textContent = s.artist || '';
+        if (cover) {
+          cover.src = s.cover || '';
+          cover.style.opacity = s.cover ? '1' : '0';
+        }
+      }
+
+      function playSong() {
+        audio.play().catch(() => {});
+        btn.innerHTML = '<i class="fas fa-pause"></i>';
+      }
+
+      function pauseSong() {
+        audio.pause();
+        btn.innerHTML = '<i class="fas fa-play"></i>';
+      }
+
+      btn.addEventListener('click', () => audio.paused ? playSong() : pauseSong());
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          idx = (idx - 1 + songs.length) % songs.length;
+          loadSong(idx);
+          playSong();
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          idx = (idx + 1) % songs.length;
+          loadSong(idx);
+          playSong();
         });
       }
 
-      btn.addEventListener('click', () => {
-        if (audio.paused) {
-          audio.play().catch(() => {});
-          btn.innerHTML = '<i class="fas fa-pause"></i>';
+      audio.addEventListener('ended', () => {
+        if (songs.length > 1) {
+          idx = (idx + 1) % songs.length;
+          loadSong(idx);
+          playSong();
         } else {
-          audio.pause();
-          btn.innerHTML = '<i class="fas fa-play"></i>';
+          // single song — replay
+          audio.currentTime = 0;
+          playSong();
         }
       });
 
-      audio.addEventListener('timeupdate', () => {
-        if (audio.duration) {
-          progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
-        }
-      });
-
-      if (progressWrap) {
-        progressWrap.addEventListener('click', (e) => {
-          const rect = progressWrap.getBoundingClientRect();
-          const pct = (e.clientX - rect.left) / rect.width;
-          if (audio.duration) audio.currentTime = pct * audio.duration;
-        });
+      if (volSlider) {
+        volSlider.addEventListener('input', e => { audio.volume = e.target.value; });
       }
+
+      loadSong(0);
     }
 
     // --- Main entry ---

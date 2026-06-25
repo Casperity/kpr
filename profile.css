@@ -312,26 +312,36 @@ body.profile-page.has-bg-image::before {
   z-index: 1;
 }
 
-/* --- Music Player (Profile) --- */
+/* --- Music Player (Profile) — matches index.html style --- */
 .profile-music {
   margin-top: 24px;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 14px;
-  padding: 14px 18px;
+  border-radius: 15px;
+  padding: 15px;
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.profile-music-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .profile-music-info {
   flex: 1;
   text-align: left;
   min-width: 0;
+  overflow: hidden;
 }
 
 .profile-music-title {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: #fff;
   white-space: nowrap;
@@ -340,53 +350,40 @@ body.profile-page.has-bg-image::before {
 }
 
 .profile-music-artist {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.profile-music-controls {
+  display: flex;
+  gap: 14px;
+  align-items: center;
 }
 
 .profile-music-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.1rem;
+  color: #fff;
+  font-size: 1.15rem;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 50%;
-  transition: color 0.2s, transform 0.2s;
+  padding: 4px;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .profile-music-btn:hover {
-  color: var(--accent, #a78bfa);
-  transform: scale(1.15);
-}
-
-.profile-music-progress {
-  flex: 1;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.profile-music-progress-bar {
-  height: 100%;
-  width: 0%;
-  background: var(--accent, #a78bfa);
-  border-radius: 3px;
-  transition: width 0.1s linear;
+  transform: scale(1.1);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .profile-music-volume {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: 10px;
 }
 
 .profile-music-volume i {
   color: rgba(255, 255, 255, 0.5);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .profile-music-volume input[type="range"] {
@@ -398,28 +395,23 @@ body.profile-page.has-bg-image::before {
 }
 
 .profile-music-volume input[type="range"]::-webkit-slider-runnable-track {
-  width: 100%;
   height: 4px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 2px;
-  transition: background 0.2s;
 }
 
 .profile-music-volume input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
   height: 10px;
   width: 10px;
   border-radius: 50%;
-  background: var(--accent, #a78bfa);
+  background: #fff;
   margin-top: -3px;
-  box-shadow: 0 0 8px rgba(var(--accent-rgb, 167, 139, 250), 0.6);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 }
 
 .profile-music-volume input[type="range"]:hover::-webkit-slider-thumb {
   transform: scale(1.3);
-  box-shadow: 0 0 12px rgba(var(--accent-rgb, 167, 139, 250), 0.8);
 }
 
 .profile-music-volume input[type="range"]:focus {
