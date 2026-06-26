@@ -313,6 +313,12 @@
               const u = allUsers.find(x => x.id == userId);
               if (u) {
                 u.isVip = targetStatus;
+                u.badges = u.badges || [];
+                if (targetStatus) {
+                  if (!u.badges.includes('vip')) u.badges.push('vip');
+                } else {
+                  u.badges = u.badges.filter(b => b !== 'vip');
+                }
                 renderUsers();
               }
               Toast.show(`VIP status updated successfully`, 'success');
