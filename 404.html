@@ -67,6 +67,7 @@
       transition: filter 1s ease;
     }
 
+    /* Blur transition when overlay is active */
     .profile-container.blurred,
     .profile-bg-video.blurred {
       filter: blur(20px);
@@ -81,6 +82,7 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.55);
+    /*  backdrop-filter: blur(6px);*/
       z-index: 1;
     }
     
@@ -93,48 +95,29 @@
       background: transparent;
     }
     
+    /* Make sure profile elements sit above background video and overlay */
     .profile-container {
       position: relative;
       z-index: 2;
     }
 
-    /* ── Gallery Carousel ─────────────────────────── */
-    .profile-gallery-carousel {
+    /* ── Gallery grid ─────────────────────────── */
+    .profile-gallery {
       width: 100%;
       margin-top: 20px;
-      position: relative;
-    }
-
-    /* The viewport: clips to exactly 2 rows × 3 cols */
-    .gallery-carousel-viewport {
-      overflow: hidden;
-      border-radius: 16px;
-    }
-
-    /* The scrolling track: lays pages side by side */
-    .gallery-carousel-track {
-      display: flex;
-      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Each "page" = one 3×2 grid */
-    .gallery-carousel-page {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
       gap: 6px;
-      /* Width = 100% of viewport; flex-shrink: 0 keeps it from collapsing */
-      min-width: 100%;
-      flex-shrink: 0;
+      border-radius: 16px;
+      overflow: hidden;
     }
-
     .gallery-item {
       position: relative;
       aspect-ratio: 1 / 1;
       overflow: hidden;
       cursor: pointer;
       background: rgba(0,0,0,0.3);
-      transition: transform 0.2s, filter 0.2s;
+      transition: transform 0.2s, brightness 0.2s;
     }
     .gallery-item:hover {
       transform: scale(1.03);
@@ -160,56 +143,6 @@
       opacity: 0.85;
       pointer-events: none;
     }
-
-    /* ── Carousel nav arrows ── */
-    .gallery-carousel-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 5;
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.15);
-      color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: background 0.15s, opacity 0.15s;
-      opacity: 0.75;
-    }
-    .gallery-carousel-arrow:hover { background: rgba(255,255,255,0.18); opacity: 1; }
-    .gallery-carousel-arrow.hidden { display: none; }
-    .gallery-carousel-arrow[data-dir="prev"] { left: -14px; }
-    .gallery-carousel-arrow[data-dir="next"] { right: -14px; }
-
-    /* ── Dot indicators ── */
-    .gallery-carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 10px;
-    }
-    .gallery-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.25);
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      transition: background 0.2s, transform 0.2s;
-    }
-    .gallery-dot.active {
-      background: var(--accent, #a78bfa);
-      transform: scale(1.35);
-    }
-
     /* ── Lightbox ─────────────────────────────── */
     #gallery-lightbox {
       display: none;
@@ -439,6 +372,12 @@
       website: 'Website', email: 'Email', other: 'Link'
     };
 
+    /* ── Badge Catalog ─────────────────────────────────────
+     * To add a new badge, just add a new entry here.
+     * icon  = FontAwesome class
+     * label = tooltip text shown on hover
+     * color = icon color
+     */
     const BADGE_CATALOG = {
       dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#a78bfa' },
       og:          { icon: 'fas fa-crown',           label: 'OG',           color: '#facc15' },
@@ -453,6 +392,7 @@
       bughunter:   { icon: 'fas fa-bug',             label: 'Bug Hunter',   color: '#0ce600' },
     };
 
+    // --- Utility: hex to RGB for CSS var ---
     function hexToRgb(hex) {
       hex = hex.replace('#', '');
       if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
@@ -460,19 +400,23 @@
       return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
     }
 
+    // --- Escape HTML ---
     function esc(str) {
       const d = document.createElement('div');
       d.textContent = str || '';
       return d.innerHTML;
     }
 
+    // --- State management ---
     function showState(id) {
       ['state-loading', 'state-profile', 'state-404', 'state-error', 'state-banned'].forEach(s => {
         document.getElementById(s).style.display = s === id ? '' : 'none';
       });
     }
 
+    // --- Render profile ---
     function renderProfile(data) {
+      // Handle banned users — show generic message, never leak ban reason to public
       if (data.banned) {
         document.getElementById('banned-reason').textContent = 'This user has been banned.';
         showState('state-banned');
@@ -482,10 +426,12 @@
       const body = document.getElementById('body');
       const container = document.getElementById('state-profile');
 
+      // -- Background --
       const bgColor = data.settings?.bgColor || data.settings?.bg_color || '#0a0a0f';
       body.style.setProperty('--bg-color', bgColor);
       body.style.backgroundColor = bgColor;
 
+      // Check for video background
       const bgVideo = data.settings?.bgVideoUrl || data.settings?.bg_video_url || '';
       let bgVideoEl = document.getElementById('bg-video');
       if (bgVideoEl) bgVideoEl.remove();
@@ -499,6 +445,7 @@
         bgVideoEl.playsInline = true;
         bgVideoEl.className = 'profile-bg-video';
 
+        // Force fit (letterbox) support
         const forceFit = !!(data.settings?.bgVideoFit);
         if (forceFit) {
           body.style.setProperty('--bg-video-fit', 'contain');
@@ -509,6 +456,7 @@
         }
 
         body.appendChild(bgVideoEl);
+  //      bgVideoEl.play().catch(e => console.log("Video autoplay failed:", e));
         const muteBtn = document.createElement('button');
         muteBtn.id = 'video-mute-btn';
         muteBtn.innerHTML = '<i class="fas fa-volume-xmark"></i>';
@@ -534,10 +482,12 @@
         }
       }
 
+      // -- Accent --
       const accent = data.settings?.accentColor || data.settings?.accent_color || '#a78bfa';
       container.style.setProperty('--accent', accent);
       container.style.setProperty('--accent-rgb', hexToRgb(accent));
 
+      // -- OG tags --
       document.title = `${data.displayName || data.display_name || data.username} | kpr.lol`;
       const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) ogTitle.content = data.displayName || data.display_name || data.username;
@@ -548,10 +498,12 @@
         if (ogImg) ogImg.content = data.avatarUrl || data.avatar_url;
       }
 
+      // -- Avatar --
       const avatarUrl = data.avatarUrl || data.avatar_url || 'data:image/svg+xml,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect fill="#1a1a24" width="128" height="128"/><circle cx="64" cy="48" r="24" fill="#2a2a3a"/><ellipse cx="64" cy="110" rx="40" ry="30" fill="#2a2a3a"/></svg>'
       );
 
+      // -- Social links --
       let linksHtml = '';
       const links = data.socialLinks || data.social_links || data.socials || [];
       links.forEach(link => {
@@ -566,12 +518,14 @@
           </a>`;
       });
 
+      // -- Music player --
       let musicHtml = '';
       const playlist = data.settings?.musicPlaylist;
       const hasSingleSong = !!(data.settings?.musicUrl || data.settings?.music_url);
       const hasMultipleSongs = !!(playlist && playlist.length > 1);
 
       if (playlist && playlist.length > 0) {
+        // Admin playlist — full player with cover, prev/next
         const first = playlist[0];
         musicHtml = `
           <div class="profile-music" id="music-player">
@@ -623,6 +577,7 @@
           </div>`;
       }
 
+      // -- Views --
       let viewsHtml = '';
       if (data.views != null || data.profile_views != null) {
         const views = data.views ?? data.profile_views ?? 0;
@@ -633,6 +588,7 @@
           </div>`;
       }
 
+      // -- User Badges (icons) --
       let userBadgesHtml = '';
       const badgeList = data.badges || [];
       if (badgeList.length > 0) {
@@ -645,6 +601,7 @@
         userBadgesHtml += '</div>';
       }
 
+      // -- Pronouns / Aliases --
       let badgesHtml = '';
       if (data.pronouns || data.aliases) {
         badgesHtml += '<div class="bio-details">';
@@ -655,58 +612,30 @@
 
       // -- Gallery --
       const galleryData = data.gallery || [];
+
+      // -- Build card --
       const hasGallery = galleryData.length > 0;
-      const showTabs = hasGallery;
+      const showTabs = hasGallery; // only show tabs if there's a gallery
 
-      // Build carousel HTML — chunk items into pages of 6 (3 cols × 2 rows)
-      let galleryCarouselHtml = '';
+      // Build gallery grid HTML
+      let galleryGridHtml = '';
       if (hasGallery) {
-        const ITEMS_PER_PAGE = 6;
-        const pages = [];
-        for (let i = 0; i < galleryData.length; i += ITEMS_PER_PAGE) {
-          pages.push(galleryData.slice(i, i + ITEMS_PER_PAGE));
-        }
-
-        let pagesHtml = '';
-        pages.forEach((page) => {
-          pagesHtml += '<div class="gallery-carousel-page">';
-          page.forEach((item, localIdx) => {
-            const globalIdx = galleryData.indexOf(item); // keep correct lightbox index
-            if (item.type === 'video') {
-              pagesHtml += `
-                <div class="gallery-item" data-idx="${globalIdx}">
-                  <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
-                  <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
-                </div>`;
-            } else {
-              pagesHtml += `
-                <div class="gallery-item" data-idx="${globalIdx}">
-                  <img src="${esc(item.url)}" alt="Gallery item ${globalIdx + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
-                </div>`;
-            }
-          });
-          // Pad to 6 cells if last page is short, so grid stays even
-          for (let p = page.length; p < ITEMS_PER_PAGE; p++) {
-            pagesHtml += '<div class="gallery-item" style="cursor:default; background: rgba(255,255,255,0.03);"></div>';
+        galleryGridHtml = '<div class="profile-gallery">';
+        galleryData.forEach((item, i) => {
+          if (item.type === 'video') {
+            galleryGridHtml += `
+              <div class="gallery-item" data-idx="${i}">
+                <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
+                <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
+              </div>`;
+          } else {
+            galleryGridHtml += `
+              <div class="gallery-item" data-idx="${i}">
+                <img src="${esc(item.url)}" alt="Gallery item ${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
+              </div>`;
           }
-          pagesHtml += '</div>';
         });
-
-        const dotsHtml = pages.length > 1
-          ? `<div class="gallery-carousel-dots">${pages.map((_, i) => `<button class="gallery-dot${i === 0 ? ' active' : ''}" data-page="${i}" aria-label="Go to page ${i + 1}"></button>`).join('')}</div>`
-          : '';
-
-        galleryCarouselHtml = `
-          <div class="profile-gallery-carousel" id="gallery-carousel">
-            ${pages.length > 1 ? `<button class="gallery-carousel-arrow hidden" data-dir="prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>` : ''}
-            <div class="gallery-carousel-viewport">
-              <div class="gallery-carousel-track" id="gallery-track">
-                ${pagesHtml}
-              </div>
-            </div>
-            ${pages.length > 1 ? `<button class="gallery-carousel-arrow" data-dir="next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>` : ''}
-            ${dotsHtml}
-          </div>`;
+        galleryGridHtml += '</div>';
       }
 
       container.innerHTML = `
@@ -731,7 +660,7 @@
             ${viewsHtml}
           </div>
           <div class="profile-tab-panel" id="tab-panel-gallery">
-            ${galleryCarouselHtml}
+            ${galleryGridHtml}
           </div>
           ` : `
           ${linksHtml ? `<div class="profile-links">${linksHtml}</div>` : ''}
@@ -745,6 +674,7 @@
 
       // Lightbox
       if (galleryData.length > 0) {
+        // Inject lightbox DOM once
         if (!document.getElementById('gallery-lightbox')) {
           const lb = document.createElement('div');
           lb.id = 'gallery-lightbox';
@@ -757,11 +687,6 @@
           document.body.appendChild(lb);
         }
         initGalleryLightbox(galleryData);
-      }
-
-      // Carousel logic
-      if (hasGallery) {
-        initGalleryCarousel();
       }
 
       // Tab switching
@@ -779,9 +704,11 @@
 
       showState('state-profile');
 
+      // -- Init music player --
       const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
       if (hasMusic) initMusicPlayer(data);
 
+      // Apply permanent background blur setting
       const bgBlurEnabled = data.settings?.bgBlur ?? data.settings?.bg_blur ?? true;
       if (bgBlurEnabled) {
         body.classList.remove('no-bg-blur');
@@ -789,6 +716,7 @@
         body.classList.add('no-bg-blur');
       }
 
+      // -- Enter Overlay and Blur flow --
       const hasVideo = !!bgVideo;
       const shouldShowOverlay = hasMusic || hasVideo;
 
@@ -802,6 +730,8 @@
         }
         overlay.style.display = 'flex';
         overlay.classList.remove('fade-out');
+
+        // The click overlay itself always uses blur to hide background before clicking
         overlay.style.backdropFilter = 'blur(25px)';
         overlay.style.webkitBackdropFilter = 'blur(25px)';
         container.classList.add('blurred');
@@ -814,6 +744,7 @@
             bgVideoEl.classList.remove('blurred');
             bgVideoEl.play().catch(() => {});
             
+            // Unmute background video if configured
             const isMuted = data.settings?.bgVideoMuted ?? data.settings?.bg_video_muted ?? true;
             if (!isMuted) {
               bgVideoEl.muted = false;
@@ -826,6 +757,7 @@
                 : '<i class="fas fa-volume-up"></i>';
               muteBtn.title = bgVideoEl.muted ? 'Unmute video' : 'Mute video';
             }
+
           }
           
           const autoplayEnabled = data.settings?.musicAutoplay ?? data.settings?.music_autoplay ?? false;
@@ -842,6 +774,7 @@
         if (overlay) overlay.style.display = 'none';
         container.classList.remove('blurred');
         
+        // No overlay, apply video mute configuration immediately
         if (bgVideoEl) {
           const isMuted = data.settings?.bgVideoMuted ?? data.settings?.bg_video_muted ?? true;
           if (!isMuted) {
@@ -849,44 +782,6 @@
           }
         }
       }
-    }
-
-    // --- Gallery Carousel ---
-    function initGalleryCarousel() {
-      const track = document.getElementById('gallery-track');
-      if (!track) return;
-
-      const pages = track.querySelectorAll('.gallery-carousel-page');
-      const totalPages = pages.length;
-      if (totalPages <= 1) return;
-
-      const carousel = document.getElementById('gallery-carousel');
-      const prevBtn = carousel.querySelector('[data-dir="prev"]');
-      const nextBtn = carousel.querySelector('[data-dir="next"]');
-      const dots = carousel.querySelectorAll('.gallery-dot');
-      let current = 0;
-
-      function goTo(idx) {
-        current = Math.max(0, Math.min(idx, totalPages - 1));
-        track.style.transform = `translateX(-${current * 100}%)`;
-        dots.forEach((d, i) => d.classList.toggle('active', i === current));
-        if (prevBtn) prevBtn.classList.toggle('hidden', current === 0);
-        if (nextBtn) nextBtn.classList.toggle('hidden', current === totalPages - 1);
-      }
-
-      if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
-      if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
-      dots.forEach(dot => dot.addEventListener('click', () => goTo(+dot.dataset.page)));
-
-      // Touch/swipe support
-      let touchStartX = 0;
-      track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-      track.addEventListener('touchend', e => {
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
-      });
-
-      goTo(0);
     }
 
     // --- Music player ---
@@ -991,6 +886,7 @@
           playSong();
           renderPlaylist();
         } else {
+          // single song — replay
           audio.currentTime = 0;
           playSong();
         }
@@ -1000,6 +896,7 @@
         volSlider.addEventListener('input', e => { audio.volume = e.target.value; });
       }
 
+      // -- Expandable playlist (only present when songs.length > 1) --
       if (expandBtn && playlistEl && playerEl) {
         renderPlaylist();
         expandBtn.addEventListener('click', () => {
@@ -1056,11 +953,9 @@
         document.body.style.overflow = '';
       }
 
+      // Attach click handlers to gallery items
       document.querySelectorAll('.gallery-item').forEach(el => {
-        el.addEventListener('click', () => {
-          const idx = +el.dataset.idx;
-          if (!isNaN(idx)) openLightbox(idx);
-        });
+        el.addEventListener('click', () => openLightbox(+el.dataset.idx));
       });
 
       prevBtn.addEventListener('click', e => { e.stopPropagation(); showItem(current - 1); });
@@ -1079,11 +974,15 @@
     async function init() {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
 
+
+      // Check known paths
       if (KNOWN_PATHS.includes(path) || KNOWN_PATHS.includes(path + '.html')) {
+        // If we're on a known path and this 404 page loaded, something went wrong
         showState('state-404');
         return;
       }
 
+      // Extract username (first segment after /)
       const segments = path.split('/').filter(Boolean);
       const username = segments[0];
 
