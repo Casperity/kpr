@@ -979,3 +979,269 @@ input, select, textarea, button {
   box-shadow: 0 0 16px color-mix(in srgb, var(--badge-color) 55%, transparent);
   transform: scale(1.15);
 }
+
+
+.cp-trigger {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      user-select: none;
+    }
+    .cp-trigger:hover {
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+    }
+    .cp-trigger-swatch {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      flex-shrink: 0;
+      background: #a78bfa;
+    }
+    .cp-trigger-hex {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.8);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+    }
+    .cp-trigger-arrow {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.25);
+      transition: transform 0.2s ease;
+    }
+    .cp-trigger.open .cp-trigger-arrow {
+      transform: rotate(180deg);
+    }
+    .cp-panel {
+      display: none;
+      flex-direction: column;
+      background: rgba(18, 18, 26, 0.98);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 16px;
+      gap: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      margin-top: 8px;
+      position: relative;
+      z-index: 200;
+    }
+    .cp-panel.open {
+      display: flex;
+    }
+    .cp-sb-wrap {
+      position: relative;
+      width: 100%;
+      height: 160px;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: crosshair;
+      flex-shrink: 0;
+    }
+    .cp-sb-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .cp-sb-white {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, #fff 0%, transparent 100%);
+    }
+    .cp-sb-black {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, #000 100%);
+    }
+    .cp-sb-cursor {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2.5px solid #fff;
+      box-shadow: 0 0 0 1.5px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .cp-sliders {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .cp-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cp-slider-preview {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      flex-shrink: 0;
+      background: #a78bfa;
+    }
+    .cp-slider-track {
+      flex: 1;
+      height: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      -webkit-appearance: none;
+      appearance: none;
+      outline: none;
+      border: none;
+      background: transparent;
+    }
+    .cp-hue-track {
+      background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    }
+    .cp-slider-track::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2.5px solid #fff;
+      box-shadow: 0 0 0 1.5px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.4);
+      cursor: grab;
+    }
+    .cp-slider-track::-webkit-slider-thumb:active { cursor: grabbing; }
+    .cp-slider-track::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2.5px solid #fff;
+      box-shadow: 0 0 0 1.5px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.4);
+      cursor: grab;
+    }
+    .cp-inputs {
+      display: grid;
+      gap: 6px;
+    }
+    .cp-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .cp-input-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .cp-input {
+      padding: 7px 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.78rem;
+      text-align: center;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+      font-family: 'Courier New', monospace;
+    }
+    .cp-input:focus {
+      border-color: rgba(167,139,250,0.5);
+    }
+    .cp-swatches-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 2px;
+    }
+    .cp-swatches {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .cp-swatch-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+      padding: 0;
+    }
+    .cp-swatch-btn:hover {
+      transform: scale(1.2);
+      border-color: rgba(255,255,255,0.35);
+    }
+    .cp-swatch-btn.active {
+      border-color: #fff;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+    }
+    .cp-alpha-bg {
+      position: relative;
+      flex: 1;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .cp-alpha-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(45deg, #555 25%, transparent 25%),
+        linear-gradient(-45deg, #555 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #555 75%),
+        linear-gradient(-45deg, transparent 75%, #555 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+      background-color: #333;
+    }
+    .cp-alpha-bg .cp-slider-track {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+    }
+    .cp-mode-row {
+      display: flex;
+      gap: 4px;
+    }
+    .cp-mode-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: transparent;
+      color: rgba(255,255,255,0.35);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
+    }
+    .cp-mode-btn.active {
+      background: rgba(167,139,250,0.15);
+      border-color: rgba(167,139,250,0.35);
+      color: #c4b5fd;
+    }
+    .cp-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
