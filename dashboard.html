@@ -146,19 +146,44 @@
           <div class="form-group">
             <label class="form-label">Accent Color</label>
             <div class="color-picker-row">
-              <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;">
+              <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;" title="Click to open color picker">
                 <input type="color" id="input-accent-picker" value="#a78bfa" />
               </div>
               <input type="text" class="form-input" id="input-accent" value="#a78bfa" placeholder="#a78bfa" maxlength="7" />
+            </div>
+            <div class="color-presets" data-target="accent">
+              <span class="preset-label">Presets</span>
+              <div class="preset-colors">
+                <button type="button" class="preset-color" style="background:#a78bfa; --preset-glow:rgba(167,139,250,0.45);" data-color="#a78bfa" title="Lain Violet"></button>
+                <button type="button" class="preset-color" style="background:#6366f1; --preset-glow:rgba(99,102,241,0.45);" data-color="#6366f1" title="Indigo Cyber"></button>
+                <button type="button" class="preset-color" style="background:#00c8ff; --preset-glow:rgba(0,200,255,0.45);" data-color="#00c8ff" title="Lain Blue"></button>
+                <button type="button" class="preset-color" style="background:#39ff14; --preset-glow:rgba(57,255,20,0.45);" data-color="#39ff14" title="Neon Green"></button>
+                <button type="button" class="preset-color" style="background:#ec4899; --preset-glow:rgba(236,72,153,0.45);" data-color="#ec4899" title="Hot Pink"></button>
+                <button type="button" class="preset-color" style="background:#f43f5e; --preset-glow:rgba(244,63,94,0.45);" data-color="#f43f5e" title="Rose Crimson"></button>
+                <button type="button" class="preset-color" style="background:#f59e0b; --preset-glow:rgba(245,158,11,0.45);" data-color="#f59e0b" title="Amber Glow"></button>
+                <button type="button" class="preset-color" style="background:#ffffff; --preset-glow:rgba(255,255,255,0.3);" data-color="#ffffff" title="Pure White"></button>
+              </div>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Background Color</label>
             <div class="color-picker-row">
-              <div class="color-swatch" id="swatch-bg" style="background:#0a0a0f;">
+              <div class="color-swatch" id="swatch-bg" style="background:#0a0a0f;" title="Click to open color picker">
                 <input type="color" id="input-bg-picker" value="#0a0a0f" />
               </div>
               <input type="text" class="form-input" id="input-bg" value="#0a0a0f" placeholder="#0a0a0f" maxlength="7" />
+            </div>
+            <div class="color-presets" data-target="bg">
+              <span class="preset-label">Presets</span>
+              <div class="preset-colors">
+                <button type="button" class="preset-color" style="background:#050505; --preset-glow:rgba(5,5,5,0.4);" data-color="#050505" title="Pure Black"></button>
+                <button type="button" class="preset-color" style="background:#0a0a0f; --preset-glow:rgba(10,10,15,0.4);" data-color="#0a0a0f" title="Deep Void"></button>
+                <button type="button" class="preset-color" style="background:#0f172a; --preset-glow:rgba(15,23,42,0.4);" data-color="#0f172a" title="Midnight Blue"></button>
+                <button type="button" class="preset-color" style="background:#1e1b4b; --preset-glow:rgba(30,27,75,0.4);" data-color="#1e1b4b" title="Dark Nebula"></button>
+                <button type="button" class="preset-color" style="background:#064e3b; --preset-glow:rgba(6,78,59,0.4);" data-color="#064e3b" title="Forest Shadow"></button>
+                <button type="button" class="preset-color" style="background:#2d0a4e; --preset-glow:rgba(45,10,78,0.4);" data-color="#2d0a4e" title="Deep Violet"></button>
+                <button type="button" class="preset-color" style="background:#450a0a; --preset-glow:rgba(69,10,10,0.4);" data-color="#450a0a" title="Blood Red"></button>
+              </div>
             </div>
           </div>
           <div class="form-group">
@@ -471,6 +496,7 @@
         syncToggle(inputBgBlur);
         syncToggle(inputBgVideoMuted);
 
+        updateActivePresets();
         updatePreview();
       } catch (err) {
         console.error('Failed to load profile:', err);
@@ -719,10 +745,27 @@
     }
 
     // --- Color picker sync ---
+    function updateActivePresets() {
+      // Accent color preset active class
+      const accentVal = (inputAccent.value || '').trim().toLowerCase();
+      document.querySelectorAll('.color-presets[data-target="accent"] .preset-color').forEach(btn => {
+        const btnCol = btn.getAttribute('data-color').toLowerCase();
+        btn.classList.toggle('active', btnCol === accentVal);
+      });
+
+      // Background color preset active class
+      const bgVal = (inputBg.value || '').trim().toLowerCase();
+      document.querySelectorAll('.color-presets[data-target="bg"] .preset-color').forEach(btn => {
+        const btnCol = btn.getAttribute('data-color').toLowerCase();
+        btn.classList.toggle('active', btnCol === bgVal);
+      });
+    }
+
     function syncColor(picker, text, swatch) {
       picker.addEventListener('input', () => {
         text.value = picker.value;
         swatch.style.background = picker.value;
+        updateActivePresets();
         updatePreview();
       });
       text.addEventListener('input', () => {
@@ -731,11 +774,31 @@
           picker.value = v;
           swatch.style.background = v;
         }
+        updateActivePresets();
         updatePreview();
       });
     }
     syncColor(inputAccentPicker, inputAccent, swatchAccent);
     syncColor(inputBgPicker, inputBg, swatchBg);
+
+    // Bind preset button clicks
+    document.querySelectorAll('.preset-color').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.closest('.color-presets').getAttribute('data-target');
+        const color = btn.getAttribute('data-color');
+        if (target === 'accent') {
+          inputAccent.value = color;
+          inputAccentPicker.value = color;
+          swatchAccent.style.background = color;
+        } else if (target === 'bg') {
+          inputBg.value = color;
+          inputBgPicker.value = normalizeHex(color);
+          swatchBg.style.background = color;
+        }
+        updateActivePresets();
+        updatePreview();
+      });
+    });
 
     // --- Name input -> preview ---
     inputName.addEventListener('input', updatePreview);
