@@ -233,7 +233,8 @@
               </div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <span style="color: rgba(255,255,255,0.2); font-size: 0.72rem;">ID: ${u.id}</span>
-                ${!u.isAdmin ? `<button class="ban-btn" data-user="${u.id}" data-banned="${u.isBanned}" style="background: rgba(255,255,255,0.05); border: 1px solid ${banBtnColor}33; color: ${banBtnColor}; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;"><i class="fas ${banBtnIcon}" style="margin-right:4px;"></i>${banBtnLabel}</button>` : ''}
+                ${!u.isAdmin ? `<button class="ban-btn" data-user="${u.id}" data-banned="${u.isBanned}" style="background: rgba(255,255,255,0.05); border: 1px solid ${banBtnColor}33; color: ${banBtnColor}; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;"><i class="fas ${banBtnIcon}" style="margin-right:4px;"></i>${banBtnLabel}</button>
+                <button class="delete-btn" data-user="${u.id}" data-username="${u.username}" style="background: rgba(239,68,68,0); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.2s;"><i class="fas fa-trash" style="margin-right:4px;"></i>Delete</button>` : ''}
               </div>
             </div>
             ${u.isBanned && u.banReason ? `<div style="font-size:0.75rem; color: rgba(239,68,68,0.7); margin-bottom:8px;"><i class="fas fa-circle-exclamation" style="margin-right:4px;"></i>Reason: ${u.banReason}</div>` : ''}
@@ -333,6 +334,24 @@
         Toast.show(err.error || 'Failed to update ban status', 'error');
       }
     }
+
+    // --- Delete button handler ---
+    container.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.user;
+        const username = btn.dataset.username;
+        if (!confirm(`Are you sure you want to permanently delete @${username}?\n\nThis action cannot be undone.`)) return;
+        try {
+          await API.request('/api/admin/users/' + userId, { method: 'DELETE' });
+          allUsers = allUsers.filter(u => u.id != userId);
+          renderUsers();
+          Toast.show(`@${username} has been deleted`, 'success');
+        } catch (err) {
+          console.error(err);
+          Toast.show(err.error || 'Failed to delete user', 'error');
+        }
+      });
+    });
 
     loadUsers();
   </script>
