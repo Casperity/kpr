@@ -459,8 +459,8 @@
           document.getElementById('nav-admin').style.display = '';
         }
         
-        const isVipOrAdmin = !!(user.isAdmin || user.isVip);
-        if (isVipOrAdmin) {
+        const isVip = !!user.isVip;
+        if (isVip) {
           document.getElementById('section-playlist').style.display = '';
         } else {
           document.getElementById('section-playlist').style.display = 'none';
@@ -494,8 +494,8 @@
           return; // stop loading the rest
         }
 
-        // Gallery (VIP/Admin only)
-        if (isVipOrAdmin) {
+        // Gallery (VIP only)
+        if (isVip) {
           galleryItems = (res.gallery || []).map(g => ({ url: g.url || '', type: g.type || 'image' }));
           renderGalleryList();
         } else {
@@ -523,9 +523,9 @@
         ownedBadges  = user.badges       || [];
         activeBadges = (user.activeBadges || []).filter(b => ownedBadges.includes(b));
         
-        // Playlist (admin/VIP only)
+        // Playlist (VIP only)
         playlist = (res.settings?.musicPlaylist) || [];
-        if (isVipOrAdmin) renderPlaylist();
+        if (isVip) renderPlaylist();
         renderBadgeToggles();
 
         // Theme
@@ -1111,8 +1111,8 @@
           musicTitle: inputMusicTitle.value.trim(),
           musicArtist: inputMusicArtist.value.trim()
         };
-        // Admin/VIP playlist — send even if empty (null clears it)
-        if (currentUser?.isAdmin || currentUser?.isVip) {
+        // VIP playlist — send even if empty (null clears it)
+        if (currentUser?.isVip) {
           settingsPayload.musicPlaylist = playlist.filter(s => s.url && s.url.trim()).map(s => ({
             url: s.url.trim(), title: s.title?.trim() || '', artist: s.artist?.trim() || '', cover: s.cover?.trim() || ''
           }));
@@ -1132,8 +1132,8 @@
         // Active badges
         await API.updateActiveBadges(activeBadges);
 
-        // Gallery (VIP/Admin only)
-        if (currentUser?.isAdmin || currentUser?.isVip) {
+        // Gallery (VIP only)
+        if (currentUser?.isVip) {
           const validGalleryItems = galleryItems
             .filter(g => g.url && g.url.trim())
             .map((g, i) => ({ url: g.url.trim(), type: detectMediaType(g.url) || 'image', displayOrder: i }));
