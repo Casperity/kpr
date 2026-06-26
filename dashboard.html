@@ -316,6 +316,316 @@
     let accentHex = '#a78bfa';
     let bgHex = '#0a0a0f';
 
+    class ColorPicker {
+      constructor(container, initialHex, onChange) {
+        this.container = container;
+        this.onChange = onChange;
+        this.hsv = { h: 0, s: 0, v: 1 };
+        this.alpha = 1;
+        this.mode = 'hex';
+        this.isOpen = false;
+        this.isDraggingSB = false;
+        this.recentColors = JSON.parse(localStorage.getItem('cp_recent') || '[]');
+        this.presets = [
+          '#a78bfa','#818cf8','#f472b6','#fb923c',
+          '#facc15','#4ade80','#34d399','#38bdf8',
+          '#e879f9','#f87171','#ffffff','#0a0a0f'
+        ];
+        this._build();
+        this.setHex(initialHex || '#a78bfa');
+      }
+
+      _build() {
+        const c = this.container;
+        c.innerHTML = '';
+        this.trigger = document.createElement('button');
+        this.trigger.type = 'button';
+        this.trigger.className = 'cp-trigger';
+        this.trigger.innerHTML = `
+          <span class="cp-trigger-swatch" id="cp-ts-${Math.random().toString(36).slice(2)}"></span>
+          <span class="cp-trigger-hex"></span>
+          <i class="fas fa-chevron-down cp-trigger-arrow"></i>`;
+        this.trigger.addEventListener('click', () => this.toggle());
+        c.appendChild(this.trigger);
+        this.triggerSwatch = this.trigger.querySelector('.cp-trigger-swatch');
+        this.triggerHex = this.trigger.querySelector('.cp-trigger-hex');
+
+        this.panel = document.createElement('div');
+        this.panel.className = 'cp-panel';
+        this.panel.innerHTML = `
+          <div class="cp-sb-wrap">
+            <canvas class="cp-sb-canvas"></canvas>
+            <div class="cp-sb-white"></div>
+            <div class="cp-sb-black"></div>
+            <div class="cp-sb-cursor"></div>
+          </div>
+          <div class="cp-sliders">
+            <div class="cp-slider-row">
+              <div class="cp-slider-preview"></div>
+              <input type="range" class="cp-slider-track cp-hue-track" min="0" max="360" step="1" value="0" />
+            </div>
+            <div class="cp-slider-row">
+              <div style="width:30px;height:30px;flex-shrink:0;"></div>
+              <div class="cp-alpha-bg">
+                <input type="range" class="cp-slider-track" min="0" max="100" step="1" value="100" />
+              </div>
+            </div>
+          </div>
+          <div class="cp-mode-row">
+            <button type="button" class="cp-mode-btn active" data-mode="hex">HEX</button>
+            <button type="button" class="cp-mode-btn" data-mode="rgb">RGB</button>
+            <button type="button" class="cp-mode-btn" data-mode="hsl">HSL</button>
+          </div>
+          <div class="cp-inputs"></div>
+          <div class="cp-section">
+            <div class="cp-swatches-label">Presets</div>
+            <div class="cp-swatches" id="cp-presets-${Math.random().toString(36).slice(2)}"></div>
+          </div>
+          <div class="cp-section" style="display:none;">
+            <div class="cp-swatches-label">Recent</div>
+            <div class="cp-swatches"></div>
+          </div>`;
+        c.appendChild(this.panel);
+
+        this.sbWrap     = this.panel.querySelector('.cp-sb-wrap');
+        this.sbCanvas   = this.panel.querySelector('.cp-sb-canvas');
+        this.sbCursor   = this.panel.querySelector('.cp-sb-cursor');
+        this.previewEl  = this.panel.querySelector('.cp-slider-preview');
+        this.hueSlider  = this.panel.querySelectorAll('.cp-slider-track')[0];
+        this.alphaSlider = this.panel.querySelectorAll('.cp-slider-track')[1];
+        this.alphaTrack  = this.alphaSlider;
+        this.inputsWrap  = this.panel.querySelector('.cp-inputs');
+        this.presetsEl   = this.panel.querySelectorAll('.cp-swatches')[0];
+        this.recentSection = this.panel.querySelectorAll('.cp-section')[2];
+        this.recentEl    = this.panel.querySelectorAll('.cp-swatches')[1];
+
+        this.sbWrap.addEventListener('mousedown', e => this._onSBStart(e));
+        this.sbWrap.addEventListener('touchstart', e => this._onSBStart(e), { passive: false });
+        document.addEventListener('mousemove', e => this._onSBMove(e));
+        document.addEventListener('touchmove', e => this._onSBMove(e), { passive: false });
+        document.addEventListener('mouseup', () => { this.isDraggingSB = false; });
+        document.addEventListener('touchend', () => { this.isDraggingSB = false; });
+
+        this.hueSlider.addEventListener('input', () => { this.hsv.h = +this.hueSlider.value; this._render(); });
+        this.alphaSlider.addEventListener('input', () => { this.alpha = +this.alphaSlider.value / 100; this._render(); });
+
+        this.panel.querySelectorAll('.cp-mode-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.mode = btn.dataset.mode;
+            this.panel.querySelectorAll('.cp-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this._buildInputs();
+          });
+        });
+
+        this.presets.forEach(hex => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cp-swatch-btn';
+          btn.style.background = hex;
+          btn.title = hex;
+          btn.addEventListener('click', () => { this.setHex(hex); this._render(); });
+          this.presetsEl.appendChild(btn);
+        });
+
+        this._buildInputs();
+        this._renderRecent();
+        document.addEventListener('mousedown', e => { if (this.isOpen && !c.contains(e.target)) this.close(); });
+      }
+
+      _buildInputs() {
+        const w = this.inputsWrap;
+        w.innerHTML = '';
+        if (this.mode === 'hex') {
+          w.style.gridTemplateColumns = '1fr auto';
+          w.innerHTML = `
+            <div class="cp-input-group">
+              <input class="cp-input" data-id="hex" maxlength="7" value="" />
+              <div class="cp-input-label">HEX</div>
+            </div>
+            <div class="cp-input-group">
+              <input class="cp-input" data-id="a" maxlength="3" style="width:52px;" value="100" />
+              <div class="cp-input-label">A%</div>
+            </div>`;
+          w.querySelector('[data-id="hex"]').addEventListener('input', e => {
+            let v = e.target.value;
+            if (!v.startsWith('#')) v = '#' + v;
+            if (/^#[0-9a-fA-F]{6}$/.test(v)) { this.setHex(v); this._render(true); }
+          });
+          w.querySelector('[data-id="a"]').addEventListener('input', e => {
+            this.alpha = Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) / 100;
+            this.alphaSlider.value = Math.round(this.alpha * 100);
+            this._render(true);
+          });
+        } else if (this.mode === 'rgb') {
+          w.style.gridTemplateColumns = 'repeat(4, 1fr)';
+          w.innerHTML = `
+            <div class="cp-input-group"><input class="cp-input" data-id="r" maxlength="3" /><div class="cp-input-label">R</div></div>
+            <div class="cp-input-group"><input class="cp-input" data-id="g" maxlength="3" /><div class="cp-input-label">G</div></div>
+            <div class="cp-input-group"><input class="cp-input" data-id="b" maxlength="3" /><div class="cp-input-label">B</div></div>
+            <div class="cp-input-group"><input class="cp-input" data-id="a2" maxlength="3" /><div class="cp-input-label">A%</div></div>`;
+          ['r','g','b'].forEach(ch => { w.querySelector(`[data-id="${ch}"]`).addEventListener('input', () => this._onRGBInput()); });
+          w.querySelector('[data-id="a2"]').addEventListener('input', e => {
+            this.alpha = Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) / 100;
+            this.alphaSlider.value = Math.round(this.alpha * 100);
+            this._render(true);
+          });
+        } else {
+          w.style.gridTemplateColumns = 'repeat(4, 1fr)';
+          w.innerHTML = `
+            <div class="cp-input-group"><input class="cp-input" data-id="h" maxlength="3" /><div class="cp-input-label">H°</div></div>
+            <div class="cp-input-group"><input class="cp-input" data-id="s" maxlength="3" /><div class="cp-input-label">S%</div></div>
+            <div class="cp-input-group"><input class="cp-input" data-id="l" maxlength="3" /><div class="cp-input-label">L%</div></div>
+            <div class="cp-input-group"><input class="cp-input" data-id="a3" maxlength="3" /><div class="cp-input-label">A%</div></div>`;
+          ['h','s','l'].forEach(ch => { w.querySelector(`[data-id="${ch}"]`).addEventListener('input', () => this._onHSLInput()); });
+          w.querySelector('[data-id="a3"]').addEventListener('input', e => {
+            this.alpha = Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) / 100;
+            this.alphaSlider.value = Math.round(this.alpha * 100);
+            this._render(true);
+          });
+        }
+        this._updateInputValues();
+      }
+
+      _onRGBInput() {
+        const r = parseInt(this.inputsWrap.querySelector('[data-id="r"]')?.value) || 0;
+        const g = parseInt(this.inputsWrap.querySelector('[data-id="g"]')?.value) || 0;
+        const b = parseInt(this.inputsWrap.querySelector('[data-id="b"]')?.value) || 0;
+        this.hsv = this._rgbToHsv(r, g, b);
+        this.hueSlider.value = this.hsv.h;
+        this._render(true);
+      }
+
+      _onHSLInput() {
+        const h = parseInt(this.inputsWrap.querySelector('[data-id="h"]')?.value) || 0;
+        const s = parseInt(this.inputsWrap.querySelector('[data-id="s"]')?.value) || 0;
+        const l = parseInt(this.inputsWrap.querySelector('[data-id="l"]')?.value) || 0;
+        const rgb = this._hslToRgb(h, s / 100, l / 100);
+        this.hsv = this._rgbToHsv(rgb.r, rgb.g, rgb.b);
+        this.hueSlider.value = this.hsv.h;
+        this._render(true);
+      }
+
+      _onSBStart(e) { e.preventDefault(); this.isDraggingSB = true; this._onSBMove(e); }
+      _onSBMove(e) {
+        if (!this.isDraggingSB) return;
+        e.preventDefault();
+        const rect = this.sbWrap.getBoundingClientRect();
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const cy = e.touches ? e.touches[0].clientY : e.clientY;
+        this.hsv.s = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+        this.hsv.v = Math.max(0, Math.min(1, 1 - (cy - rect.top) / rect.height));
+        this._render();
+      }
+
+      setHex(hex) {
+        hex = (hex || '#000000').replace('#','');
+        if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+        const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+        this.hsv = this._rgbToHsv(r, g, b);
+        this.hueSlider.value = this.hsv.h;
+      }
+
+      getHex() {
+        const rgb = this._hsvToRgb(this.hsv.h, this.hsv.s, this.hsv.v);
+        return '#' + [rgb.r, rgb.g, rgb.b].map(c => c.toString(16).padStart(2,'0')).join('');
+      }
+
+      getRgba() {
+        const rgb = this._hsvToRgb(this.hsv.h, this.hsv.s, this.hsv.v);
+        return `rgba(${rgb.r},${rgb.g},${rgb.b},${this.alpha.toFixed(2)})`;
+      }
+
+      _render(skipInputs = false) {
+        const hueRgb = this._hsvToRgb(this.hsv.h, 1, 1);
+        const colorHex = this.getHex();
+        const colorRgba = this.getRgba();
+        this.sbCanvas.style.background = `rgb(${hueRgb.r},${hueRgb.g},${hueRgb.b})`;
+        this.sbCursor.style.left = (this.hsv.s * 100) + '%';
+        this.sbCursor.style.top = ((1 - this.hsv.v) * 100) + '%';
+        this.sbCursor.style.borderColor = this.hsv.v > 0.5 ? '#fff' : '#888';
+        this.previewEl.style.background = colorRgba;
+        this.alphaTrack.style.background = `linear-gradient(to right, transparent, ${colorHex})`;
+        this.triggerSwatch.style.background = colorRgba;
+        this.triggerHex.textContent = this.alpha < 1 ? colorRgba : colorHex.toUpperCase();
+        if (!skipInputs) this._updateInputValues();
+        this.onChange && this.onChange(colorHex, this.alpha, colorRgba);
+      }
+
+      _updateInputValues() {
+        const hex = this.getHex();
+        const rgb = this._hsvToRgb(this.hsv.h, this.hsv.s, this.hsv.v);
+        const hsl = this._rgbToHsl(rgb.r, rgb.g, rgb.b);
+        const aPercent = Math.round(this.alpha * 100);
+        if (this.mode === 'hex') {
+          const hi = this.inputsWrap.querySelector('[data-id="hex"]');
+          const ai = this.inputsWrap.querySelector('[data-id="a"]');
+          if (hi && document.activeElement !== hi) hi.value = hex.toUpperCase();
+          if (ai && document.activeElement !== ai) ai.value = aPercent;
+        } else if (this.mode === 'rgb') {
+          const fields = { r: rgb.r, g: rgb.g, b: rgb.b, a2: aPercent };
+          for (const [k, v] of Object.entries(fields)) { const el = this.inputsWrap.querySelector(`[data-id="${k}"]`); if (el && document.activeElement !== el) el.value = v; }
+        } else {
+          const fields = { h: Math.round(hsl.h), s: Math.round(hsl.s*100), l: Math.round(hsl.l*100), a3: aPercent };
+          for (const [k, v] of Object.entries(fields)) { const el = this.inputsWrap.querySelector(`[data-id="${k}"]`); if (el && document.activeElement !== el) el.value = v; }
+        }
+      }
+
+      _renderRecent() {
+        const rec = this.recentColors;
+        this.recentEl.innerHTML = '';
+        if (!rec.length) { this.recentSection.style.display = 'none'; return; }
+        this.recentSection.style.display = '';
+        rec.forEach(hex => {
+          const btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'cp-swatch-btn';
+          btn.style.background = hex; btn.title = hex;
+          btn.addEventListener('click', () => { this.setHex(hex); this._render(); });
+          this.recentEl.appendChild(btn);
+        });
+      }
+
+      _addRecent(hex) {
+        this.recentColors = [hex, ...this.recentColors.filter(c => c !== hex)].slice(0, 10);
+        try { localStorage.setItem('cp_recent', JSON.stringify(this.recentColors)); } catch {}
+        this._renderRecent();
+      }
+
+      toggle() { this.isOpen ? this.close() : this.open(); }
+      open()   { this.isOpen = true;  this.panel.classList.add('open');    this.trigger.classList.add('open');    this._render(); }
+      close()  { this.isOpen = false; this.panel.classList.remove('open'); this.trigger.classList.remove('open'); this._addRecent(this.getHex()); }
+
+      _hsvToRgb(h, s, v) {
+        const i = Math.floor(h/60)%6, f = h/60-Math.floor(h/60);
+        const p = v*(1-s), q = v*(1-f*s), t = v*(1-(1-f)*s);
+        const m = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]][i];
+        return { r: Math.round(m[0]*255), g: Math.round(m[1]*255), b: Math.round(m[2]*255) };
+      }
+      _rgbToHsv(r, g, b) {
+        r/=255; g/=255; b/=255;
+        const max=Math.max(r,g,b), min=Math.min(r,g,b), d=max-min;
+        let h = 0;
+        if (d) { switch(max) { case r: h=(g-b)/d+(g<b?6:0); break; case g: h=(b-r)/d+2; break; default: h=(r-g)/d+4; } h/=6; }
+        return { h: h*360, s: max===0?0:d/max, v: max };
+      }
+      _rgbToHsl(r, g, b) {
+        r/=255; g/=255; b/=255;
+        const max=Math.max(r,g,b), min=Math.min(r,g,b), l=(max+min)/2;
+        if (max===min) return { h:0, s:0, l };
+        const d=max-min, s=l>0.5?d/(2-max-min):d/(max+min);
+        let h=0;
+        switch(max) { case r: h=(g-b)/d+(g<b?6:0); break; case g: h=(b-r)/d+2; break; default: h=(r-g)/d+4; }
+        return { h: h/6*360, s, l };
+      }
+      _hslToRgb(h, s, l) {
+        h/=360;
+        if (s===0) { const v=Math.round(l*255); return {r:v,g:v,b:v}; }
+        const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
+        const hue2rgb=(p,q,t)=>{ if(t<0)t++; if(t>1)t--; if(t<1/6)return p+(q-p)*6*t; if(t<1/2)return q; if(t<2/3)return p+(q-p)*(2/3-t)*6; return p; };
+        return { r:Math.round(hue2rgb(p,q,h+1/3)*255), g:Math.round(hue2rgb(p,q,h)*255), b:Math.round(hue2rgb(p,q,h-1/3)*255) };
+      }
+    }
+
     // --- Auth check ---
     if (!API.isLoggedIn()) {
       window.location.href = '/login';
@@ -952,315 +1262,7 @@
     inputBgVideoMuted.addEventListener('change', () => syncToggle(inputBgVideoMuted));
 
 
-    class ColorPicker {
-      constructor(container, initialHex, onChange) {
-        this.container = container;
-        this.onChange = onChange;
-        this.hsv = { h: 0, s: 0, v: 1 };
-        this.alpha = 1;
-        this.mode = 'hex';
-        this.isOpen = false;
-        this.isDraggingSB = false;
-        this.recentColors = JSON.parse(localStorage.getItem('cp_recent') || '[]');
-        this.presets = [
-          '#a78bfa','#818cf8','#f472b6','#fb923c',
-          '#facc15','#4ade80','#34d399','#38bdf8',
-          '#e879f9','#f87171','#ffffff','#0a0a0f'
-        ];
-        this._build();
-        this.setHex(initialHex || '#a78bfa');
-      }
-
-      _build() {
-        const c = this.container;
-        c.innerHTML = '';
-        this.trigger = document.createElement('button');
-        this.trigger.type = 'button';
-        this.trigger.className = 'cp-trigger';
-        this.trigger.innerHTML = `
-          <span class="cp-trigger-swatch" id="cp-ts-${Math.random().toString(36).slice(2)}"></span>
-          <span class="cp-trigger-hex"></span>
-          <i class="fas fa-chevron-down cp-trigger-arrow"></i>`;
-        this.trigger.addEventListener('click', () => this.toggle());
-        c.appendChild(this.trigger);
-        this.triggerSwatch = this.trigger.querySelector('.cp-trigger-swatch');
-        this.triggerHex = this.trigger.querySelector('.cp-trigger-hex');
-
-        this.panel = document.createElement('div');
-        this.panel.className = 'cp-panel';
-        this.panel.innerHTML = `
-          <div class="cp-sb-wrap">
-            <canvas class="cp-sb-canvas"></canvas>
-            <div class="cp-sb-white"></div>
-            <div class="cp-sb-black"></div>
-            <div class="cp-sb-cursor"></div>
-          </div>
-          <div class="cp-sliders">
-            <div class="cp-slider-row">
-              <div class="cp-slider-preview"></div>
-              <input type="range" class="cp-slider-track cp-hue-track" min="0" max="360" step="1" value="0" />
-            </div>
-            <div class="cp-slider-row">
-              <div style="width:30px;height:30px;flex-shrink:0;"></div>
-              <div class="cp-alpha-bg">
-                <input type="range" class="cp-slider-track" min="0" max="100" step="1" value="100" />
-              </div>
-            </div>
-          </div>
-          <div class="cp-mode-row">
-            <button type="button" class="cp-mode-btn active" data-mode="hex">HEX</button>
-            <button type="button" class="cp-mode-btn" data-mode="rgb">RGB</button>
-            <button type="button" class="cp-mode-btn" data-mode="hsl">HSL</button>
-          </div>
-          <div class="cp-inputs"></div>
-          <div class="cp-section">
-            <div class="cp-swatches-label">Presets</div>
-            <div class="cp-swatches" id="cp-presets-${Math.random().toString(36).slice(2)}"></div>
-          </div>
-          <div class="cp-section" style="display:none;">
-            <div class="cp-swatches-label">Recent</div>
-            <div class="cp-swatches"></div>
-          </div>`;
-        c.appendChild(this.panel);
-
-        this.sbWrap     = this.panel.querySelector('.cp-sb-wrap');
-        this.sbCanvas   = this.panel.querySelector('.cp-sb-canvas');
-        this.sbCursor   = this.panel.querySelector('.cp-sb-cursor');
-        this.previewEl  = this.panel.querySelector('.cp-slider-preview');
-        this.hueSlider  = this.panel.querySelectorAll('.cp-slider-track')[0];
-        this.alphaSlider = this.panel.querySelectorAll('.cp-slider-track')[1];
-        this.alphaTrack  = this.alphaSlider;
-        this.inputsWrap  = this.panel.querySelector('.cp-inputs');
-        this.presetsEl   = this.panel.querySelectorAll('.cp-swatches')[0];
-        this.recentSection = this.panel.querySelectorAll('.cp-section')[2];
-        this.recentEl    = this.panel.querySelectorAll('.cp-swatches')[1];
-
-        this.sbWrap.addEventListener('mousedown', e => this._onSBStart(e));
-        this.sbWrap.addEventListener('touchstart', e => this._onSBStart(e), { passive: false });
-        document.addEventListener('mousemove', e => this._onSBMove(e));
-        document.addEventListener('touchmove', e => this._onSBMove(e), { passive: false });
-        document.addEventListener('mouseup', () => { this.isDraggingSB = false; });
-        document.addEventListener('touchend', () => { this.isDraggingSB = false; });
-
-        this.hueSlider.addEventListener('input', () => { this.hsv.h = +this.hueSlider.value; this._render(); });
-        this.alphaSlider.addEventListener('input', () => { this.alpha = +this.alphaSlider.value / 100; this._render(); });
-
-        this.panel.querySelectorAll('.cp-mode-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            this.mode = btn.dataset.mode;
-            this.panel.querySelectorAll('.cp-mode-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            this._buildInputs();
-          });
-        });
-
-        this.presets.forEach(hex => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'cp-swatch-btn';
-          btn.style.background = hex;
-          btn.title = hex;
-          btn.addEventListener('click', () => { this.setHex(hex); this._render(); });
-          this.presetsEl.appendChild(btn);
-        });
-
-        this._buildInputs();
-        this._renderRecent();
-        document.addEventListener('mousedown', e => { if (this.isOpen && !c.contains(e.target)) this.close(); });
-      }
-
-      _buildInputs() {
-        const w = this.inputsWrap;
-        w.innerHTML = '';
-        if (this.mode === 'hex') {
-          w.style.gridTemplateColumns = '1fr auto';
-          w.innerHTML = `
-            <div class="cp-input-group">
-              <input class="cp-input" data-id="hex" maxlength="7" value="" />
-              <div class="cp-input-label">HEX</div>
-            </div>
-            <div class="cp-input-group">
-              <input class="cp-input" data-id="a" maxlength="3" style="width:52px;" value="100" />
-              <div class="cp-input-label">A%</div>
-            </div>`;
-          w.querySelector('[data-id="hex"]').addEventListener('input', e => {
-            let v = e.target.value;
-            if (!v.startsWith('#')) v = '#' + v;
-            if (/^#[0-9a-fA-F]{6}$/.test(v)) { this.setHex(v); this._render(true); }
-          });
-          w.querySelector('[data-id="a"]').addEventListener('input', e => {
-            this.alpha = Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) / 100;
-            this.alphaSlider.value = Math.round(this.alpha * 100);
-            this._render(true);
-          });
-        } else if (this.mode === 'rgb') {
-          w.style.gridTemplateColumns = 'repeat(4, 1fr)';
-          w.innerHTML = `
-            <div class="cp-input-group"><input class="cp-input" data-id="r" maxlength="3" /><div class="cp-input-label">R</div></div>
-            <div class="cp-input-group"><input class="cp-input" data-id="g" maxlength="3" /><div class="cp-input-label">G</div></div>
-            <div class="cp-input-group"><input class="cp-input" data-id="b" maxlength="3" /><div class="cp-input-label">B</div></div>
-            <div class="cp-input-group"><input class="cp-input" data-id="a2" maxlength="3" /><div class="cp-input-label">A%</div></div>`;
-          ['r','g','b'].forEach(ch => { w.querySelector(`[data-id="${ch}"]`).addEventListener('input', () => this._onRGBInput()); });
-          w.querySelector('[data-id="a2"]').addEventListener('input', e => {
-            this.alpha = Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) / 100;
-            this.alphaSlider.value = Math.round(this.alpha * 100);
-            this._render(true);
-          });
-        } else {
-          w.style.gridTemplateColumns = 'repeat(4, 1fr)';
-          w.innerHTML = `
-            <div class="cp-input-group"><input class="cp-input" data-id="h" maxlength="3" /><div class="cp-input-label">H°</div></div>
-            <div class="cp-input-group"><input class="cp-input" data-id="s" maxlength="3" /><div class="cp-input-label">S%</div></div>
-            <div class="cp-input-group"><input class="cp-input" data-id="l" maxlength="3" /><div class="cp-input-label">L%</div></div>
-            <div class="cp-input-group"><input class="cp-input" data-id="a3" maxlength="3" /><div class="cp-input-label">A%</div></div>`;
-          ['h','s','l'].forEach(ch => { w.querySelector(`[data-id="${ch}"]`).addEventListener('input', () => this._onHSLInput()); });
-          w.querySelector('[data-id="a3"]').addEventListener('input', e => {
-            this.alpha = Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) / 100;
-            this.alphaSlider.value = Math.round(this.alpha * 100);
-            this._render(true);
-          });
-        }
-        this._updateInputValues();
-      }
-
-      _onRGBInput() {
-        const r = parseInt(this.inputsWrap.querySelector('[data-id="r"]')?.value) || 0;
-        const g = parseInt(this.inputsWrap.querySelector('[data-id="g"]')?.value) || 0;
-        const b = parseInt(this.inputsWrap.querySelector('[data-id="b"]')?.value) || 0;
-        this.hsv = this._rgbToHsv(r, g, b);
-        this.hueSlider.value = this.hsv.h;
-        this._render(true);
-      }
-
-      _onHSLInput() {
-        const h = parseInt(this.inputsWrap.querySelector('[data-id="h"]')?.value) || 0;
-        const s = parseInt(this.inputsWrap.querySelector('[data-id="s"]')?.value) || 0;
-        const l = parseInt(this.inputsWrap.querySelector('[data-id="l"]')?.value) || 0;
-        const rgb = this._hslToRgb(h, s / 100, l / 100);
-        this.hsv = this._rgbToHsv(rgb.r, rgb.g, rgb.b);
-        this.hueSlider.value = this.hsv.h;
-        this._render(true);
-      }
-
-      _onSBStart(e) { e.preventDefault(); this.isDraggingSB = true; this._onSBMove(e); }
-      _onSBMove(e) {
-        if (!this.isDraggingSB) return;
-        e.preventDefault();
-        const rect = this.sbWrap.getBoundingClientRect();
-        const cx = e.touches ? e.touches[0].clientX : e.clientX;
-        const cy = e.touches ? e.touches[0].clientY : e.clientY;
-        this.hsv.s = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
-        this.hsv.v = Math.max(0, Math.min(1, 1 - (cy - rect.top) / rect.height));
-        this._render();
-      }
-
-      setHex(hex) {
-        hex = (hex || '#000000').replace('#','');
-        if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
-        const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
-        this.hsv = this._rgbToHsv(r, g, b);
-        this.hueSlider.value = this.hsv.h;
-      }
-
-      getHex() {
-        const rgb = this._hsvToRgb(this.hsv.h, this.hsv.s, this.hsv.v);
-        return '#' + [rgb.r, rgb.g, rgb.b].map(c => c.toString(16).padStart(2,'0')).join('');
-      }
-
-      getRgba() {
-        const rgb = this._hsvToRgb(this.hsv.h, this.hsv.s, this.hsv.v);
-        return `rgba(${rgb.r},${rgb.g},${rgb.b},${this.alpha.toFixed(2)})`;
-      }
-
-      _render(skipInputs = false) {
-        const hueRgb = this._hsvToRgb(this.hsv.h, 1, 1);
-        const colorHex = this.getHex();
-        const colorRgba = this.getRgba();
-        this.sbCanvas.style.background = `rgb(${hueRgb.r},${hueRgb.g},${hueRgb.b})`;
-        this.sbCursor.style.left = (this.hsv.s * 100) + '%';
-        this.sbCursor.style.top = ((1 - this.hsv.v) * 100) + '%';
-        this.sbCursor.style.borderColor = this.hsv.v > 0.5 ? '#fff' : '#888';
-        this.previewEl.style.background = colorRgba;
-        this.alphaTrack.style.background = `linear-gradient(to right, transparent, ${colorHex})`;
-        this.triggerSwatch.style.background = colorRgba;
-        this.triggerHex.textContent = this.alpha < 1 ? colorRgba : colorHex.toUpperCase();
-        if (!skipInputs) this._updateInputValues();
-        this.onChange && this.onChange(colorHex, this.alpha, colorRgba);
-      }
-
-      _updateInputValues() {
-        const hex = this.getHex();
-        const rgb = this._hsvToRgb(this.hsv.h, this.hsv.s, this.hsv.v);
-        const hsl = this._rgbToHsl(rgb.r, rgb.g, rgb.b);
-        const aPercent = Math.round(this.alpha * 100);
-        if (this.mode === 'hex') {
-          const hi = this.inputsWrap.querySelector('[data-id="hex"]');
-          const ai = this.inputsWrap.querySelector('[data-id="a"]');
-          if (hi && document.activeElement !== hi) hi.value = hex.toUpperCase();
-          if (ai && document.activeElement !== ai) ai.value = aPercent;
-        } else if (this.mode === 'rgb') {
-          const fields = { r: rgb.r, g: rgb.g, b: rgb.b, a2: aPercent };
-          for (const [k, v] of Object.entries(fields)) { const el = this.inputsWrap.querySelector(`[data-id="${k}"]`); if (el && document.activeElement !== el) el.value = v; }
-        } else {
-          const fields = { h: Math.round(hsl.h), s: Math.round(hsl.s*100), l: Math.round(hsl.l*100), a3: aPercent };
-          for (const [k, v] of Object.entries(fields)) { const el = this.inputsWrap.querySelector(`[data-id="${k}"]`); if (el && document.activeElement !== el) el.value = v; }
-        }
-      }
-
-      _renderRecent() {
-        const rec = this.recentColors;
-        this.recentEl.innerHTML = '';
-        if (!rec.length) { this.recentSection.style.display = 'none'; return; }
-        this.recentSection.style.display = '';
-        rec.forEach(hex => {
-          const btn = document.createElement('button');
-          btn.type = 'button'; btn.className = 'cp-swatch-btn';
-          btn.style.background = hex; btn.title = hex;
-          btn.addEventListener('click', () => { this.setHex(hex); this._render(); });
-          this.recentEl.appendChild(btn);
-        });
-      }
-
-      _addRecent(hex) {
-        this.recentColors = [hex, ...this.recentColors.filter(c => c !== hex)].slice(0, 10);
-        try { localStorage.setItem('cp_recent', JSON.stringify(this.recentColors)); } catch {}
-        this._renderRecent();
-      }
-
-      toggle() { this.isOpen ? this.close() : this.open(); }
-      open()   { this.isOpen = true;  this.panel.classList.add('open');    this.trigger.classList.add('open');    this._render(); }
-      close()  { this.isOpen = false; this.panel.classList.remove('open'); this.trigger.classList.remove('open'); this._addRecent(this.getHex()); }
-
-      _hsvToRgb(h, s, v) {
-        const i = Math.floor(h/60)%6, f = h/60-Math.floor(h/60);
-        const p = v*(1-s), q = v*(1-f*s), t = v*(1-(1-f)*s);
-        const m = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]][i];
-        return { r: Math.round(m[0]*255), g: Math.round(m[1]*255), b: Math.round(m[2]*255) };
-      }
-      _rgbToHsv(r, g, b) {
-        r/=255; g/=255; b/=255;
-        const max=Math.max(r,g,b), min=Math.min(r,g,b), d=max-min;
-        let h = 0;
-        if (d) { switch(max) { case r: h=(g-b)/d+(g<b?6:0); break; case g: h=(b-r)/d+2; break; default: h=(r-g)/d+4; } h/=6; }
-        return { h: h*360, s: max===0?0:d/max, v: max };
-      }
-      _rgbToHsl(r, g, b) {
-        r/=255; g/=255; b/=255;
-        const max=Math.max(r,g,b), min=Math.min(r,g,b), l=(max+min)/2;
-        if (max===min) return { h:0, s:0, l };
-        const d=max-min, s=l>0.5?d/(2-max-min):d/(max+min);
-        let h=0;
-        switch(max) { case r: h=(g-b)/d+(g<b?6:0); break; case g: h=(b-r)/d+2; break; default: h=(r-g)/d+4; }
-        return { h: h/6*360, s, l };
-      }
-      _hslToRgb(h, s, l) {
-        h/=360;
-        if (s===0) { const v=Math.round(l*255); return {r:v,g:v,b:v}; }
-        const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
-        const hue2rgb=(p,q,t)=>{ if(t<0)t++; if(t>1)t--; if(t<1/6)return p+(q-p)*6*t; if(t<1/2)return q; if(t<2/3)return p+(q-p)*(2/3-t)*6; return p; };
-        return { r:Math.round(hue2rgb(p,q,h+1/3)*255), g:Math.round(hue2rgb(p,q,h)*255), b:Math.round(hue2rgb(p,q,h-1/3)*255) };
-      }
-    }
+  
 
     // --- Logout --- yuh
     btnLogout.addEventListener('click', () => {
