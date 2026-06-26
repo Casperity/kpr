@@ -404,6 +404,12 @@
         }
       });
 
+      /* ── Pre-fill invite code from ?code= query param ── */
+      const codeParam = new URLSearchParams(window.location.search).get('code');
+      if (codeParam) {
+        inviteInput.value = codeParam.trim();
+      }
+
       /* Auto-focus username */
       userInput.focus();
 
