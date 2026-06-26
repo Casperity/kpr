@@ -82,10 +82,9 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.55);
-    /*  backdrop-filter: blur(6px);*/
       z-index: 1;
     }
-    
+
     body.profile-page.no-bg-blur::before {
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
@@ -94,46 +93,35 @@
     body.profile-page.has-bg-video.no-bg-blur::before {
       background: transparent;
     }
-    
+
     /* Make sure profile elements sit above background video and overlay */
     .profile-container {
       position: relative;
       z-index: 2;
     }
 
-    /* ── Gallery carousel ─────────────────────── */
-    .gallery-carousel {
-      position: relative;
+    /* ── Gallery grid ─────────────────────────── */
+    .profile-gallery {
       width: 100%;
-      margin-top: 16px;
-    }
-    .gallery-carousel-track-wrap {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      border-radius: 16px;
       overflow: hidden;
-      border-radius: 12px;
-    }
-    .gallery-carousel-track {
-      display: flex;
-      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
     }
     .gallery-item {
-      flex: 0 0 calc(100% / 3);
-      aspect-ratio: 1 / 1;
       position: relative;
+      aspect-ratio: 1 / 1;
       overflow: hidden;
       cursor: pointer;
       background: rgba(0,0,0,0.3);
-      padding: 3px;
-      box-sizing: border-box;
+      transition: transform 0.2s, brightness 0.2s;
     }
-    .gallery-item-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      overflow: hidden;
-      transition: transform 0.18s;
+    .gallery-item:hover {
+      transform: scale(1.03);
+      z-index: 1;
     }
-    .gallery-item:hover .gallery-item-inner { transform: scale(1.04); }
     .gallery-item img,
     .gallery-item video {
       width: 100%;
@@ -144,56 +132,17 @@
     }
     .gallery-item .gallery-play-icon {
       position: absolute;
-      inset: 3px;
-      border-radius: 8px;
+      inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       background: rgba(0,0,0,0.35);
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       opacity: 0.85;
       pointer-events: none;
     }
-    .gallery-carousel-nav {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .gallery-nav-btn {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.7);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 0.78rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s, color 0.15s;
-    }
-    .gallery-nav-btn:hover { background: var(--accent, #a78bfa); color: #fff; border-color: transparent; }
-    .gallery-nav-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
-    .gallery-nav-dots {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-    }
-    .gallery-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      transition: background 0.2s, transform 0.2s;
-    }
-    .gallery-dot.active {
-      background: var(--accent, #a78bfa);
-      transform: scale(1.35);
-    }
+
     /* ── Lightbox ─────────────────────────────── */
     #gallery-lightbox {
       display: none;
@@ -423,12 +372,6 @@
       website: 'Website', email: 'Email', other: 'Link'
     };
 
-    /* ── Badge Catalog ─────────────────────────────────────
-     * To add a new badge, just add a new entry here.
-     * icon  = FontAwesome class
-     * label = tooltip text shown on hover
-     * color = icon color
-     */
     const BADGE_CATALOG = {
       dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#a78bfa' },
       og:          { icon: 'fas fa-crown',           label: 'OG',           color: '#facc15' },
@@ -443,7 +386,6 @@
       bughunter:   { icon: 'fas fa-bug',             label: 'Bug Hunter',   color: '#0ce600' },
     };
 
-    // --- Utility: hex to RGB for CSS var ---
     function hexToRgb(hex) {
       hex = hex.replace('#', '');
       if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
@@ -451,23 +393,19 @@
       return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
     }
 
-    // --- Escape HTML ---
     function esc(str) {
       const d = document.createElement('div');
       d.textContent = str || '';
       return d.innerHTML;
     }
 
-    // --- State management ---
     function showState(id) {
       ['state-loading', 'state-profile', 'state-404', 'state-error', 'state-banned'].forEach(s => {
         document.getElementById(s).style.display = s === id ? '' : 'none';
       });
     }
 
-    // --- Render profile ---
     function renderProfile(data) {
-      // Handle banned users — show generic message, never leak ban reason to public
       if (data.banned) {
         document.getElementById('banned-reason').textContent = 'This user has been banned.';
         showState('state-banned');
@@ -482,7 +420,6 @@
       body.style.setProperty('--bg-color', bgColor);
       body.style.backgroundColor = bgColor;
 
-      // Check for video background
       const bgVideo = data.settings?.bgVideoUrl || data.settings?.bg_video_url || '';
       let bgVideoEl = document.getElementById('bg-video');
       if (bgVideoEl) bgVideoEl.remove();
@@ -496,7 +433,6 @@
         bgVideoEl.playsInline = true;
         bgVideoEl.className = 'profile-bg-video';
 
-        // Force fit (letterbox) support
         const forceFit = !!(data.settings?.bgVideoFit);
         if (forceFit) {
           body.style.setProperty('--bg-video-fit', 'contain');
@@ -507,7 +443,7 @@
         }
 
         body.appendChild(bgVideoEl);
-  //      bgVideoEl.play().catch(e => console.log("Video autoplay failed:", e));
+
         const muteBtn = document.createElement('button');
         muteBtn.id = 'video-mute-btn';
         muteBtn.innerHTML = '<i class="fas fa-volume-xmark"></i>';
@@ -515,7 +451,7 @@
         document.body.appendChild(muteBtn);
         muteBtn.addEventListener('click', () => {
           bgVideoEl.muted = !bgVideoEl.muted;
-          muteBtn.innerHTML = bgVideoEl.muted? '<i class="fas fa-volume-xmark"></i>' : '<i class="fas fa-volume-up"></i>';
+          muteBtn.innerHTML = bgVideoEl.muted ? '<i class="fas fa-volume-xmark"></i>' : '<i class="fas fa-volume-up"></i>';
           muteBtn.title = bgVideoEl.muted ? 'Unmute video' : 'Mute video';
         });
         body.classList.add('has-bg-video');
@@ -576,7 +512,6 @@
       const hasMultipleSongs = !!(playlist && playlist.length > 1);
 
       if (playlist && playlist.length > 0) {
-        // Admin playlist — full player with cover, prev/next
         const first = playlist[0];
         musicHtml = `
           <div class="profile-music" id="music-player">
@@ -639,7 +574,7 @@
           </div>`;
       }
 
-      // -- User Badges (icons) --
+      // -- User Badges --
       let userBadgesHtml = '';
       const badgeList = data.badges || [];
       if (badgeList.length > 0) {
@@ -663,21 +598,27 @@
 
       // -- Gallery --
       const galleryData = data.gallery || [];
-
-      // -- Build card --
       const hasGallery = galleryData.length > 0;
-      const showTabs = hasGallery; // only show tabs if there's a gallery
+      const showTabs = hasGallery;
 
-      // Build gallery carousel HTML (items rendered by JS after DOM insert)
       let galleryGridHtml = '';
       if (hasGallery) {
-        galleryGridHtml = `
-          <div class="gallery-carousel" id="gallery-carousel">
-            <div class="gallery-carousel-track-wrap">
-              <div class="gallery-carousel-track" id="gallery-track"></div>
-            </div>
-            <div class="gallery-carousel-nav" id="gallery-nav"></div>
-          </div>`;
+        galleryGridHtml = '<div class="profile-gallery">';
+        galleryData.forEach((item, i) => {
+          if (item.type === 'video') {
+            galleryGridHtml += `
+              <div class="gallery-item" data-idx="${i}">
+                <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
+                <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
+              </div>`;
+          } else {
+            galleryGridHtml += `
+              <div class="gallery-item" data-idx="${i}">
+                <img src="${esc(item.url)}" alt="Gallery item ${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
+              </div>`;
+          }
+        });
+        galleryGridHtml += '</div>';
       }
 
       container.innerHTML = `
@@ -715,7 +656,7 @@
         </div>`;
 
       // Lightbox
-      if (galleryData.length > 0) {
+      if (hasGallery) {
         if (!document.getElementById('gallery-lightbox')) {
           const lb = document.createElement('div');
           lb.id = 'gallery-lightbox';
@@ -727,8 +668,6 @@
           `;
           document.body.appendChild(lb);
         }
-        // Build carousel items into DOM, then init lightbox
-        initGalleryCarousel(galleryData);
         initGalleryLightbox(galleryData);
       }
 
@@ -751,7 +690,7 @@
       const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
       if (hasMusic) initMusicPlayer(data);
 
-      // Apply permanent background blur setting
+      // Apply background blur setting
       const bgBlurEnabled = data.settings?.bgBlur ?? data.settings?.bg_blur ?? true;
       if (bgBlurEnabled) {
         body.classList.remove('no-bg-blur');
@@ -759,7 +698,7 @@
         body.classList.add('no-bg-blur');
       }
 
-      // -- Enter Overlay and Blur flow --
+      // -- Enter Overlay --
       const hasVideo = !!bgVideo;
       const shouldShowOverlay = hasMusic || hasVideo;
 
@@ -773,8 +712,6 @@
         }
         overlay.style.display = 'flex';
         overlay.classList.remove('fade-out');
-
-        // The click overlay itself always uses blur to hide background before clicking
         overlay.style.backdropFilter = 'blur(25px)';
         overlay.style.webkitBackdropFilter = 'blur(25px)';
         container.classList.add('blurred');
@@ -786,43 +723,30 @@
           if (bgVideoEl) {
             bgVideoEl.classList.remove('blurred');
             bgVideoEl.play().catch(() => {});
-            
-            // Unmute background video if configured
+
             const isMuted = data.settings?.bgVideoMuted ?? data.settings?.bg_video_muted ?? true;
-            if (!isMuted) {
-              bgVideoEl.muted = false;
-            }
+            if (!isMuted) bgVideoEl.muted = false;
 
             const muteBtn = document.getElementById('video-mute-btn');
             if (muteBtn) {
-              muteBtn.innerHTML = bgVideoEl.muted
-                ? '<i class="fas fa-volume-xmark"></i>'
-                : '<i class="fas fa-volume-up"></i>';
+              muteBtn.innerHTML = bgVideoEl.muted ? '<i class="fas fa-volume-xmark"></i>' : '<i class="fas fa-volume-up"></i>';
               muteBtn.title = bgVideoEl.muted ? 'Unmute video' : 'Mute video';
             }
+          }
 
-          }
-          
           const autoplayEnabled = data.settings?.musicAutoplay ?? data.settings?.music_autoplay ?? false;
-          if (autoplayEnabled && window.playProfileMusic) {
-            window.playProfileMusic();
-          }
-          
-          setTimeout(() => {
-            overlay.style.display = 'none';
-          }, 800);
+          if (autoplayEnabled && window.playProfileMusic) window.playProfileMusic();
+
+          setTimeout(() => { overlay.style.display = 'none'; }, 800);
         };
       } else {
         const overlay = document.getElementById('enter-overlay');
         if (overlay) overlay.style.display = 'none';
         container.classList.remove('blurred');
-        
-        // No overlay, apply video mute configuration immediately
+
         if (bgVideoEl) {
           const isMuted = data.settings?.bgVideoMuted ?? data.settings?.bg_video_muted ?? true;
-          if (!isMuted) {
-            bgVideoEl.muted = false;
-          }
+          if (!isMuted) bgVideoEl.muted = false;
         }
       }
     }
@@ -839,17 +763,17 @@
 
       if (!songs.length) return;
 
-      const audio     = document.getElementById('profile-audio');
-      const btn       = document.getElementById('music-toggle');
-      const prevBtn   = document.getElementById('music-prev');
-      const nextBtn   = document.getElementById('music-next');
-      const cover     = document.getElementById('music-cover');
-      const titleEl   = document.getElementById('music-title');
-      const artistEl  = document.getElementById('music-artist');
-      const volSlider = document.getElementById('music-volume');
-      const expandBtn = document.getElementById('music-expand-btn');
+      const audio      = document.getElementById('profile-audio');
+      const btn        = document.getElementById('music-toggle');
+      const prevBtn    = document.getElementById('music-prev');
+      const nextBtn    = document.getElementById('music-next');
+      const cover      = document.getElementById('music-cover');
+      const titleEl    = document.getElementById('music-title');
+      const artistEl   = document.getElementById('music-artist');
+      const volSlider  = document.getElementById('music-volume');
+      const expandBtn  = document.getElementById('music-expand-btn');
       const playlistEl = document.getElementById('music-playlist');
-      const playerEl  = document.getElementById('music-player');
+      const playerEl   = document.getElementById('music-player');
       if (!audio || !btn) return;
 
       let idx = 0;
@@ -869,8 +793,7 @@
 
         playlistEl.querySelectorAll('.playlist-item').forEach(item => {
           item.addEventListener('click', () => {
-            const i = parseInt(item.dataset.index, 10);
-            idx = i;
+            idx = parseInt(item.dataset.index, 10);
             loadSong(idx);
             playSong();
             renderPlaylist();
@@ -901,35 +824,26 @@
 
       btn.addEventListener('click', () => audio.paused ? playSong() : pauseSong());
 
-      window.playProfileMusic = function() {
-        playSong();
-      };
+      window.playProfileMusic = function() { playSong(); };
 
       if (prevBtn) {
         prevBtn.addEventListener('click', () => {
           idx = (idx - 1 + songs.length) % songs.length;
-          loadSong(idx);
-          playSong();
-          renderPlaylist();
+          loadSong(idx); playSong(); renderPlaylist();
         });
       }
       if (nextBtn) {
         nextBtn.addEventListener('click', () => {
           idx = (idx + 1) % songs.length;
-          loadSong(idx);
-          playSong();
-          renderPlaylist();
+          loadSong(idx); playSong(); renderPlaylist();
         });
       }
 
       audio.addEventListener('ended', () => {
         if (songs.length > 1) {
           idx = (idx + 1) % songs.length;
-          loadSong(idx);
-          playSong();
-          renderPlaylist();
+          loadSong(idx); playSong(); renderPlaylist();
         } else {
-          // single song — replay
           audio.currentTime = 0;
           playSong();
         }
@@ -939,14 +853,11 @@
         volSlider.addEventListener('input', e => { audio.volume = e.target.value; });
       }
 
-      // -- Expandable playlist (only present when songs.length > 1) --
       if (expandBtn && playlistEl && playerEl) {
         renderPlaylist();
         expandBtn.addEventListener('click', () => {
           const isOpen = playerEl.classList.toggle('expanded');
-          expandBtn.innerHTML = isOpen
-            ? '<i class="fas fa-chevron-up"></i>'
-            : '<i class="fas fa-chevron-down"></i>';
+          expandBtn.innerHTML = isOpen ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
         });
       }
 
@@ -955,10 +866,10 @@
 
     // --- Gallery Lightbox ---
     function initGalleryLightbox(items) {
-      const lb = document.getElementById('gallery-lightbox');
-      const wrap = document.getElementById('lb-media-wrap');
-      const prevBtn = document.getElementById('lb-prev');
-      const nextBtn = document.getElementById('lb-next');
+      const lb       = document.getElementById('gallery-lightbox');
+      const wrap     = document.getElementById('lb-media-wrap');
+      const prevBtn  = document.getElementById('lb-prev');
+      const nextBtn  = document.getElementById('lb-next');
       const closeBtn = document.getElementById('lb-close');
       let current = 0;
 
@@ -996,19 +907,18 @@
         document.body.style.overflow = '';
       }
 
-      // Attach click handlers to gallery items
       document.querySelectorAll('.gallery-item').forEach(el => {
         el.addEventListener('click', () => openLightbox(+el.dataset.idx));
       });
 
-      prevBtn.addEventListener('click', e => { e.stopPropagation(); showItem(current - 1); });
-      nextBtn.addEventListener('click', e => { e.stopPropagation(); showItem(current + 1); });
+      prevBtn.addEventListener('click',  e => { e.stopPropagation(); showItem(current - 1); });
+      nextBtn.addEventListener('click',  e => { e.stopPropagation(); showItem(current + 1); });
       closeBtn.addEventListener('click', closeLightbox);
       lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
       document.addEventListener('keydown', e => {
         if (!lb.classList.contains('open')) return;
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowLeft') showItem(current - 1);
+        if (e.key === 'Escape')     closeLightbox();
+        if (e.key === 'ArrowLeft')  showItem(current - 1);
         if (e.key === 'ArrowRight') showItem(current + 1);
       });
     }
@@ -1017,15 +927,11 @@
     async function init() {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
 
-
-      // Check known paths
       if (KNOWN_PATHS.includes(path) || KNOWN_PATHS.includes(path + '.html')) {
-        // If we're on a known path and this 404 page loaded, something went wrong
         showState('state-404');
         return;
       }
 
-      // Extract username (first segment after /)
       const segments = path.split('/').filter(Boolean);
       const username = segments[0];
 
