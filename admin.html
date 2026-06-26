@@ -230,7 +230,7 @@
                 <a href="/${u.username}" target="_blank" style="color: #fff; text-decoration: none; font-weight: 600;">${u.username}</a>
                 ${u.displayName ? `<span style="color: rgba(255,255,255,0.35);">${u.displayName}</span>` : ''}
                 ${u.isAdmin ? '<span style="background: #fb923c; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;">ADMIN</span>' : ''}
-                ${u.isVip ? '<span style="background: #a78bfa; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;">VIP</span>' : ''}
+                ${u.isVip ? `<span style="background: #a78bfa; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;" title="${u.vipExpiresAt ? 'Expires: ' + new Date(u.vipExpiresAt).toLocaleString() : 'Permanent VIP'}">VIP${u.vipExpiresAt ? ' (Temp)' : ''}</span>` : ''}
                 ${banInfo}
               </div>
               <div style="display:flex; align-items:center; gap:8px;">
@@ -302,17 +302,33 @@
           const userId = btn.dataset.user;
           const isVip = btn.dataset.vip === 'true';
           const targetStatus = !isVip;
-          if (!confirm(`${targetStatus ? 'Give' : 'Remove'} VIP status ${targetStatus ? 'to' : 'from'} this user?`)) return;
+
+          let expiresAt = null;
+          if (targetStatus) {
+            const durationInput = prompt("Enter VIP duration in days (Enter 0 or leave empty for Permanent):", "30");
+            if (durationInput === null) return; // User cancelled
+            const days = parseInt(durationInput.trim(), 10);
+            if (durationInput.trim() !== "" && !isNaN(days) && days > 0) {
+              const expiryDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+              expiresAt = expiryDate.toISOString();
+            } else if (durationInput.trim() !== "" && (isNaN(days) || days < 0)) {
+              Toast.show("Invalid number of days entered.", "error");
+              return;
+            }
+          } else {
+            if (!confirm(`Remove VIP status from this user?`)) return;
+          }
 
           try {
             const res = await API.request('/api/admin/users/' + userId + '/vip', {
               method: 'PUT',
-              body: JSON.stringify({ isVip: targetStatus })
+              body: JSON.stringify({ isVip: targetStatus, expiresAt })
             });
             if (res.success) {
               const u = allUsers.find(x => x.id == userId);
               if (u) {
                 u.isVip = targetStatus;
+                u.vipExpiresAt = res.vipExpiresAt;
                 u.badges = u.badges || [];
                 if (targetStatus) {
                   if (!u.badges.includes('vip')) u.badges.push('vip');

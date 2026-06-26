@@ -63,6 +63,17 @@
       </div>
     </div>
 
+    <!-- VIP Expiration Notice (hidden by default) -->
+    <div id="vip-notice" style="display:none; grid-column: 1 / -1; background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.35); border-radius: 16px; padding: 18px 24px; margin-bottom: 8px;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="font-size:1.5rem; flex-shrink:0;">👑</div>
+        <div>
+          <div style="font-size:0.95rem; font-weight:700; color:#a78bfa; margin-bottom:4px;">Temporary VIP Status Active</div>
+          <div id="vip-notice-display" style="font-size:0.84rem; color:rgba(255,255,255,0.75);"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Left: Form -->
     <div class="dash-form-area">
 
@@ -468,6 +479,16 @@
         inputAvatar.value = user.avatarUrl || '';
         updateBioCounter();
         updateAvatarPreview();
+
+        // VIP notice
+        if (user.vipExpiresAt) {
+          const vipNotice = document.getElementById('vip-notice');
+          const vipNoticeDisplay = document.getElementById('vip-notice-display');
+          if (vipNotice && vipNoticeDisplay) {
+            vipNotice.style.display = '';
+            vipNoticeDisplay.textContent = `Your VIP status is temporary and will expire on ${new Date(user.vipExpiresAt).toLocaleString()}.`;
+          }
+        }
 
         // If banned — lock the whole dashboard
         if (user.isBanned) {
