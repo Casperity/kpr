@@ -270,12 +270,11 @@
         </div>
       </div>
 
-      <!-- Admin Playlist (shown only for admins) -->
-      <div class="dash-section" id="section-playlist" style="display:none;">
+      <!-- Playlist -->
+      <div class="dash-section" id="section-playlist">
         <div class="dash-section-header" onclick="toggleSection('section-playlist')">
           <div class="dash-section-title">
             <i class="fas fa-music"></i> Playlist
-            <span style="font-size:0.7rem;background:rgba(251,146,60,0.15);color:#fb923c;border:1px solid rgba(251,146,60,0.3);border-radius:6px;padding:2px 8px;margin-left:6px;font-weight:600;">Admin</span>
           </div>
           <i class="fas fa-chevron-down dash-section-toggle"></i>
         </div>
@@ -459,12 +458,7 @@
           document.getElementById('nav-admin').style.display = '';
         }
         
-        const isVip = !!user.isVip;
-        if (isVip) {
-          document.getElementById('section-playlist').style.display = '';
-        } else {
-          document.getElementById('section-playlist').style.display = 'none';
-        }
+        const isVipOrAdmin = !!(user.isAdmin || user.isVip);
 
         // Basic info
         inputName.value = user.displayName || '';
@@ -494,8 +488,8 @@
           return; // stop loading the rest
         }
 
-        // Gallery (VIP only)
-        if (isVip) {
+        // Gallery (VIP/Admin only)
+        if (isVipOrAdmin) {
           galleryItems = (res.gallery || []).map(g => ({ url: g.url || '', type: g.type || 'image' }));
           renderGalleryList();
         } else {
@@ -523,9 +517,22 @@
         ownedBadges  = user.badges       || [];
         activeBadges = (user.activeBadges || []).filter(b => ownedBadges.includes(b));
         
-        // Playlist (VIP only)
-        playlist = (res.settings?.musicPlaylist) || [];
-        if (isVip) renderPlaylist();
+        // Playlist (VIP/Admin only)
+        if (isVipOrAdmin) {
+          playlist = (res.settings?.musicPlaylist) || [];
+          renderPlaylist();
+        } else {
+          const playlistBody = document.querySelector('#section-playlist .dash-section-body');
+          if (playlistBody) {
+            playlistBody.innerHTML = `
+              <div style="text-align: center; padding: 24px 16px; color: rgba(255,255,255,0.4); display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <i class="fas fa-lock" style="font-size: 1.8rem; color: #a78bfa; margin-bottom: 4px;"></i>
+                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">VIP Feature</div>
+                <div style="font-size: 0.8rem; line-height: 1.4;">The playlist feature is restricted to VIP users.</div>
+              </div>
+            `;
+          }
+        }
         renderBadgeToggles();
 
         // Theme
@@ -1111,8 +1118,8 @@
           musicTitle: inputMusicTitle.value.trim(),
           musicArtist: inputMusicArtist.value.trim()
         };
-        // VIP playlist — send even if empty (null clears it)
-        if (currentUser?.isVip) {
+        // VIP/Admin playlist — send even if empty (null clears it)
+        if (currentUser?.isAdmin || currentUser?.isVip) {
           settingsPayload.musicPlaylist = playlist.filter(s => s.url && s.url.trim()).map(s => ({
             url: s.url.trim(), title: s.title?.trim() || '', artist: s.artist?.trim() || '', cover: s.cover?.trim() || ''
           }));
@@ -1132,8 +1139,8 @@
         // Active badges
         await API.updateActiveBadges(activeBadges);
 
-        // Gallery (VIP only)
-        if (currentUser?.isVip) {
+        // Gallery (VIP/Admin only)
+        if (currentUser?.isAdmin || currentUser?.isVip) {
           const validGalleryItems = galleryItems
             .filter(g => g.url && g.url.trim())
             .map((g, i) => ({ url: g.url.trim(), type: detectMediaType(g.url) || 'image', displayOrder: i }));
