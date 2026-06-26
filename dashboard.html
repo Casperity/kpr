@@ -243,6 +243,59 @@
         </button>
       </div>
 
+      <!-- Account Settings -->
+      <div class="dash-section" id="section-account" style="margin-top:12px;">
+        <div class="dash-section-header" onclick="toggleSection('section-account')">
+          <div class="dash-section-title">
+            <i class="fas fa-gear"></i> Account Settings
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body" style="display:none;">
+
+          <!-- Change Password -->
+          <div style="margin-bottom:28px;">
+            <div style="font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Change Password</div>
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input type="password" class="form-input" id="input-current-pw" placeholder="Enter current password" autocomplete="current-password" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" class="form-input" id="input-new-pw" placeholder="At least 6 characters" autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" class="form-input" id="input-confirm-pw" placeholder="Repeat new password" autocomplete="new-password" />
+            </div>
+            <button class="btn-save" id="btn-change-pw" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);width:auto;padding:10px 24px;font-size:0.875rem;">
+              <i class="fas fa-key"></i> Update Password
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:24px;"></div>
+
+          <!-- Delete Account -->
+          <div>
+            <div style="font-size:0.8rem;font-weight:600;color:rgba(239,68,68,0.7);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Danger Zone</div>
+            <div style="font-size:0.82rem;color:rgba(255,255,255,0.38);margin-bottom:14px;line-height:1.5;">Permanently deletes your account and all your data. This cannot be undone.</div>
+            <div class="form-group">
+              <label class="form-label">Confirm with your password</label>
+              <input type="password" class="form-input" id="input-delete-pw" placeholder="Enter your password to confirm" autocomplete="current-password"
+                style="border-color:rgba(239,68,68,0.25);" />
+            </div>
+            <button id="btn-delete-account"
+              style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:12px;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.08);color:#ef4444;font-family:'Poppins',sans-serif;font-size:0.875rem;font-weight:600;cursor:pointer;transition:background 0.2s,border-color 0.2s;"
+              onmouseover="this.style.background='rgba(239,68,68,0.16)';this.style.borderColor='rgba(239,68,68,0.6)'"
+              onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.borderColor='rgba(239,68,68,0.4)'">
+              <i class="fas fa-trash-can"></i> Delete My Account
+            </button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
     <!-- Right: Live Preview -->
@@ -888,6 +941,70 @@
     btnLogout.addEventListener('click', () => {
       API.logout();
       window.location.href = '/login';
+    });
+
+    // --- Change Password ---
+    document.getElementById('btn-change-pw').addEventListener('click', async () => {
+      const currentPw  = document.getElementById('input-current-pw').value;
+      const newPw      = document.getElementById('input-new-pw').value;
+      const confirmPw  = document.getElementById('input-confirm-pw').value;
+
+      if (!currentPw) return Toast.show('Enter your current password.', 'error');
+      if (!newPw)     return Toast.show('Enter a new password.', 'error');
+      if (newPw.length < 6) return Toast.show('New password must be at least 6 characters.', 'error');
+      if (newPw !== confirmPw) return Toast.show('Passwords do not match.', 'error');
+
+      const btn = document.getElementById('btn-change-pw');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating…';
+
+      try {
+        await API.request('/api/user/password', {
+          method: 'PUT',
+          body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw })
+        });
+        Toast.show('Password updated! Please log back in.', 'success');
+        document.getElementById('input-current-pw').value = '';
+        document.getElementById('input-new-pw').value = '';
+        document.getElementById('input-confirm-pw').value = '';
+        // Force re-login since all sessions are now stale
+        setTimeout(() => { API.logout(); window.location.href = '/login'; }, 2000);
+      } catch (err) {
+        Toast.show(err.message || err.error || 'Failed to update password.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key"></i> Update Password';
+      }
+    });
+
+    // --- Delete Account ---
+    document.getElementById('btn-delete-account').addEventListener('click', async () => {
+      const pw = document.getElementById('input-delete-pw').value;
+      if (!pw) return Toast.show('Enter your password to confirm deletion.', 'error');
+
+      const confirmed = window.confirm(
+        'Are you absolutely sure? This will permanently delete your account and all your data. There is no undo.'
+      );
+      if (!confirmed) return;
+
+      const btn = document.getElementById('btn-delete-account');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…';
+
+      try {
+        await API.request('/api/user/account', {
+          method: 'DELETE',
+          body: JSON.stringify({ password: pw })
+        });
+        API.clearToken();
+        API.clearUser();
+        Toast.show('Account deleted. Goodbye.', 'info', 3000);
+        setTimeout(() => { window.location.href = '/'; }, 2500);
+      } catch (err) {
+        Toast.show(err.message || err.error || 'Failed to delete account.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-trash-can"></i> Delete My Account';
+      }
     });
 
     // --- Init ---
