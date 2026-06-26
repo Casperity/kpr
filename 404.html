@@ -217,6 +217,56 @@
     }
     #lb-close:hover { background: rgba(239,68,68,0.3); }
 
+    /* ── Profile tabs ────────────────────────── */
+    .profile-tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 4px;
+      margin: 16px 0 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .profile-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.45);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      letter-spacing: 0.02em;
+    }
+    .profile-tab-btn:hover {
+      color: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.06);
+    }
+    .profile-tab-btn.active {
+      background: var(--accent, #a78bfa);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    .profile-tab-panel {
+      display: none;
+      animation: tab-fade 0.2s ease;
+    }
+    .profile-tab-panel.active {
+      display: block;
+    }
+    @keyframes tab-fade {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     #video-mute-btn {
       position: fixed;
       bottom: 20px;
@@ -561,28 +611,33 @@
       }
 
       // -- Gallery --
-      let galleryHtml = '';
       const galleryData = data.gallery || [];
-      if (galleryData.length > 0) {
-        galleryHtml = '<div class="profile-gallery">';
+
+      // -- Build card --
+      const hasGallery = galleryData.length > 0;
+      const showTabs = hasGallery; // only show tabs if there's a gallery
+
+      // Build gallery grid HTML
+      let galleryGridHtml = '';
+      if (hasGallery) {
+        galleryGridHtml = '<div class="profile-gallery">';
         galleryData.forEach((item, i) => {
           if (item.type === 'video') {
-            galleryHtml += `
+            galleryGridHtml += `
               <div class="gallery-item" data-idx="${i}">
                 <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
                 <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
               </div>`;
           } else {
-            galleryHtml += `
+            galleryGridHtml += `
               <div class="gallery-item" data-idx="${i}">
                 <img src="${esc(item.url)}" alt="Gallery item ${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
               </div>`;
           }
         });
-        galleryHtml += '</div>';
+        galleryGridHtml += '</div>';
       }
 
-      // -- Build card --
       container.innerHTML = `
         <div class="profile-card">
           <img class="profile-avatar" src="${esc(avatarUrl)}" alt="${esc(data.displayName || data.display_name || data.username)}" onerror="this.style.display='none'" />
@@ -590,10 +645,28 @@
           ${userBadgesHtml}
           ${badgesHtml}
           ${data.bio ? `<p class="profile-bio">${esc(data.bio)}</p>` : ''}
+          ${showTabs ? `
+          <div class="profile-tabs">
+            <button class="profile-tab-btn active" data-tab="links">
+              <i class="fas fa-link"></i> Links
+            </button>
+            <button class="profile-tab-btn" data-tab="gallery">
+              <i class="fas fa-images"></i> Gallery
+            </button>
+          </div>
+          <div class="profile-tab-panel active" id="tab-panel-links">
+            ${linksHtml ? `<div class="profile-links">${linksHtml}</div>` : ''}
+            ${musicHtml}
+            ${viewsHtml}
+          </div>
+          <div class="profile-tab-panel" id="tab-panel-gallery">
+            ${galleryGridHtml}
+          </div>
+          ` : `
           ${linksHtml ? `<div class="profile-links">${linksHtml}</div>` : ''}
-          ${galleryHtml}
           ${musicHtml}
           ${viewsHtml}
+          `}
         </div>
         <div class="profile-footer">
           <a href="/">kpr.lol</a>
@@ -614,6 +687,19 @@
           document.body.appendChild(lb);
         }
         initGalleryLightbox(galleryData);
+      }
+
+      // Tab switching
+      if (showTabs) {
+        container.querySelectorAll('.profile-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+            container.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+            container.querySelectorAll('.profile-tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-panel-' + target)?.classList.add('active');
+          });
+        });
       }
 
       showState('state-profile');
