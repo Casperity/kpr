@@ -60,7 +60,8 @@
       inset: 0;
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      object-fit: var(--bg-video-fit, cover);
+      background: var(--bg-video-bg, transparent);
       z-index: 0;
       pointer-events: none;
       transition: filter 1s ease;
@@ -276,6 +277,17 @@
         bgVideoEl.muted = true;
         bgVideoEl.playsInline = true;
         bgVideoEl.className = 'profile-bg-video';
+
+        // Force fit (letterbox) support
+        const forceFit = !!(data.settings?.bgVideoFit);
+        if (forceFit) {
+          body.style.setProperty('--bg-video-fit', 'contain');
+          body.style.setProperty('--bg-video-bg', '#000');
+        } else {
+          body.style.setProperty('--bg-video-fit', 'cover');
+          body.style.setProperty('--bg-video-bg', 'transparent');
+        }
+
         body.appendChild(bgVideoEl);
   //      bgVideoEl.play().catch(e => console.log("Video autoplay failed:", e));
         const muteBtn = document.createElement('button');
