@@ -101,15 +101,28 @@
       z-index: 2;
     }
 
-    /* ── Gallery grid ─────────────────────────── */
-    .profile-gallery {
+    /* ── Gallery carousel ─────────────────────── */
+    .gallery-carousel {
+      position: relative;
       width: 100%;
-      margin-top: 20px;
+      margin-top: 16px;
+    }
+    .gallery-carousel-viewport {
+      overflow: hidden;
+      width: 100%;
+      border-radius: 12px;
+    }
+    .gallery-carousel-track {
+      display: flex;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .gallery-page {
+      flex: 0 0 100%;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 6px;
-      border-radius: 16px;
-      overflow: hidden;
+      box-sizing: border-box;
     }
     .gallery-item {
       position: relative;
@@ -117,10 +130,11 @@
       overflow: hidden;
       cursor: pointer;
       background: rgba(0,0,0,0.3);
+      border-radius: 8px;
       transition: transform 0.2s, brightness 0.2s;
     }
     .gallery-item:hover {
-      transform: scale(1.03);
+      transform: scale(1.02);
       z-index: 1;
     }
     .gallery-item img,
@@ -142,6 +156,49 @@
       font-size: 1.6rem;
       opacity: 0.85;
       pointer-events: none;
+    }
+    .gallery-carousel-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .gallery-nav-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.7);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .gallery-nav-btn:hover {
+      background: var(--accent, #a78bfa);
+      color: #fff;
+      border-color: transparent;
+    }
+    .gallery-nav-dots {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    .gallery-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .gallery-dot.active {
+      background: var(--accent, #a78bfa);
+      transform: scale(1.35);
     }
     /* ── Lightbox ─────────────────────────────── */
     #gallery-lightbox {
@@ -617,25 +674,49 @@
       const hasGallery = galleryData.length > 0;
       const showTabs = hasGallery; // only show tabs if there's a gallery
 
-      // Build gallery grid HTML
+      // Build gallery carousel HTML (paginated into 3 columns, 2 rows max per page)
       let galleryGridHtml = '';
       if (hasGallery) {
-        galleryGridHtml = '<div class="profile-gallery">';
-        galleryData.forEach((item, i) => {
-          if (item.type === 'video') {
-            galleryGridHtml += `
-              <div class="gallery-item" data-idx="${i}">
-                <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
-                <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
-              </div>`;
-          } else {
-            galleryGridHtml += `
-              <div class="gallery-item" data-idx="${i}">
-                <img src="${esc(item.url)}" alt="Gallery item ${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
-              </div>`;
+        const itemsPerPage = 6;
+        const pageCount = Math.ceil(galleryData.length / itemsPerPage);
+        
+        galleryGridHtml = `
+          <div class="gallery-carousel" id="gallery-carousel">
+            <div class="gallery-carousel-viewport">
+              <div class="gallery-carousel-track" id="gallery-track">`;
+        
+        for (let p = 0; p < pageCount; p++) {
+          galleryGridHtml += `<div class="gallery-page">`;
+          const startIdx = p * itemsPerPage;
+          const endIdx = Math.min(startIdx + itemsPerPage, galleryData.length);
+          
+          for (let i = startIdx; i < endIdx; i++) {
+            const item = galleryData[i];
+            if (item.type === 'video') {
+              galleryGridHtml += `
+                <div class="gallery-item" data-idx="${i}">
+                  <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
+                  <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
+                </div>`;
+            } else {
+              galleryGridHtml += `
+                <div class="gallery-item" data-idx="${i}">
+                  <img src="${esc(item.url)}" alt="Gallery item ${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
+                </div>`;
+            }
           }
-        });
-        galleryGridHtml += '</div>';
+          galleryGridHtml += `</div>`;
+        }
+        
+        galleryGridHtml += `
+              </div>
+            </div>
+            <div class="gallery-carousel-nav" id="gallery-nav">
+              <button class="gallery-nav-btn" id="gallery-prev-btn"><i class="fas fa-chevron-left"></i></button>
+              <div class="gallery-nav-dots" id="gallery-dots"></div>
+              <button class="gallery-nav-btn" id="gallery-next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>`;
       }
 
       container.innerHTML = `
@@ -672,7 +753,7 @@
           <a href="/">kpr.lol</a>
         </div>`;
 
-      // Lightbox
+      // Lightbox & Carousel
       if (galleryData.length > 0) {
         // Inject lightbox DOM once
         if (!document.getElementById('gallery-lightbox')) {
@@ -686,6 +767,7 @@
           `;
           document.body.appendChild(lb);
         }
+        initGalleryCarousel(galleryData);
         initGalleryLightbox(galleryData);
       }
 
@@ -908,6 +990,61 @@
       }
 
       loadSong(0);
+    }
+
+    // --- Gallery Carousel ---
+    function initGalleryCarousel(items) {
+      const track = document.getElementById('gallery-track');
+      const prevBtn = document.getElementById('gallery-prev-btn');
+      const nextBtn = document.getElementById('gallery-next-btn');
+      const dotsContainer = document.getElementById('gallery-dots');
+      const navContainer = document.getElementById('gallery-nav');
+      if (!track) return;
+
+      const itemsPerPage = 6;
+      const totalItems = items.length;
+      const pageCount = Math.ceil(totalItems / itemsPerPage);
+      let currentPage = 0;
+
+      // Hook up nav controls if multiple pages
+      if (pageCount > 1) {
+        if (dotsContainer) {
+          dotsContainer.innerHTML = Array.from({ length: pageCount }).map((_, i) => `
+            <span class="gallery-dot ${i === 0 ? 'active' : ''}" data-page="${i}"></span>
+          `).join('');
+
+          dotsContainer.querySelectorAll('.gallery-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+              goToPage(parseInt(dot.dataset.page, 10));
+            });
+          });
+        }
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            goToPage((currentPage - 1 + pageCount) % pageCount);
+          });
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            goToPage((currentPage + 1) % pageCount);
+          });
+        }
+      } else {
+        if (navContainer) navContainer.style.display = 'none';
+      }
+
+      function goToPage(pageIdx) {
+        currentPage = pageIdx;
+        track.style.transform = `translateX(-${currentPage * 100}%)`;
+        
+        // Update dots active status
+        if (dotsContainer) {
+          dotsContainer.querySelectorAll('.gallery-dot').forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === currentPage);
+          });
+        }
+      }
     }
 
     // --- Gallery Lightbox ---
