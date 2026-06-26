@@ -442,8 +442,7 @@
   <script>
     // If already logged in, update nav to point to dashboard
     if (typeof API !== 'undefined' && API.isLoggedIn()) {
-      document.getElementById('nav-login').textContent = 'Dashboard';
-      document.getElementById('nav-login').href = '/dashboard';
+      document.getElementById('nav-login').style.display = 'none';
       document.getElementById('nav-signup').textContent = 'Go to Dashboard';
       document.getElementById('nav-signup').href = '/dashboard';
     }
