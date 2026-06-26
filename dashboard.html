@@ -146,19 +146,45 @@
           <div class="form-group">
             <label class="form-label">Accent Color</label>
             <div class="color-picker-row">
-              <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;">
-                <input type="color" id="input-accent-picker" value="#a78bfa" />
-              </div>
+              <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;" title="Toggle color picker"></div>
               <input type="text" class="form-input" id="input-accent" value="#a78bfa" placeholder="#a78bfa" maxlength="7" />
+              <input type="color" id="input-accent-picker" value="#a78bfa" style="display:none;" />
+            </div>
+            <div class="modern-color-picker" id="picker-accent">
+              <div class="picker-gradient-area">
+                <div class="picker-gradient" id="picker-gradient-accent"></div>
+                <div class="picker-thumb" id="picker-thumb-accent"></div>
+              </div>
+              <div class="picker-sliders">
+                <div class="picker-hue-track">
+                  <div class="picker-hue-fill" id="picker-hue-fill-accent"></div>
+                  <div class="picker-hue-thumb" id="picker-hue-thumb-accent"></div>
+                  <input type="range" min="0" max="360" value="258" class="picker-slider hue" id="picker-hue-accent">
+                </div>
+              </div>
+              <div class="picker-presets" id="picker-presets-accent"></div>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Background Color</label>
             <div class="color-picker-row">
-              <div class="color-swatch" id="swatch-bg" style="background:#0a0a0f;">
-                <input type="color" id="input-bg-picker" value="#0a0a0f" />
-              </div>
+              <div class="color-swatch" id="swatch-bg" style="background:#0a0a0f;" title="Toggle color picker"></div>
               <input type="text" class="form-input" id="input-bg" value="#0a0a0f" placeholder="#0a0a0f" maxlength="7" />
+              <input type="color" id="input-bg-picker" value="#0a0a0f" style="display:none;" />
+            </div>
+            <div class="modern-color-picker" id="picker-bg">
+              <div class="picker-gradient-area">
+                <div class="picker-gradient" id="picker-gradient-bg"></div>
+                <div class="picker-thumb" id="picker-thumb-bg"></div>
+              </div>
+              <div class="picker-sliders">
+                <div class="picker-hue-track">
+                  <div class="picker-hue-fill" id="picker-hue-fill-bg"></div>
+                  <div class="picker-hue-thumb" id="picker-hue-thumb-bg"></div>
+                  <input type="range" min="0" max="360" value="0" class="picker-slider hue" id="picker-hue-bg">
+                </div>
+              </div>
+              <div class="picker-presets" id="picker-presets-bg"></div>
             </div>
           </div>
           <div class="form-group">
@@ -341,10 +367,8 @@
     const linksLimit = document.getElementById('links-limit');
     const btnAddLink = document.getElementById('btn-add-link');
     const inputAccent = document.getElementById('input-accent');
-    const inputAccentPicker = document.getElementById('input-accent-picker');
     const swatchAccent = document.getElementById('swatch-accent');
     const inputBg = document.getElementById('input-bg');
-    const inputBgPicker = document.getElementById('input-bg-picker');
     const swatchBg = document.getElementById('swatch-bg');
     const inputBgImage = document.getElementById('input-bg-image');
     const inputBgVideo = document.getElementById('input-bg-video');
@@ -471,8 +495,11 @@
         inputAccentPicker.value = accent;
         swatchAccent.style.background = accent;
         inputBg.value = bg;
-        inputBgPicker.value = normalizeHex(bg);
+        inputBgPicker.value = bg;
         swatchBg.style.background = bg;
+        // Init modern color pickers
+        if (window.accentPicker) window.accentPicker.setColor(accent);
+        if (window.bgPicker) window.bgPicker.setColor(bg);
         inputBgImage.value = settings.bgImageUrl || '';
         inputBgVideo.value = settings.bgVideoUrl || settings.bg_video_url || '';
         inputBgBlur.checked = settings.bgBlur !== false; // default true
@@ -490,13 +517,6 @@
         console.error('Failed to load profile:', err);
         Toast.show('Failed to load profile data', 'error');
       }
-    }
-
-    function normalizeHex(hex) {
-      hex = (hex || '#000000').replace('#', '');
-      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-      if (hex.length < 6) hex = hex.padEnd(6, '0');
-      return '#' + hex.substring(0, 6);
     }
 
     // --- Badge toggles ---
@@ -732,24 +752,184 @@
       return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     }
 
-    // --- Color picker sync ---
-    function syncColor(picker, text, swatch) {
-      picker.addEventListener('input', () => {
-        text.value = picker.value;
-        swatch.style.background = picker.value;
-        updatePreview();
-      });
-      text.addEventListener('input', () => {
-        const v = text.value;
-        if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-          picker.value = v;
-          swatch.style.background = v;
+    // --- Modern Color Picker Class ---
+    class ModernColorPicker {
+      constructor(containerId, textInput, swatch, presets, onChange) {
+        this.container = document.getElementById(containerId);
+        if (!this.container) return;
+        this.textInput = textInput;
+        this.swatch = swatch;
+        this.onChange = onChange;
+        this.isDragging = false;
+        this.hue = 0;
+        this.sat = 0;
+        this.val = 1;
+
+        const suffix = containerId.replace('picker-', '');
+        this.gradient = document.getElementById(`picker-gradient-${suffix}`);
+        this.thumb = document.getElementById(`picker-thumb-${suffix}`);
+        this.hueSlider = document.getElementById(`picker-hue-${suffix}`);
+        this.hueThumb = document.getElementById(`picker-hue-thumb-${suffix}`);
+        this.presetsEl = document.getElementById(`picker-presets-${suffix}`);
+
+        this.init(presets);
+      }
+
+      init(presets) {
+        if (!this.gradient || !this.thumb || !this.hueSlider) return;
+
+        // Gradient drag
+        const onDrag = (e) => {
+          const rect = this.gradient.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+          const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+          this.sat = x;
+          this.val = 1 - y;
+          this.updateThumb();
+          this.updateColor();
+        };
+
+        this.gradient.addEventListener('mousedown', (e) => {
+          this.isDragging = true;
+          onDrag(e);
+        });
+        document.addEventListener('mousemove', (e) => {
+          if (!this.isDragging) return;
+          onDrag(e);
+        });
+        document.addEventListener('mouseup', () => this.isDragging = false);
+
+        // Touch support for mobile dragging
+        this.gradient.addEventListener('touchstart', (e) => {
+          this.isDragging = true;
+          onDrag(e);
+        }, { passive: true });
+        document.addEventListener('touchmove', (e) => {
+          if (!this.isDragging) return;
+          if (e.cancelable) e.preventDefault();
+          onDrag(e);
+        }, { passive: false });
+        document.addEventListener('touchend', () => this.isDragging = false);
+
+        // Hue slider
+        this.hueSlider.addEventListener('input', () => {
+          this.hue = parseInt(this.hueSlider.value);
+          if (this.hueThumb) {
+            const pct = (this.hue / 360) * 100;
+            this.hueThumb.style.left = `calc(${pct}% + 9px - ${pct * 0.018}px)`;
+          }
+          this.updateGradient();
+          this.updateColor();
+        });
+
+        // Presets
+        if (this.presetsEl && presets) {
+          presets.forEach(color => {
+            const el = document.createElement('div');
+            el.className = 'preset-color';
+            el.style.background = color;
+            el.addEventListener('click', () => this.setColor(color));
+            this.presetsEl.appendChild(el);
+          });
         }
-        updatePreview();
-      });
+
+        // Text input
+        if (this.textInput) {
+          this.textInput.addEventListener('input', () => {
+            const v = this.textInput.value;
+            if (/^#[0-9a-fA-F]{6}$/.test(v)) this.setColor(v);
+          });
+        }
+      }
+
+      hsvToRgb(h, s, v) {
+        let r, g, b;
+        const i = Math.floor(h / 60) % 6;
+        const f = h / 60 - Math.floor(h / 60);
+        const p = v * (1 - s);
+        const q = v * (1 - f * s);
+        const t = v * (1 - (1 - f) * s);
+        switch (i) {
+          case 0: r = v; g = t; b = p; break;
+          case 1: r = q; g = v; b = p; break;
+          case 2: r = p; g = v; b = t; break;
+          case 3: r = p; g = q; b = v; break;
+          case 4: r = t; g = p; b = v; break;
+          case 5: r = v; g = p; b = q; break;
+        }
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+      }
+
+      rgbToHsv(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h = 0, s = max === 0 ? 0 : (max - min) / max, v = max;
+        if (max !== min) {
+          const d = max - min;
+          switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+          }
+          h *= 60;
+        }
+        return [h, s, v];
+      }
+
+      hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+      }
+
+      rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(x => {
+          const hex = Math.round(x).toString(16);
+          return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+      }
+
+      updateThumb() {
+        this.thumb.style.left = `${this.sat * 100}%`;
+        this.thumb.style.top = `${(1 - this.val) * 100}%`;
+      }
+
+      updateGradient() {
+        const [r, g, b] = this.hsvToRgb(this.hue, 1, 1);
+        this.gradient.style.background = `linear-gradient(to right, #fff, rgb(${r},${g},${b}))`;
+      }
+
+      updateColor() {
+        const [r, g, b] = this.hsvToRgb(this.hue, this.sat, this.val);
+        const hex = this.rgbToHex(r, g, b);
+        if (this.textInput) this.textInput.value = hex;
+        if (this.swatch) this.swatch.style.background = hex;
+        if (this.onChange) this.onChange(hex);
+      }
+
+      setColor(hex) {
+        hex = normalizeHex(hex);
+        const [r, g, b] = this.hexToRgb(hex);
+        const [h, s, v] = this.rgbToHsv(r, g, b);
+        this.hue = h; this.sat = s; this.val = v;
+        if (this.hueSlider) this.hueSlider.value = Math.round(this.hue);
+        if (this.hueThumb) {
+          const pct = (this.hue / 360) * 100;
+          this.hueThumb.style.left = `calc(${pct}% + 9px - ${pct * 0.018}px)`;
+        }
+        this.updateGradient();
+        this.updateThumb();
+        this.updateColor();
+      }
     }
-    syncColor(inputAccentPicker, inputAccent, swatchAccent);
-    syncColor(inputBgPicker, inputBg, swatchBg);
+
+    function normalizeHex(hex) {
+      hex = (hex || '#000000').replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      if (hex.length < 6) hex = hex.padEnd(6, '0');
+      return '#' + hex.substring(0, 6);
+    }
 
     // --- Name input -> preview ---
     inputName.addEventListener('input', updatePreview);
@@ -981,6 +1161,33 @@
     btnLogout.addEventListener('click', () => {
       API.logout();
       window.location.href = '/login';
+    });
+
+    // --- Modern color picker presets ---
+    const accentPresets = ['#a78bfa', '#f472b6', '#38bdf8', '#4ade80', '#facc15', '#fb923c', '#f87171', '#c084fc', '#22d3ee', '#a3e635'];
+    const bgPresets = ['#0a0a0f', '#111118', '#1a1a2e', '#16213e', '#0f172a', '#1e1b4b', '#4c1d95', '#831843', '#7c2d12', '#022c22'];
+
+    window.accentPicker = new ModernColorPicker('picker-accent', inputAccent, swatchAccent, accentPresets, () => updatePreview());
+    window.bgPicker = new ModernColorPicker('picker-bg', inputBg, swatchBg, bgPresets, () => updatePreview());
+
+    // Toggle logic for color swatches to expand/collapse picker panels
+    swatchAccent.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('picker-accent').classList.toggle('active');
+    });
+    swatchBg.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('picker-bg').classList.toggle('active');
+    });
+
+    // Close color pickers when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.form-group')) {
+        const pickerAcc = document.getElementById('picker-accent');
+        const pickerBg = document.getElementById('picker-bg');
+        if (pickerAcc) pickerAcc.classList.remove('active');
+        if (pickerBg) pickerBg.classList.remove('active');
+      }
     });
 
     // --- Init ---
