@@ -117,6 +117,26 @@
         </div>
       </div>
 
+      </div>
+
+      <!-- Gallery -->
+      <div class="dash-section" id="section-gallery">
+        <div class="dash-section-header" onclick="toggleSection('section-gallery')">
+          <div class="dash-section-title">
+            <i class="fas fa-images"></i> Gallery
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div class="form-hint" style="margin-bottom:14px;">Add photos and videos to your profile gallery. Drag to reorder. Only GitHub URLs allowed for media.</div>
+          <div id="gallery-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button class="btn-add-link" id="btn-add-gallery-item" style="margin-top:10px;">
+            <i class="fas fa-plus"></i> Add Item
+          </button>
+          <div class="links-limit" id="gallery-limit">0 / 20 items</div>
+        </div>
+      </div>
+
       <!-- Social Links -->
       <div class="dash-section" id="section-links">
         <div class="dash-section-header" onclick="toggleSection('section-links')">
@@ -334,12 +354,13 @@
     };
 
     const MAX_LINKS = 15;
-    const MAX_SONGS = 20;
+    const MAX_GALLERY = 20;
     let socialLinks = [];
+    let galleryItems = [];
+    let ownedBadges = [];
+    let activeBadges = [];
+    let playlist = [];
     let currentUser = null;
-    let ownedBadges = [];    // badges admin granted
-    let activeBadges = [];   // badges user chose to display
-    let playlist = [];       // admin playlist [{url,title,artist,cover}]
 
     // --- Auth check ---
     if (!API.isLoggedIn()) {
@@ -357,6 +378,9 @@
     const linksList = document.getElementById('links-list');
     const linksLimit = document.getElementById('links-limit');
     const btnAddLink = document.getElementById('btn-add-link');
+    const galleryList = document.getElementById('gallery-list');
+    const galleryLimit = document.getElementById('gallery-limit');
+    const btnAddGalleryItem = document.getElementById('btn-add-gallery-item');
     const inputAccent = document.getElementById('input-accent');
     const inputAccentPicker = document.getElementById('input-accent-picker');
     const swatchAccent = document.getElementById('swatch-accent');
@@ -463,6 +487,10 @@
           updatePreview();
           return; // stop loading the rest
         }
+
+        // Gallery
+        galleryItems = (res.gallery || []).map(g => ({ url: g.url || '', type: g.type || 'image' }));
+        renderGalleryList();
 
         // Social links
         socialLinks = (res.socialLinks || []).map(l => ({
@@ -748,6 +776,117 @@
       if (inputs.length) inputs[inputs.length - 1].focus();
     });
 
+    // --- Gallery ---
+    function detectMediaType(url) {
+      const lower = (url || '').toLowerCase().split('?')[0];
+      if (/\.(mp4|webm|ogg|mov|avi|mkv)$/.test(lower)) return 'video';
+      return 'image';
+    }
+
+    function renderGalleryList() {
+      galleryList.innerHTML = '';
+      galleryItems.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'social-link-row';
+        row.draggable = true;
+        row.dataset.idx = idx;
+        row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;cursor:grab;transition:opacity 0.15s,background 0.15s;';
+
+        // Type badge
+        const typeBadge = document.createElement('span');
+        typeBadge.style.cssText = `flex-shrink:0;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.05em;${
+          item.type === 'video'
+            ? 'background:rgba(251,146,60,0.15);color:#fb923c;border:1px solid rgba(251,146,60,0.3);'
+            : 'background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.3);'
+        }`;
+        typeBadge.textContent = item.type === 'video' ? 'Video' : 'Image';
+
+        // URL input
+        const urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.className = 'form-input';
+        urlInput.placeholder = 'https://raw.githubusercontent.com/...';
+        urlInput.value = item.url;
+        urlInput.style.cssText = 'flex:1;font-size:0.82rem;padding:8px 12px;min-width:0;';
+        urlInput.addEventListener('input', e => {
+          galleryItems[idx].url = e.target.value.trim();
+          galleryItems[idx].type = detectMediaType(e.target.value);
+          // Re-render to update badge without losing focus
+          const newType = detectMediaType(e.target.value);
+          if (newType !== item.type) {
+            item.type = newType;
+            typeBadge.textContent = newType === 'video' ? 'Video' : 'Image';
+            typeBadge.style.cssText = `flex-shrink:0;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.05em;${
+              newType === 'video'
+                ? 'background:rgba(251,146,60,0.15);color:#fb923c;border:1px solid rgba(251,146,60,0.3);'
+                : 'background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.3);'
+            }`;
+          }
+        });
+
+        // Delete button
+        const delBtn = document.createElement('button');
+        delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        delBtn.style.cssText = 'flex-shrink:0;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:0.78rem;transition:background 0.15s;';
+        delBtn.title = 'Remove item';
+        delBtn.addEventListener('click', () => {
+          galleryItems.splice(idx, 1);
+          renderGalleryList();
+        });
+
+        // Drag handle
+        const dragHandle = document.createElement('span');
+        dragHandle.innerHTML = '<i class="fas fa-grip-vertical"></i>';
+        dragHandle.style.cssText = 'flex-shrink:0;color:rgba(255,255,255,0.25);cursor:grab;padding:0 4px;font-size:0.85rem;';
+
+        row.appendChild(dragHandle);
+        row.appendChild(typeBadge);
+        row.appendChild(urlInput);
+        row.appendChild(delBtn);
+        galleryList.appendChild(row);
+
+        // Drag-to-reorder events
+        let dragSrc = null;
+        row.addEventListener('dragstart', e => {
+          dragSrc = idx;
+          e.dataTransfer.effectAllowed = 'move';
+          row.style.opacity = '0.4';
+        });
+        row.addEventListener('dragend', () => {
+          row.style.opacity = '1';
+          galleryList.querySelectorAll('.social-link-row').forEach(r => r.style.background = 'rgba(255,255,255,0.04)');
+        });
+        row.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          row.style.background = 'rgba(99,102,241,0.12)';
+        });
+        row.addEventListener('dragleave', () => {
+          row.style.background = 'rgba(255,255,255,0.04)';
+        });
+        row.addEventListener('drop', e => {
+          e.preventDefault();
+          if (dragSrc === null || dragSrc === idx) return;
+          const moved = galleryItems.splice(dragSrc, 1)[0];
+          galleryItems.splice(idx, 0, moved);
+          renderGalleryList();
+        });
+      });
+
+      const max = currentUser?.isAdmin ? 200 : MAX_GALLERY;
+      galleryLimit.textContent = `${galleryItems.length} / ${max} items`;
+      btnAddGalleryItem.style.display = galleryItems.length >= max ? 'none' : '';
+    }
+
+    btnAddGalleryItem.addEventListener('click', () => {
+      const max = currentUser?.isAdmin ? 200 : MAX_GALLERY;
+      if (galleryItems.length >= max) return;
+      galleryItems.push({ url: '', type: 'image' });
+      renderGalleryList();
+      const inputs = galleryList.querySelectorAll('input[type="url"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+
     function escAttr(str) {
       return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     }
@@ -973,6 +1112,12 @@
 
         // Active badges
         await API.updateActiveBadges(activeBadges);
+
+        // Gallery
+        const validGalleryItems = galleryItems
+          .filter(g => g.url && g.url.trim())
+          .map((g, i) => ({ url: g.url.trim(), type: detectMediaType(g.url) || 'image', displayOrder: i }));
+        await API.updateGallery(validGalleryItems);
 
         Toast.show('Profile saved successfully!', 'success');
       } catch (err) {

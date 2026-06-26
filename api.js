@@ -103,6 +103,13 @@ const API = {
     });
   },
 
+  updateGallery(items) {
+    return this.request('/api/user/gallery', {
+      method: 'PUT',
+      body: JSON.stringify({ items })
+    });
+  },
+
   /* ── Admin endpoints ──────────────────────────────────── */
   getInvites() {
     return this.request('/api/admin/invites');

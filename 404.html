@@ -100,6 +100,123 @@
       position: relative;
       z-index: 2;
     }
+
+    /* ── Gallery grid ─────────────────────────── */
+    .profile-gallery {
+      width: 100%;
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      cursor: pointer;
+      background: rgba(0,0,0,0.3);
+      transition: transform 0.2s, brightness 0.2s;
+    }
+    .gallery-item:hover {
+      transform: scale(1.03);
+      z-index: 1;
+    }
+    .gallery-item img,
+    .gallery-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    .gallery-item .gallery-play-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.35);
+      color: #fff;
+      font-size: 1.6rem;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+    /* ── Lightbox ─────────────────────────────── */
+    #gallery-lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99000;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      align-items: center;
+      justify-content: center;
+      animation: lb-in 0.2s ease;
+    }
+    #gallery-lightbox.open { display: flex; }
+    @keyframes lb-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    #lb-media-wrap {
+      position: relative;
+      max-width: min(90vw, 900px);
+      max-height: 88vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #lb-media-wrap img, #lb-media-wrap video {
+      max-width: 100%;
+      max-height: 88vh;
+      border-radius: 14px;
+      object-fit: contain;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+    }
+    .lb-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      backdrop-filter: blur(8px);
+    }
+    .lb-btn:hover { background: rgba(255,255,255,0.2); }
+    #lb-prev { left: 16px; }
+    #lb-next { right: 16px; }
+    #lb-close {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      backdrop-filter: blur(8px);
+    }
+    #lb-close:hover { background: rgba(239,68,68,0.3); }
+
     #video-mute-btn {
       position: fixed;
       bottom: 20px;
@@ -321,7 +438,7 @@
       container.style.setProperty('--accent-rgb', hexToRgb(accent));
 
       // -- OG tags --
-      document.title = `${data.displayName || data.display_name || data.username} — kpr.lol`;
+      document.title = `${data.displayName || data.display_name || data.username} | kpr.lol`;
       const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) ogTitle.content = data.displayName || data.display_name || data.username;
       const ogDesc = document.querySelector('meta[property="og:description"]');
@@ -443,6 +560,28 @@
         badgesHtml += '</div>';
       }
 
+      // -- Gallery --
+      let galleryHtml = '';
+      const galleryData = data.gallery || [];
+      if (galleryData.length > 0) {
+        galleryHtml = '<div class="profile-gallery">';
+        galleryData.forEach((item, i) => {
+          if (item.type === 'video') {
+            galleryHtml += `
+              <div class="gallery-item" data-idx="${i}">
+                <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
+                <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
+              </div>`;
+          } else {
+            galleryHtml += `
+              <div class="gallery-item" data-idx="${i}">
+                <img src="${esc(item.url)}" alt="Gallery item ${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
+              </div>`;
+          }
+        });
+        galleryHtml += '</div>';
+      }
+
       // -- Build card --
       container.innerHTML = `
         <div class="profile-card">
@@ -452,12 +591,30 @@
           ${badgesHtml}
           ${data.bio ? `<p class="profile-bio">${esc(data.bio)}</p>` : ''}
           ${linksHtml ? `<div class="profile-links">${linksHtml}</div>` : ''}
+          ${galleryHtml}
           ${musicHtml}
           ${viewsHtml}
         </div>
         <div class="profile-footer">
           <a href="/">kpr.lol</a>
         </div>`;
+
+      // Lightbox
+      if (galleryData.length > 0) {
+        // Inject lightbox DOM once
+        if (!document.getElementById('gallery-lightbox')) {
+          const lb = document.createElement('div');
+          lb.id = 'gallery-lightbox';
+          lb.innerHTML = `
+            <button id="lb-prev" class="lb-btn"><i class="fas fa-chevron-left"></i></button>
+            <div id="lb-media-wrap"></div>
+            <button id="lb-next" class="lb-btn"><i class="fas fa-chevron-right"></i></button>
+            <button id="lb-close" class="lb-btn"><i class="fas fa-xmark"></i></button>
+          `;
+          document.body.appendChild(lb);
+        }
+        initGalleryLightbox(galleryData);
+      }
 
       showState('state-profile');
 
@@ -667,9 +824,70 @@
       loadSong(0);
     }
 
+    // --- Gallery Lightbox ---
+    function initGalleryLightbox(items) {
+      const lb = document.getElementById('gallery-lightbox');
+      const wrap = document.getElementById('lb-media-wrap');
+      const prevBtn = document.getElementById('lb-prev');
+      const nextBtn = document.getElementById('lb-next');
+      const closeBtn = document.getElementById('lb-close');
+      let current = 0;
+
+      function showItem(idx) {
+        current = (idx + items.length) % items.length;
+        const item = items[current];
+        wrap.innerHTML = '';
+        if (item.type === 'video') {
+          const v = document.createElement('video');
+          v.src = item.url;
+          v.controls = true;
+          v.autoplay = true;
+          v.loop = true;
+          v.playsInline = true;
+          wrap.appendChild(v);
+        } else {
+          const img = document.createElement('img');
+          img.src = item.url;
+          img.alt = 'Gallery image';
+          wrap.appendChild(img);
+        }
+        prevBtn.style.display = items.length > 1 ? '' : 'none';
+        nextBtn.style.display = items.length > 1 ? '' : 'none';
+      }
+
+      function openLightbox(idx) {
+        showItem(idx);
+        lb.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        lb.classList.remove('open');
+        wrap.innerHTML = '';
+        document.body.style.overflow = '';
+      }
+
+      // Attach click handlers to gallery items
+      document.querySelectorAll('.gallery-item').forEach(el => {
+        el.addEventListener('click', () => openLightbox(+el.dataset.idx));
+      });
+
+      prevBtn.addEventListener('click', e => { e.stopPropagation(); showItem(current - 1); });
+      nextBtn.addEventListener('click', e => { e.stopPropagation(); showItem(current + 1); });
+      closeBtn.addEventListener('click', closeLightbox);
+      lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+      document.addEventListener('keydown', e => {
+        if (!lb.classList.contains('open')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') showItem(current - 1);
+        if (e.key === 'ArrowRight') showItem(current + 1);
+      });
+    }
+
     // --- Main entry ---
     async function init() {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
+
 
       // Check known paths
       if (KNOWN_PATHS.includes(path) || KNOWN_PATHS.includes(path + '.html')) {
