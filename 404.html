@@ -101,28 +101,39 @@
       z-index: 2;
     }
 
-    /* ── Gallery grid ─────────────────────────── */
-    .profile-gallery {
+    /* ── Gallery carousel ─────────────────────── */
+    .gallery-carousel {
+      position: relative;
       width: 100%;
-      margin-top: 20px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      border-radius: 16px;
+      margin-top: 16px;
+    }
+    .gallery-carousel-track-wrap {
       overflow: hidden;
+      border-radius: 12px;
+    }
+    .gallery-carousel-track {
+      display: flex;
+      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
     }
     .gallery-item {
-      position: relative;
+      flex: 0 0 calc(100% / 3);
       aspect-ratio: 1 / 1;
+      position: relative;
       overflow: hidden;
       cursor: pointer;
       background: rgba(0,0,0,0.3);
-      transition: transform 0.2s, brightness 0.2s;
+      padding: 3px;
+      box-sizing: border-box;
     }
-    .gallery-item:hover {
-      transform: scale(1.03);
-      z-index: 1;
+    .gallery-item-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.18s;
     }
+    .gallery-item:hover .gallery-item-inner { transform: scale(1.04); }
     .gallery-item img,
     .gallery-item video {
       width: 100%;
@@ -133,15 +144,55 @@
     }
     .gallery-item .gallery-play-icon {
       position: absolute;
-      inset: 0;
+      inset: 3px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: rgba(0,0,0,0.35);
       color: #fff;
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       opacity: 0.85;
       pointer-events: none;
+    }
+    .gallery-carousel-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .gallery-nav-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.7);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .gallery-nav-btn:hover { background: var(--accent, #a78bfa); color: #fff; border-color: transparent; }
+    .gallery-nav-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+    .gallery-nav-dots {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    .gallery-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .gallery-dot.active {
+      background: var(--accent, #a78bfa);
+      transform: scale(1.35);
     }
     /* ── Lightbox ─────────────────────────────── */
     #gallery-lightbox {
@@ -617,25 +668,16 @@
       const hasGallery = galleryData.length > 0;
       const showTabs = hasGallery; // only show tabs if there's a gallery
 
-      // Build gallery grid HTML
+      // Build gallery carousel HTML (items rendered by JS after DOM insert)
       let galleryGridHtml = '';
       if (hasGallery) {
-        galleryGridHtml = '<div class="profile-gallery">';
-        galleryData.forEach((item, i) => {
-          if (item.type === 'video') {
-            galleryGridHtml += `
-              <div class="gallery-item" data-idx="${i}">
-                <video src="${esc(item.url)}" muted loop playsinline preload="metadata"></video>
-                <div class="gallery-play-icon"><i class="fas fa-play"></i></div>
-              </div>`;
-          } else {
-            galleryGridHtml += `
-              <div class="gallery-item" data-idx="${i}">
-                <img src="${esc(item.url)}" alt="Gallery item ${i + 1}" loading="lazy" onerror="this.parentElement.style.display='none'" />
-              </div>`;
-          }
-        });
-        galleryGridHtml += '</div>';
+        galleryGridHtml = `
+          <div class="gallery-carousel" id="gallery-carousel">
+            <div class="gallery-carousel-track-wrap">
+              <div class="gallery-carousel-track" id="gallery-track"></div>
+            </div>
+            <div class="gallery-carousel-nav" id="gallery-nav"></div>
+          </div>`;
       }
 
       container.innerHTML = `
@@ -674,7 +716,6 @@
 
       // Lightbox
       if (galleryData.length > 0) {
-        // Inject lightbox DOM once
         if (!document.getElementById('gallery-lightbox')) {
           const lb = document.createElement('div');
           lb.id = 'gallery-lightbox';
@@ -686,6 +727,8 @@
           `;
           document.body.appendChild(lb);
         }
+        // Build carousel items into DOM, then init lightbox
+        initGalleryCarousel(galleryData);
         initGalleryLightbox(galleryData);
       }
 
