@@ -273,6 +273,7 @@
 
     const PLATFORMS = [
       { value: 'discord',    label: 'Discord',    icon: 'fa-brands fa-discord' },
+      { value: 'discord server',    label: 'Discord Server',    icon: 'fa-brands fa-discord' },
       { value: 'twitter',    label: 'Twitter / X', icon: 'fa-brands fa-x-twitter' },
       { value: 'instagram',  label: 'Instagram',  icon: 'fa-brands fa-instagram' },
       { value: 'youtube',    label: 'YouTube',    icon: 'fa-brands fa-youtube' },
@@ -586,36 +587,111 @@
       if (inputs.length) inputs[inputs.length - 1].focus();
     });
 
+    // --- Platform metadata: base URL + placeholder for smart input ---
+    const PLATFORM_META = {
+      twitter:     { base: 'https://twitter.com/',         placeholder: 'username',          label: 'Username' },
+      x:           { base: 'https://x.com/',              placeholder: 'username',          label: 'Username' },
+      instagram:   { base: 'https://instagram.com/',      placeholder: 'username',          label: 'Username' },
+      tiktok:      { base: 'https://tiktok.com/@',        placeholder: 'username',          label: 'Username' },
+      youtube:     { base: 'https://youtube.com/@',       placeholder: 'handle or channel', label: 'Handle' },
+      twitch:      { base: 'https://twitch.tv/',          placeholder: 'username',          label: 'Username' },
+      kick:        { base: 'https://kick.com/',           placeholder: 'username',          label: 'Username' },
+      discord:     { base: 'https://discord.gg/',         placeholder: 'invite code',       label: 'Invite code' },
+      github:      { base: 'https://github.com/',         placeholder: 'username',          label: 'Username' },
+      linkedin:    { base: 'https://linkedin.com/in/',    placeholder: 'username',          label: 'Username' },
+      spotify:     { base: 'https://open.spotify.com/user/', placeholder: 'user ID',        label: 'User ID' },
+      soundcloud:  { base: 'https://soundcloud.com/',    placeholder: 'username',          label: 'Username' },
+      snapchat:    { base: 'https://snapchat.com/add/',  placeholder: 'username',          label: 'Username' },
+      reddit:      { base: 'https://reddit.com/u/',      placeholder: 'username',          label: 'Username' },
+      telegram:    { base: 'https://t.me/',              placeholder: 'username',          label: 'Username' },
+      facebook:    { base: 'https://facebook.com/',      placeholder: 'username or page',  label: 'Username' },
+      pinterest:   { base: 'https://pinterest.com/',     placeholder: 'username',          label: 'Username' },
+      threads:     { base: 'https://threads.net/@',      placeholder: 'username',          label: 'Username' },
+      bluesky:     { base: 'https://bsky.app/profile/',  placeholder: 'handle.bsky.social', label: 'Handle' },
+      steam:       { base: 'https://steamcommunity.com/id/', placeholder: 'custom URL',    label: 'Custom URL' },
+      cashapp:     { base: 'https://cash.app/$',         placeholder: 'cashtag',           label: 'Cashtag' },
+      paypal:      { base: 'https://paypal.me/',         placeholder: 'username',          label: 'Username' },
+      venmo:       { base: 'https://venmo.com/',         placeholder: 'username',          label: 'Username' },
+      mastodon:    { base: null, placeholder: 'https://mastodon.social/@username', label: 'Full URL' },
+      email:       { base: 'mailto:',                    placeholder: 'you@example.com',   label: 'Email address' },
+      website:     { base: null, placeholder: 'https://yoursite.com',             label: 'Full URL' },
+      custom:      { base: null, placeholder: 'https://...',                       label: 'Full URL' },
+      other:       { base: null, placeholder: 'https://...',                       label: 'Full URL' },
+    };
+
+    /** Strip a stored full URL back to just the user-facing value */
+    function urlToValue(platform, fullUrl) {
+      if (!fullUrl) return '';
+      const meta = PLATFORM_META[platform];
+      if (!meta || !meta.base) return fullUrl; // full-URL platforms
+      if (fullUrl.toLowerCase().startsWith(meta.base.toLowerCase())) {
+        return fullUrl.slice(meta.base.length);
+      }
+      return fullUrl; // fallback
+    }
+
+    /** Build the full URL from user input value */
+    function valueToUrl(platform, value) {
+      if (!value) return '';
+      const meta = PLATFORM_META[platform];
+      if (!meta || !meta.base) return value.trim(); // already a full URL
+      // If user pasted the full URL anyway, don't double-prefix
+      if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('mailto:')) return value.trim();
+      return meta.base + value.trim();
+    }
+
     // --- Render social links ---
     function renderLinksList() {
       linksList.innerHTML = '';
       socialLinks.forEach((link, idx) => {
+        const meta = PLATFORM_META[link.platform] || PLATFORM_META['other'];
+        const displayVal = urlToValue(link.platform, link.url);
+        const isFullUrl = !meta.base;
         const row = document.createElement('div');
         row.className = 'social-link-row';
         row.innerHTML = `
           <select class="form-select" data-idx="${idx}" data-field="platform">
             ${PLATFORMS.map(p => `<option value="${p.value}" ${p.value === link.platform ? 'selected' : ''}>${p.label}</option>`).join('')}
           </select>
-          <input type="url" class="form-input" data-idx="${idx}" data-field="url" value="${escAttr(link.url)}" placeholder="https://..." />
+          <input
+            type="${isFullUrl ? 'url' : 'text'}"
+            class="form-input"
+            data-idx="${idx}"
+            data-field="url"
+            value="${escAttr(displayVal)}"
+            placeholder="${escAttr(meta.placeholder)}"
+          />
           <button class="social-link-delete" data-idx="${idx}" title="Remove link">
             <i class="fas fa-trash-alt"></i>
           </button>`;
         linksList.appendChild(row);
       });
 
-      // Events
+      // Platform change — re-render row so placeholder updates
       linksList.querySelectorAll('[data-field="platform"]').forEach(el => {
         el.addEventListener('change', e => {
-          socialLinks[+e.target.dataset.idx].platform = e.target.value;
+          const idx = +e.target.dataset.idx;
+          const oldUrl = socialLinks[idx].url;
+          const oldPlatform = socialLinks[idx].platform;
+          const newPlatform = e.target.value;
+          // Try to preserve user's typed value across platform switches
+          const currentInput = linksList.querySelector(`[data-idx="${idx}"][data-field="url"]`);
+          const currentVal = currentInput ? currentInput.value : urlToValue(oldPlatform, oldUrl);
+          socialLinks[idx].platform = newPlatform;
+          socialLinks[idx].url = valueToUrl(newPlatform, currentVal);
+          renderLinksList();
           updatePreview();
         });
       });
+
       linksList.querySelectorAll('[data-field="url"]').forEach(el => {
         el.addEventListener('input', e => {
-          socialLinks[+e.target.dataset.idx].url = e.target.value;
+          const idx = +e.target.dataset.idx;
+          socialLinks[idx].url = valueToUrl(socialLinks[idx].platform, e.target.value);
           updatePreview();
         });
       });
+
       linksList.querySelectorAll('.social-link-delete').forEach(el => {
         el.addEventListener('click', e => {
           const idx = +e.currentTarget.dataset.idx;
@@ -848,7 +924,7 @@
         }
         await API.updateSettings(settingsPayload);
 
-        // Social links
+        // Social links — build full URLs before saving
         const validLinks = socialLinks
           .filter(l => l.url && l.url.trim())
           .map(l => ({
