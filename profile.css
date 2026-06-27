@@ -724,3 +724,148 @@ body.profile-page.has-bg-image::before {
     font-size: 4.5rem;
   }
 }
+
+/* --- Floating Corner Links (Uiverse Example-1) --- */
+.profile-links-corner {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+.example-1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.example-1 .icon-content {
+  margin: 0 10px;
+  position: relative;
+}
+
+.example-1 .icon-content .tooltip {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #000;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 5px;
+  opacity: 0;
+  visibility: hidden;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.example-1 .icon-content:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  top: -50px;
+}
+
+.example-1 .icon-content .link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  color: #4d4d4d;
+  background-color: #fff;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.example-1 .icon-content .link:hover {
+  box-shadow: 3px 2px 45px 0px rgba(0, 0, 0, 0.25);
+}
+
+.example-1 .icon-content .link svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.example-1 .icon-content .link i {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom Platform Hover Colors */
+.example-1 .icon-content .link[data-social="discord"]:hover,
+.example-1 .icon-content .link[data-social="discord_server"]:hover {
+  color: #5865F2;
+}
+.example-1 .icon-content .link[data-social="twitter"]:hover {
+  color: #1DA1F2;
+}
+.example-1 .icon-content .link[data-social="instagram"]:hover {
+  color: #E1306C;
+}
+.example-1 .icon-content .link[data-social="youtube"]:hover {
+  color: #FF0000;
+}
+.example-1 .icon-content .link[data-social="github"]:hover {
+  color: #24292e;
+}
+.example-1 .icon-content .link[data-social="telegram"]:hover {
+  color: #0088cc;
+}
+.example-1 .icon-content .link[data-social="spotify"]:hover {
+  color: #1db954;
+}
+.example-1 .icon-content .link[data-social="soundcloud"]:hover {
+  color: #ff5500;
+}
+.example-1 .icon-content .link[data-social="twitch"]:hover {
+  color: #9146FF;
+}
+.example-1 .icon-content .link[data-social="tiktok"]:hover {
+  color: #ff0050;
+}
+.example-1 .icon-content .link[data-social="steam"]:hover {
+  color: #00ADEE;
+}
+.example-1 .icon-content .link[data-social="website"]:hover {
+  color: #007acc;
+}
+.example-1 .icon-content .link[data-social="email"]:hover {
+  color: #EA4335;
+}
+.example-1 .icon-content .link[data-social="pinterest"]:hover {
+  color: #bd081c;
+}
+.example-1 .icon-content .link[data-social="dribbble"]:hover {
+  color: #ea4c89;
+}
+
+@media (max-width: 600px) {
+  .profile-links-corner {
+    bottom: 20px;
+    right: 20px;
+  }
+  .example-1 .icon-content {
+    margin: 0 6px;
+  }
+  .example-1 .icon-content .link {
+    width: 42px;
+    height: 42px;
+  }
+  .example-1 .icon-content .link svg {
+    width: 22px;
+    height: 22px;
+  }
+  .example-1 .icon-content .link i {
+    font-size: 20px !important;
+  }
+}
