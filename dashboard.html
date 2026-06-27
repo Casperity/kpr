@@ -109,7 +109,7 @@
   </nav>
 
   <!-- Main Content -->
-  <div class="dash-content">
+  <div class="dash-content" style="grid-template-columns: 1fr; max-width: 800px;">
 
     <!-- Ban Notice (hidden by default) -->
     <div id="ban-notice" style="display:none; grid-column: 1 / -1; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.35); border-radius: 16px; padding: 24px 28px; margin-bottom: 8px;">
@@ -425,20 +425,7 @@
 
     </div>
 
-    <!-- Right: Live Preview -->
-    <div class="dash-preview-area">
-      <div class="preview-label">Live Preview</div>
-      <div class="preview-phone" id="preview-phone">
-        <div class="preview-phone-notch"></div>
-        <div class="preview-phone-screen" id="preview-screen">
-          <img class="preview-avatar" id="preview-avatar" src="" alt="" />
-          <div class="preview-name" id="preview-name">Your Name</div>
-          <div class="preview-badges" id="preview-badges"></div>
-          <div class="preview-bio" id="preview-bio"></div>
-          <div class="preview-links" id="preview-links"></div>
-        </div>
-      </div>
-    </div>
+    <!-- Live Preview Removed -->
 
   </div>
 
@@ -1173,6 +1160,7 @@
 
     // --- Live preview update ---
     function updatePreview() {
+      if (!previewScreen) return;
       // Avatar
       const avatarUrl = inputAvatar.value.trim();
       if (avatarUrl) {
