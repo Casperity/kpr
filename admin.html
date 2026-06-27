@@ -11,6 +11,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/dashboard.css">
   <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    #users-search:focus {
+      outline: none;
+      border-color: rgba(167, 139, 250, 0.4) !important;
+    }
+    #users-load-more:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #fff !important;
+    }
+  </style>
 </head>
 <body>
   <!-- Navigation -->
@@ -67,7 +77,18 @@
         </div>
       </div>
       <div class="dash-section-body" style="display: block;">
-        <div id="users-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        <!-- Search bar -->
+        <div style="margin-bottom: 16px; position: relative;">
+          <input type="text" id="users-search" placeholder="Search by username or display name..." style="width: 100%; padding: 12px 16px 12px 40px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; font-family: inherit; font-size: 0.875rem; box-sizing: border-box; transition: border-color 0.2s;" />
+          <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3); font-size: 0.85rem;"></i>
+        </div>
+
+        <div id="users-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
+
+        <!-- Load More Button -->
+        <button id="users-load-more" style="display: none; width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: rgba(255,255,255,0.85); font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-align: center; transition: background 0.2s, color 0.2s;">
+          <i class="fas fa-arrow-down" style="margin-right: 6px;"></i>Load More
+        </button>
       </div>
     </div>
 
@@ -202,13 +223,37 @@
       }
     }
 
+    let visibleCount = 10;
+    let searchQuery = '';
+
     function renderUsers() {
       const container = document.getElementById('users-list');
-      if (!allUsers.length) {
+      const loadMoreBtn = document.getElementById('users-load-more');
+      
+      const query = searchQuery.trim().toLowerCase();
+      const filtered = allUsers.filter(u => {
+        const usernameMatch = u.username && u.username.toLowerCase().includes(query);
+        const displayNameMatch = u.displayName && u.displayName.toLowerCase().includes(query);
+        return usernameMatch || displayNameMatch;
+      });
+
+      if (!filtered.length) {
         container.innerHTML = '<div style="color: rgba(255,255,255,0.4); text-align: center; padding: 1rem;">No users found</div>';
+        if (loadMoreBtn) loadMoreBtn.style.display = 'none';
         return;
       }
-      container.innerHTML = allUsers.map(u => {
+
+      const sliced = filtered.slice(0, visibleCount);
+
+      if (loadMoreBtn) {
+        if (filtered.length > visibleCount) {
+          loadMoreBtn.style.display = 'block';
+        } else {
+          loadMoreBtn.style.display = 'none';
+        }
+      }
+
+      container.innerHTML = sliced.map(u => {
         const userBadges = u.badges || [];
         const badgePills = allowedBadges.map(id => {
           const b = BADGE_CATALOG[id] || { icon: 'fas fa-certificate', label: id, color: '#888' };
@@ -461,6 +506,19 @@
         Toast.show(err.error || 'Failed to update ban status', 'error');
       }
     }
+
+    // Search input listener
+    document.getElementById('users-search').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      visibleCount = 10;
+      renderUsers();
+    });
+
+    // Load more listener
+    document.getElementById('users-load-more').addEventListener('click', () => {
+      visibleCount += 10;
+      renderUsers();
+    });
 
     loadUsers();
   </script>
