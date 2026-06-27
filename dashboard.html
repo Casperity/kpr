@@ -831,13 +831,17 @@
       list.innerHTML = '';
       playlist.forEach((song, idx) => {
         const row = document.createElement('div');
-        row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;';
+        row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;';
         row.innerHTML = `
-          <input type="url" class="form-input" placeholder="GitHub Audio URL (mp3/ogg)" value="${escAttr(song.url || '')}" data-sidx="${idx}" data-sfield="url" />
-          <input type="text" class="form-input" placeholder="Title" maxlength="100" value="${escAttr(song.title || '')}" data-sidx="${idx}" data-sfield="title" />
-          <input type="text" class="form-input" placeholder="Artist" maxlength="100" value="${escAttr(song.artist || '')}" data-sidx="${idx}" data-sfield="artist" />
-          <input type="url" class="form-input" placeholder="GitHub Cover image URL" value="${escAttr(song.cover || '')}" data-sidx="${idx}" data-sfield="cover" />
-          <button class="social-link-delete" data-sidx="${idx}" title="Remove"><i class="fas fa-trash-alt"></i></button>`;
+          <input type="url" class="form-input" placeholder="Audio URL (mp3/ogg)" value="${escAttr(song.url || '')}" data-sidx="${idx}" data-sfield="url" style="grid-column: span 2;" />
+          <button class="social-link-delete" data-sidx="${idx}" title="Remove" style="grid-column: span 1; height: 38px; width: 38px; display: flex; align-items: center; justify-content: center; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); color: #ef4444; border-radius: 8px; cursor: pointer; transition: all 0.2s;"><i class="fas fa-trash-alt"></i></button>
+
+          <input type="url" class="form-input" placeholder="Cover image URL" value="${escAttr(song.cover || '')}" data-sidx="${idx}" data-sfield="cover" style="grid-column: span 2;" />
+          <div style="grid-column: span 1;"></div>
+
+          <input type="text" class="form-input" placeholder="Title" maxlength="100" value="${escAttr(song.title || '')}" data-sidx="${idx}" data-sfield="title" style="grid-column: span 1;" />
+          <input type="text" class="form-input" placeholder="Artist" maxlength="100" value="${escAttr(song.artist || '')}" data-sidx="${idx}" data-sfield="artist" style="grid-column: span 1;" />
+          <div style="grid-column: span 1;"></div>`;
         list.appendChild(row);
       });
 
