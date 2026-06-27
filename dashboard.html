@@ -128,6 +128,68 @@
         </div>
       </div>
 
+      <!-- Referrals -->
+      <div class="dash-section" id="section-referrals">
+        <div class="dash-section-header" onclick="toggleSection('section-referrals')">
+          <div class="dash-section-title">
+            <i class="fas fa-users"></i> Referral Program
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div class="form-hint" style="margin-bottom: 16px;">
+            Share your referral link with others to earn rewards! Registration still requires a valid invite code.
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Your Referral Link</label>
+            <div style="display:flex; gap:10px;">
+              <input type="text" class="form-input" id="input-ref-link" readonly style="background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.6);" />
+              <button class="form-btn-secondary" id="btn-copy-ref" style="flex-shrink:0; padding:0 16px; border-radius:12px; background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); color:#a78bfa; font-weight:600; cursor:pointer; transition:all 0.2s;">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:16px; margin-bottom:20px;">
+            <div style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-bottom:4px;">Total Referrals</div>
+            <div style="font-size:2.2rem; font-weight:700; color:#fff; line-height:1;" id="ref-count-val">0</div>
+          </div>
+
+          <!-- Milestones Grid -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px;">
+            <!-- Milestone 1 -->
+            <div id="reward-milestone-10" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
+              <div style="font-size:1.1rem; margin-bottom:4px;">👑</div>
+              <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">5 Days VIP</div>
+              <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">10 Referrals</div>
+              <span class="milestone-badge" id="milestone-status-10" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
+            </div>
+            <!-- Milestone 2 -->
+            <div id="reward-milestone-25" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
+              <div style="font-size:1.1rem; margin-bottom:4px;">💎</div>
+              <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">Permanent VIP</div>
+              <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">25 Referrals</div>
+              <span class="milestone-badge" id="milestone-status-25" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
+            </div>
+            <!-- Milestone 3 -->
+            <div id="reward-milestone-50" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
+              <div style="font-size:1.1rem; margin-bottom:4px;">⭐</div>
+              <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">Supporter Badge</div>
+              <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">50 Referrals</div>
+              <span class="milestone-badge" id="milestone-status-50" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
+            </div>
+          </div>
+
+          <!-- Referred Users List -->
+          <div>
+            <label class="form-label" style="margin-bottom:8px;">Users You Referred</label>
+            <div id="referred-users-list" style="display:flex; flex-wrap:wrap; gap:8px;">
+              <div style="font-size:0.8rem; color:rgba(255,255,255,0.3); font-style:italic;">No referrals yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Gallery -->
       <div class="dash-section" id="section-gallery">
@@ -456,12 +518,79 @@
       document.getElementById(id).classList.toggle('collapsed');
     }
 
+    // --- Referrals logic ---
+    async function loadReferrals() {
+      try {
+        const res = await API.getReferrals();
+        
+        // Populate link
+        const refLinkInput = document.getElementById('input-ref-link');
+        if (refLinkInput) refLinkInput.value = res.referralLink || '';
+
+        // Populate count
+        const refCountVal = document.getElementById('ref-count-val');
+        if (refCountVal) refCountVal.textContent = res.referralCount || 0;
+
+        // Render Milestones Status
+        updateMilestoneUI(10, res.rewards.vip5Days, '#a78bfa');
+        updateMilestoneUI(25, res.rewards.vipPerma, '#38bdf8');
+        updateMilestoneUI(50, res.rewards.supporterBadge, '#fb923c');
+
+        // Render referred users list
+        const listContainer = document.getElementById('referred-users-list');
+        if (listContainer) {
+          if (res.referredUsers && res.referredUsers.length > 0) {
+            listContainer.innerHTML = res.referredUsers.map(uname => {
+              return `<span style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); font-size:0.75rem; padding:4px 10px; border-radius:8px; font-weight:500;">${uname}</span>`;
+            }).join('');
+          } else {
+            listContainer.innerHTML = `<div style="font-size:0.8rem; color:rgba(255,255,255,0.3); font-style:italic;">No referrals yet.</div>`;
+          }
+        }
+
+      } catch (err) {
+        console.error('Failed to load referrals:', err);
+      }
+    }
+
+    function updateMilestoneUI(milestone, isUnlocked, colorHex) {
+      const card = document.getElementById(`reward-milestone-${milestone}`);
+      const badge = document.getElementById(`milestone-status-${milestone}`);
+      if (!card || !badge) return;
+
+      if (isUnlocked) {
+        card.style.background = `rgba(${hexToRgb(colorHex)}, 0.05)`;
+        card.style.borderColor = `rgba(${hexToRgb(colorHex)}, 0.35)`;
+        card.style.boxShadow = `0 0 15px rgba(${hexToRgb(colorHex)}, 0.08)`;
+        badge.textContent = 'UNLOCKED';
+        badge.style.background = colorHex;
+        badge.style.color = '#000';
+      } else {
+        card.style.background = 'rgba(255,255,255,0.02)';
+        card.style.borderColor = 'rgba(255,255,255,0.05)';
+        card.style.boxShadow = 'none';
+        badge.textContent = 'LOCKED';
+        badge.style.background = 'rgba(255,255,255,0.05)';
+        badge.style.color = 'rgba(255,255,255,0.3)';
+      }
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `${r}, ${g}, ${b}`;
+    }
+
     // --- Load profile data ---
     async function loadProfile() {
       try {
         const res = await API.getMe();
         const user = res.user || res;
         currentUser = user;
+
+        loadReferrals();
 
         // Populate nav
         navViewProfile.href = '/' + (user.username || '');
@@ -973,6 +1102,18 @@
     inputMusicUrl.addEventListener('input', () => validateUrlInput(inputMusicUrl));
     inputBgBlur.addEventListener('change', updatePreview);
     inputBgVideoMuted.addEventListener('change', updatePreview);
+
+    // Referral copy button
+    document.getElementById('btn-copy-ref')?.addEventListener('click', () => {
+      const linkInput = document.getElementById('input-ref-link');
+      if (linkInput && linkInput.value) {
+        navigator.clipboard.writeText(linkInput.value).then(() => {
+          Toast.show('Referral link copied to clipboard!', 'success');
+        }).catch(() => {
+          Toast.show('Failed to copy link.', 'error');
+        });
+      }
+    });
 
     // --- Live preview update ---
     function updatePreview() {

@@ -153,6 +153,12 @@
           </div>
         </div>
 
+        <!-- Referred By Notice (hidden by default) -->
+        <div id="referrer-notice" style="display:none; margin-top:-4px; margin-bottom:18px; padding:10px 14px; background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.25); border-radius:10px; font-size:0.8rem; color:#a78bfa; align-items:center; gap:6px;">
+          <i class="fa-solid fa-crown" style="font-size:0.75rem;"></i>
+          <span>Referred by: <strong id="referrer-name" style="color:#c084fc;"></strong></span>
+        </div>
+
         <!-- Submit -->
         <button type="submit" class="auth-btn" id="signup-btn">
           <span class="btn-text">
@@ -199,6 +205,9 @@
       const strengthWrap  = document.getElementById('password-strength');
       const strengthLabel = document.getElementById('strength-label');
       const confirmHint   = document.getElementById('confirm-hint');
+
+      // Referral parameter
+      const refParam      = new URLSearchParams(window.location.search).get('ref') || '';
 
       const strengthBars = [
         document.getElementById('str-1'),
@@ -378,7 +387,7 @@
         setLoading(true);
 
         try {
-          const data = await API.signup(username, password, inviteCode);
+          const data = await API.signup(username, password, inviteCode, refParam);
 
           /* Store auth data */
           if (data.token) API.setToken(data.token);
@@ -408,6 +417,16 @@
       const codeParam = new URLSearchParams(window.location.search).get('code');
       if (codeParam) {
         inviteInput.value = codeParam.trim();
+      }
+
+      /* ── Pre-fill referred by from ?ref= query param ── */
+      if (refParam) {
+        const noticeEl = document.getElementById('referrer-notice');
+        const nameEl = document.getElementById('referrer-name');
+        if (noticeEl && nameEl) {
+          nameEl.textContent = refParam.trim();
+          noticeEl.style.display = 'flex';
+        }
       }
 
       /* Auto-focus username */

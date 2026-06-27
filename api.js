@@ -52,10 +52,10 @@ const API = {
   },
 
   /* ── Auth endpoints ───────────────────────────────────── */
-  signup(username, password, inviteCode) {
+  signup(username, password, inviteCode, referredBy) {
     return this.request('/api/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ username, password, inviteCode })
+      body: JSON.stringify({ username, password, inviteCode, referredBy })
     });
   },
 
@@ -73,6 +73,10 @@ const API = {
 
   getMe() {
     return this.request('/api/user/me');
+  },
+
+  getReferrals() {
+    return this.request('/api/user/referrals');
   },
 
   updateProfile(data) {
