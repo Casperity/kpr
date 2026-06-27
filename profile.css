@@ -784,6 +784,7 @@ body.profile-page.has-bg-image::before {
   border-radius: 50%;
   color: #4d4d4d;
   background-color: #fff;
+  text-decoration: none;
   transition: all 0.3s ease-in-out;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
