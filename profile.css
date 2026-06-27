@@ -747,13 +747,13 @@ body.profile-page.has-bg-image::before {
 }
 
 .example-1 .icon-content {
-  margin: 0 10px;
+  margin: 0 5px;
   position: relative;
 }
 
 .example-1 .icon-content .tooltip {
   position: absolute;
-  top: -30px;
+  top: -24px;
   left: 50%;
   transform: translateX(-50%);
   background-color: #000;
@@ -772,15 +772,15 @@ body.profile-page.has-bg-image::before {
 .example-1 .icon-content:hover .tooltip {
   opacity: 1;
   visibility: visible;
-  top: -50px;
+  top: -42px;
 }
 
 .example-1 .icon-content .link {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 50px;
-  height: 50px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   color: #4d4d4d;
   background-color: #fff;
@@ -793,13 +793,13 @@ body.profile-page.has-bg-image::before {
 }
 
 .example-1 .icon-content .link svg {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
 .example-1 .icon-content .link i {
-  font-size: 24px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -863,17 +863,32 @@ body.profile-page.has-bg-image::before {
     justify-content: center;
   }
   .example-1 .icon-content {
-    margin: 0 6px;
+    margin: 0 4px;
   }
   .example-1 .icon-content .link {
-    width: 42px;
-    height: 42px;
+    width: 32px;
+    height: 32px;
   }
   .example-1 .icon-content .link svg {
-    width: 22px;
-    height: 22px;
+    width: 17px;
+    height: 17px;
   }
   .example-1 .icon-content .link i {
-    font-size: 20px !important;
+    font-size: 15px !important;
   }
+}
+
+/* --- Collapsible Gallery smooth transition --- */
+.gallery-expand-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out, margin-top 0.5s ease;
+  margin-top: 0;
+}
+
+.gallery-expand-body.expanded {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 20px;
 }
