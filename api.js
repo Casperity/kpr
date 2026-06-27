@@ -103,6 +103,13 @@ const API = {
     });
   },
 
+  updateUsername(username) {
+    return this.request('/api/user/username', {
+      method: 'PUT',
+      body: JSON.stringify({ username })
+    });
+  },
+
   updateSettings(data) {
     return this.request('/api/user/settings', {
       method: 'PUT',
