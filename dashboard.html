@@ -84,6 +84,104 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 2px 2px 3px rgba(0, 0, 0, 0.3);
       transition: 0.4s;
     }
+
+    /* --- Frutiger Button --- */
+    .frutiger-button {
+      cursor: pointer;
+      position: relative;
+      padding: 2px;
+      border-radius: 6px;
+      border: 0;
+      text-shadow: 1px 1px #000a;
+      background: linear-gradient(#006caa, #00c3ff);
+      box-shadow: 0px 4px 6px 0px #0008;
+      transition: 0.3s all;
+      display: inline-block;
+      overflow: hidden;
+      flex-shrink: 0;
+      height: 38px;
+    }
+
+    .frutiger-button:hover {
+      box-shadow: 0px 6px 12px 0px #0009;
+    }
+
+    .frutiger-button:active {
+      box-shadow: 0px 0px 0px 0px #0000;
+    }
+
+    .frutiger-button .inner {
+      position: relative;
+      inset: 0px;
+      padding: 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      background: radial-gradient(circle at 50% 100%, #30f8f8 10%, #30f8f800 55%),
+        linear-gradient(#00526a, #009dcd);
+      overflow: hidden;
+      transition: inherit;
+    }
+
+    .frutiger-button .inner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(-65deg, #0000 40%, #fff7 50%, #0000 70%);
+      background-size: 200% 100%;
+      background-repeat: no-repeat;
+      animation: thing 3s ease infinite;
+    }
+
+    @keyframes thing {
+      0% {
+        background-position: 130%;
+        opacity: 1;
+      }
+
+      to {
+        background-position: -166%;
+        opacity: 0;
+      }
+    }
+
+    .frutiger-button .top-white {
+      position: absolute;
+      border-radius: inherit;
+      inset: 0 -8em;
+      background: radial-gradient(
+        circle at 50% -270%,
+        #fff 45%,
+        #fff6 60%,
+        #fff0 60%
+      );
+      transition: inherit;
+    }
+
+    .frutiger-button .inner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      transition: inherit;
+      box-shadow: inset 0px 2px 8px -2px #0000;
+    }
+
+    .frutiger-button:active .inner::after {
+      box-shadow: inset 0px 2px 8px -2px #000a;
+    }
+
+    .frutiger-button .text {
+      position: relative;
+      z-index: 1;
+      color: white;
+      font-weight: 550;
+      transition: inherit;
+      font-size: 0.82rem;
+      line-height: 1;
+    }
   </style>
 </head>
 <body>
@@ -146,16 +244,6 @@
           <i class="fas fa-chevron-down dash-section-toggle"></i>
         </div>
         <div class="dash-section-body">
-          <div class="form-group" style="border: 1px solid rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; background: rgba(0,0,0,0.1); margin-bottom: 16px;">
-            <label class="form-label" style="display: flex; align-items: center; gap: 6px;">
-              Username <span style="font-size: 0.72rem; opacity: 0.6; background: rgba(167, 139, 250, 0.15); color: #a78bfa; padding: 2px 6px; border-radius: 6px; font-weight: 500;">Once every 30 days</span>
-            </label>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" class="form-input" id="input-username" placeholder="newusername" maxlength="20" style="flex: 1;" />
-              <button class="btn-save" id="btn-change-username" style="width: auto; padding: 0 16px; font-size: 0.85rem; background: #6366f1; border: none; height: 38px; border-radius: 8px; cursor: pointer; color: #fff;">Change</button>
-            </div>
-            <div class="form-hint" id="username-hint" style="margin-top: 6px;">Your current username is <span id="current-username-text" style="color: #fff; font-weight: 600;"></span></div>
-          </div>
           <div class="form-group">
             <label class="form-label">Display Name</label>
             <input type="text" class="form-input" id="input-name" placeholder="Your display name" maxlength="40" />
@@ -180,6 +268,33 @@
               <input type="url" class="form-input" id="input-avatar" placeholder="https://raw.githubusercontent.com/..." />
             </div>
             <div class="form-hint">Only GitHub URLs allowed (e.g., raw.githubusercontent.com)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="dash-section" id="section-settings">
+        <div class="dash-section-header" onclick="toggleSection('section-settings')">
+          <div class="dash-section-title">
+            <i class="fas fa-cog"></i> Settings
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div class="form-group" style="border: 1px solid rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; background: rgba(0,0,0,0.1); margin-bottom: 0;">
+            <label class="form-label" style="display: flex; align-items: center; gap: 6px;">
+              Username <span style="font-size: 0.72rem; opacity: 0.6; background: rgba(167, 139, 250, 0.15); color: #a78bfa; padding: 2px 6px; border-radius: 6px; font-weight: 500;">Once every 30 days</span>
+            </label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" class="form-input" id="input-username" placeholder="newusername" maxlength="20" style="flex: 1;" />
+              <button class="frutiger-button" id="btn-change-username">
+                <div class="inner">
+                  <div class="top-white"></div>
+                  <span class="text">Change</span>
+                </div>
+              </button>
+            </div>
+            <div class="form-hint" id="username-hint" style="margin-top: 8px;">Your current username is <span id="current-username-text" style="color: #fff; font-weight: 600;"></span></div>
           </div>
         </div>
       </div>
@@ -843,9 +958,10 @@
         return;
       }
 
+      const textSpan = btnChangeUsername.querySelector('.text');
       btnChangeUsername.disabled = true;
-      const oldText = btnChangeUsername.textContent;
-      btnChangeUsername.textContent = 'Changing...';
+      const oldText = textSpan ? textSpan.textContent : 'Change';
+      if (textSpan) textSpan.textContent = 'Changing...';
 
       try {
         const res = await API.updateUsername(username);
@@ -871,7 +987,7 @@
         Toast.show(err.error || 'Failed to update username', 'error');
       } finally {
         btnChangeUsername.disabled = false;
-        btnChangeUsername.textContent = oldText;
+        if (textSpan) textSpan.textContent = oldText;
       }
     });
 
