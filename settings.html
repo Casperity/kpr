@@ -113,6 +113,104 @@
       line-height: 1.6;
       margin-bottom: 18px;
     }
+
+    /* --- Frutiger Button --- */
+    .frutiger-button {
+      cursor: pointer;
+      position: relative;
+      padding: 2px;
+      border-radius: 6px;
+      border: 0;
+      text-shadow: 1px 1px #000a;
+      background: linear-gradient(#006caa, #00c3ff);
+      box-shadow: 0px 4px 6px 0px #0008;
+      transition: 0.3s all;
+      display: inline-block;
+      overflow: hidden;
+      flex-shrink: 0;
+      height: 38px;
+    }
+
+    .frutiger-button:hover {
+      box-shadow: 0px 6px 12px 0px #0009;
+    }
+
+    .frutiger-button:active {
+      box-shadow: 0px 0px 0px 0px #0000;
+    }
+
+    .frutiger-button .inner {
+      position: relative;
+      inset: 0px;
+      padding: 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      background: radial-gradient(circle at 50% 100%, #30f8f8 10%, #30f8f800 55%),
+        linear-gradient(#00526a, #009dcd);
+      overflow: hidden;
+      transition: inherit;
+    }
+
+    .frutiger-button .inner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(-65deg, #0000 40%, #fff7 50%, #0000 70%);
+      background-size: 200% 100%;
+      background-repeat: no-repeat;
+      animation: thing 3s ease infinite;
+    }
+
+    @keyframes thing {
+      0% {
+        background-position: 130%;
+        opacity: 1;
+      }
+
+      to {
+        background-position: -166%;
+        opacity: 0;
+      }
+    }
+
+    .frutiger-button .top-white {
+      position: absolute;
+      border-radius: inherit;
+      inset: 0 -8em;
+      background: radial-gradient(
+        circle at 50% -270%,
+        #fff 45%,
+        #fff6 60%,
+        #fff0 60%
+      );
+      transition: inherit;
+    }
+
+    .frutiger-button .inner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      transition: inherit;
+      box-shadow: inset 0px 2px 8px -2px #0000;
+    }
+
+    .frutiger-button:active .inner::after {
+      box-shadow: inset 0px 2px 8px -2px #000a;
+    }
+
+    .frutiger-button .text {
+      position: relative;
+      z-index: 1;
+      color: white;
+      font-weight: 550;
+      transition: inherit;
+      font-size: 0.82rem;
+      line-height: 1;
+    }
   </style>
 </head>
 <body>
@@ -136,6 +234,27 @@
   <div class="settings-wrap">
     <div class="settings-heading">Account Settings</div>
     <div class="settings-sub">Manage your password and account.</div>
+
+    <!-- Change Username -->
+    <div class="settings-card">
+      <div class="settings-card-title">Change Username</div>
+
+      <div class="form-group">
+        <label class="form-label" style="display: flex; align-items: center; gap: 6px;">
+          New Username <span style="font-size: 0.72rem; opacity: 0.8; background: rgba(14, 165, 233, 0.15); color: #0ea5e9; padding: 2px 6px; border-radius: 6px; font-weight: 500;">Once every 30 days</span>
+        </label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" class="form-input" id="input-username" placeholder="newusername" maxlength="20" style="flex: 1;" />
+          <button class="frutiger-button" id="btn-change-username">
+            <div class="inner">
+              <div class="top-white"></div>
+              <span class="text">Change</span>
+            </div>
+          </button>
+        </div>
+        <div class="form-hint" id="username-hint" style="margin-top: 8px;">Your current username is <span id="current-username-text" style="color: #fff; font-weight: 600;"></span></div>
+      </div>
+    </div>
 
     <!-- Change Password -->
     <div class="settings-card">
@@ -199,6 +318,74 @@
         window.location.href = '/login';
         return;
       }
+
+      const inputUsername = document.getElementById('input-username');
+      const currentUsernameText = document.getElementById('current-username-text');
+      const btnChangeUsername = document.getElementById('btn-change-username');
+      let userData = null;
+
+      // Load user data
+      async function loadUserData() {
+        try {
+          const res = await API.getMe();
+          userData = res.user || res;
+          if (inputUsername) inputUsername.value = userData.username || '';
+          if (currentUsernameText) currentUsernameText.textContent = userData.username || '';
+        } catch (err) {
+          console.error(err);
+          const cached = API.getUser() || {};
+          userData = cached;
+          if (inputUsername) inputUsername.value = cached.username || '';
+          if (currentUsernameText) currentUsernameText.textContent = cached.username || '';
+        }
+      }
+      loadUserData();
+
+      // ── Change Username ────────────────────────────────────────
+      btnChangeUsername?.addEventListener('click', async () => {
+        const username = inputUsername.value.trim();
+        if (!username) {
+          return Toast.show('Username cannot be empty', 'error');
+        }
+
+        if (username === userData.username) {
+          return Toast.show('New username must be different from current username', 'error');
+        }
+
+        if (!confirm(`Are you sure you want to change your username to "${username}"?\nThis will change your profile link to kpr.lol/${username}.\nYou can only do this once every 30 days.`)) {
+          return;
+        }
+
+        const textSpan = btnChangeUsername.querySelector('.text');
+        btnChangeUsername.disabled = true;
+        const oldText = textSpan ? textSpan.textContent : 'Change';
+        if (textSpan) textSpan.textContent = 'Changing...';
+
+        try {
+          const res = await API.updateUsername(username);
+          if (res.success) {
+            API.setToken(res.token);
+            
+            const storedUser = API.getUser() || {};
+            storedUser.username = res.username;
+            API.setUser(storedUser);
+
+            userData.username = res.username;
+            currentUsernameText.textContent = res.username;
+            inputUsername.value = res.username;
+
+            Toast.show('Username updated successfully!', 'success');
+          } else {
+            Toast.show(res.error || 'Failed to update username', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          Toast.show(err.error || 'Failed to update username', 'error');
+        } finally {
+          btnChangeUsername.disabled = false;
+          if (textSpan) textSpan.textContent = oldText;
+        }
+      });
 
       // Logout
       document.getElementById('btn-logout').addEventListener('click', () => {
