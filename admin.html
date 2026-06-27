@@ -20,6 +20,83 @@
       background: rgba(255, 255, 255, 0.08) !important;
       color: #fff !important;
     }
+    
+    /* --- Uiverse Actions Menu Card --- */
+    .card {
+      width: 160px;
+      background-color: rgba(30, 32, 40, 0.98);
+      background-image: linear-gradient(
+        139deg,
+        rgba(30, 32, 40, 1) 0%,
+        rgba(30, 32, 40, 1) 0%,
+        rgba(35, 25, 38, 1) 100%
+      );
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 8px 0px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .card .separator {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin: 4px 0;
+    }
+
+    .card .list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0px 8px;
+      margin: 0;
+    }
+
+    .card .list .element {
+      display: flex;
+      align-items: center;
+      color: #7e8590;
+      gap: 8px;
+      transition: all 0.2s ease-out;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .card .list .element i {
+      font-size: 0.85rem;
+      width: 16px;
+      text-align: center;
+      transition: all 0.2s ease-out;
+    }
+
+    .card .list .element .label {
+      font-weight: 600;
+      margin: 0;
+      color: inherit;
+    }
+
+    .card .list .element:hover {
+      background-color: #5353ff;
+      color: #ffffff;
+      transform: translate(1px, -1px);
+    }
+
+    .card .list .element:hover i {
+      color: #ffffff;
+    }
+
+    .card .list .delete:hover {
+      background-color: #ef4444;
+    }
+
+    .card .list .element:active {
+      transform: scale(0.98);
+    }
   </style>
 </head>
 <body>
@@ -278,39 +355,41 @@
                 ${u.isVip ? `<span style="background: #a78bfa; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;" title="${u.vipExpiresAt ? 'Expires: ' + new Date(u.vipExpiresAt).toLocaleString() : 'Permanent VIP'}">VIP${u.vipExpiresAt ? ' (Temp)' : ''}</span>` : ''}
                 ${banInfo}
               </div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="color: rgba(255,255,255,0.2); font-size: 0.72rem;">ID: ${u.id}</span>
+              <div style="display:flex; align-items:center; gap:8px; position:relative;">
+                  <span style="color: rgba(255,255,255,0.2); font-size: 0.72rem; margin-right: 4px;">ID: ${u.id}</span>
               
                   ${
                     !u.isAdmin
                       ? `
-                      <button class="vip-btn"
-                          data-user="${u.id}"
-                          data-vip="${u.isVip}"
-                          style="background:rgba(255,255,255,0.05);border:1px solid ${u.isVip ? '#ef4444' : '#a78bfa'}33;color:${u.isVip ? '#ef4444' : '#a78bfa'};padding:4px 10px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;">
-                          <i class="fas fa-crown" style="margin-right:4px;"></i>${u.isVip ? 'Remove VIP' : 'Give VIP'}
+                      <button class="actions-trigger-btn" data-user="${u.id}" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-ellipsis-v"></i> Actions
                       </button>
 
-                      <button class="ban-btn"
-                          data-user="${u.id}"
-                          data-banned="${u.isBanned}"
-                          style="background:rgba(255,255,255,0.05);border:1px solid ${banBtnColor}33;color:${banBtnColor};padding:4px 10px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;">
-                          <i class="fas ${banBtnIcon}" style="margin-right:4px;"></i>${banBtnLabel}
-                      </button>
-              
-                      <button class="delete-comments-btn"
-                          data-user="${u.id}"
-                          data-username="${u.username}"
-                          style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);color:#f59e0b;padding:4px 10px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;">
-                          <i class="fas fa-comments" style="margin-right:4px;"></i>Wipe Comments
-                      </button>
-
-                      <button class="delete-user-btn"
-                          data-user="${u.id}"
-                          data-username="${u.username}"
-                          style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:#ef4444;padding:4px 10px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;">
-                          <i class="fas fa-trash" style="margin-right:4px;"></i>Delete
-                      </button>
+                      <div class="actions-dropdown-card" id="actions-dropdown-${u.id}" style="display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                        <div class="card">
+                          <ul class="list">
+                            <li class="element vip-btn" data-user="${u.id}" data-vip="${u.isVip}">
+                              <i class="fas fa-crown" style="color: ${u.isVip ? '#ef4444' : '#a78bfa'};"></i>
+                              <p class="label">${u.isVip ? 'Remove VIP' : 'Give VIP'}</p>
+                            </li>
+                            <li class="element ban-btn" data-user="${u.id}" data-banned="${u.isBanned}">
+                              <i class="fas ${banBtnIcon}" style="color: ${banBtnColor};"></i>
+                              <p class="label">${banBtnLabel}</p>
+                            </li>
+                          </ul>
+                          <div class="separator"></div>
+                          <ul class="list">
+                            <li class="element delete-comments-btn" data-user="${u.id}" data-username="${u.username}">
+                              <i class="fas fa-comments" style="color: #f59e0b;"></i>
+                              <p class="label">Wipe Comments</p>
+                            </li>
+                            <li class="element delete-user-btn delete" data-user="${u.id}" data-username="${u.username}">
+                              <i class="fas fa-trash" style="color: #ef4444;"></i>
+                              <p class="label">Delete User</p>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                       `
                       : ""
                   }
@@ -486,6 +565,23 @@
           }
         });
       });
+
+      // --- Actions dropdown toggle ---
+      container.querySelectorAll('.actions-trigger-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const userId = btn.dataset.user;
+          const dd = document.getElementById('actions-dropdown-' + userId);
+          if (!dd) return;
+          
+          // Close all other dropdowns
+          document.querySelectorAll('.actions-dropdown-card').forEach(x => {
+            if (x.id !== dd.id) x.style.display = 'none';
+          });
+          
+          dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+        });
+      });
     }
 
     async function doBan(userId, banned, reason) {
@@ -518,6 +614,16 @@
     document.getElementById('users-load-more').addEventListener('click', () => {
       visibleCount += 10;
       renderUsers();
+    });
+
+    // Global click-away listener to close dropdowns
+    document.addEventListener('click', (e) => {
+      document.querySelectorAll('.actions-dropdown-card').forEach(dd => {
+        const trigger = dd.parentElement.querySelector('.actions-trigger-btn');
+        if (trigger && !trigger.contains(e.target) && !dd.contains(e.target)) {
+          dd.style.display = 'none';
+        }
+      });
     });
 
     loadUsers();
