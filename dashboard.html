@@ -49,15 +49,15 @@
       align-items: center;
       cursor: pointer;
       position: relative;
-      transition: transform 0.4s;
+      transition: transform 0.2s ease;
     }
 
     .uiverse-toggle-label:hover {
-      transform: perspective(50px) rotateX(5deg) rotateY(-5deg);
+      transform: scale(1.04);
     }
 
-    .uiverse-toggle-checkbox:checked ~ .uiverse-toggle-label:hover {
-      transform: perspective(50px) rotateX(-5deg) rotateY(5deg);
+    .uiverse-toggle-label:active {
+      transform: scale(0.96);
     }
 
     .uiverse-toggle-checkbox:checked ~ .uiverse-toggle-label::before {
