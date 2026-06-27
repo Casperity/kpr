@@ -726,11 +726,15 @@ body.profile-page.has-bg-image::before {
 }
 
 /* --- Floating Corner Links (Uiverse Example-1) --- */
+.profile-card {
+  position: relative;
+}
+
 .profile-links-corner {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  z-index: 10;
 }
 
 .example-1 {
@@ -851,8 +855,12 @@ body.profile-page.has-bg-image::before {
 
 @media (max-width: 600px) {
   .profile-links-corner {
-    bottom: 20px;
-    right: 20px;
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
   }
   .example-1 .icon-content {
     margin: 0 6px;

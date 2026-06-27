@@ -1107,7 +1107,7 @@
       }
 
       container.innerHTML = `
-        <div class="profile-card">
+        <div class="profile-card" ${cornerLinksHtml ? 'style="padding-bottom: 64px;"' : ''}>
           <img class="profile-avatar" src="${esc(avatarUrl)}" alt="${esc(data.displayName || data.display_name || data.username)}" onerror="this.style.display='none'" />
           <h1 class="profile-name">${esc(data.displayName || data.display_name || data.username)}</h1>
           ${userBadgesHtml}
@@ -1117,18 +1117,20 @@
           ${viewsHtml}
           
           ${hasGallery ? `
-            <div style="margin-top: 24px; width: 100%;">
-              <div style="font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                <i class="fas fa-images"></i> Gallery Showcase
+            <div class="gallery-expand-container" style="margin-top: 24px; width: 100%;">
+              <button id="toggle-gallery-btn" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; padding: 10px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <i class="fas fa-images"></i> <span>View Gallery</span>
+              </button>
+              <div id="gallery-expand-body" style="display: none; margin-top: 20px;">
+                ${galleryGridHtml}
               </div>
-              ${galleryGridHtml}
             </div>` : ''
           }
+          ${cornerLinksHtml}
         </div>
         <div class="profile-footer">
           <a href="/">kpr.lol</a>
-        </div>
-        ${cornerLinksHtml}`;
+        </div>`;
 
       // Lightbox & Carousel
       if (galleryData.length > 0) {
@@ -1151,6 +1153,19 @@
       // Tab switching removed (links are now floating in bottom-right corner)
 
       showState('state-profile');
+
+      // Toggle Gallery expansion
+      const toggleGalleryBtn = document.getElementById('toggle-gallery-btn');
+      const galleryExpandBody = document.getElementById('gallery-expand-body');
+      if (toggleGalleryBtn && galleryExpandBody) {
+        toggleGalleryBtn.addEventListener('click', () => {
+          const isHidden = galleryExpandBody.style.display === 'none';
+          galleryExpandBody.style.display = isHidden ? 'block' : 'none';
+          toggleGalleryBtn.querySelector('span').textContent = isHidden ? 'Hide Gallery' : 'View Gallery';
+          toggleGalleryBtn.style.background = isHidden ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)';
+          toggleGalleryBtn.style.borderColor = isHidden ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)';
+        });
+      }
 
       // -- Init music player --
       const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
