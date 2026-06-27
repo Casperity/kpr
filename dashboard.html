@@ -1377,8 +1377,11 @@
     
     function syncToggle(el) {
       if (!el) return;
-      const track = el.closest('label').querySelector('.toggle-track');
-      const thumb = el.closest('label').querySelector('.toggle-thumb');
+      const label = el.closest('label');
+      if (!label) return; // For new skeumorphic toggle where input is sibling of label
+      const track = label.querySelector('.toggle-track');
+      const thumb = label.querySelector('.toggle-thumb');
+      if (!track || !thumb) return;
       if (el.checked) {
         track.style.background = '#a78bfa';
         thumb.style.transform = 'translateX(20px)';
