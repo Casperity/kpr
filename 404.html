@@ -1432,7 +1432,8 @@
         listContainer.innerHTML = comments.map(c => {
           const isAuthor = currentUser && currentUser.username.toLowerCase() === c.author.username.toLowerCase();
           const isProfileOwner = currentUser && currentUser.username.toLowerCase() === username.toLowerCase();
-          const canDelete = isAuthor || isProfileOwner;
+          const isAdmin = currentUser && currentUser.isAdmin === true;
+          const canDelete = isAuthor || isProfileOwner || isAdmin;
 
           const deleteBtn = canDelete 
             ? `<button class="comment-delete-btn" data-id="${c.id}" title="Delete comment"><i class="fa-solid fa-trash"></i></button>`
