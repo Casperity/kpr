@@ -253,6 +253,13 @@
                           <i class="fas ${banBtnIcon}" style="margin-right:4px;"></i>${banBtnLabel}
                       </button>
               
+                      <button class="delete-comments-btn"
+                          data-user="${u.id}"
+                          data-username="${u.username}"
+                          style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);color:#f59e0b;padding:4px 10px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;">
+                          <i class="fas fa-comments" style="margin-right:4px;"></i>Wipe Comments
+                      </button>
+
                       <button class="delete-user-btn"
                           data-user="${u.id}"
                           data-username="${u.username}"
@@ -343,6 +350,26 @@
             Toast.show(err.error || 'Failed to update VIP status', 'error');
           }
         });
+      });
+
+      container.querySelectorAll('.delete-comments-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+              const userId = btn.dataset.user;
+              const username = btn.dataset.username;
+      
+              if (!confirm(`Delete all comments posted by "${username}"?\n\nThis cannot be undone.`))
+                  return;
+      
+              try {
+                  await API.request(`/api/admin/users/${userId}/comments`, {
+                      method: "DELETE"
+                  });
+                  Toast.show(`All comments by ${username} deleted successfully`, "success");
+              } catch (err) {
+                  console.error(err);
+                  Toast.show(err.error || "Failed to delete comments", "error");
+              }
+          });
       });
 
       container.querySelectorAll('.delete-user-btn').forEach(btn => {
