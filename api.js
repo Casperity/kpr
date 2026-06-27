@@ -79,6 +79,23 @@ const API = {
     return this.request('/api/user/referrals');
   },
 
+  getComments(username) {
+    return this.request('/api/profile/' + encodeURIComponent(username) + '/comments');
+  },
+
+  postComment(username, content) {
+    return this.request('/api/profile/' + encodeURIComponent(username) + '/comments', {
+      method: 'POST',
+      body: JSON.stringify({ content })
+    });
+  },
+
+  deleteComment(commentId) {
+    return this.request('/api/comments/' + commentId, {
+      method: 'DELETE'
+    });
+  },
+
   updateProfile(data) {
     return this.request('/api/user/profile', {
       method: 'PUT',

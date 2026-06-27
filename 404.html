@@ -349,10 +349,247 @@
       background: rgba(255, 255, 255, 0.15);
       color: #fff;
     }
+
+    /* --- COMMENTS DRAWER & TOGGLE --- */
+    .comments-toggle-btn {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      z-index: 999;
+      background: rgba(15, 15, 20, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.25rem;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+    .comments-toggle-btn:hover {
+      background: rgba(167, 139, 250, 0.15);
+      border-color: rgba(167, 139, 250, 0.45);
+      color: #c084fc;
+      transform: scale(1.08);
+      box-shadow: 0 0 15px rgba(167, 139, 250, 0.25);
+    }
+    
+    .comments-drawer {
+      position: fixed;
+      top: 0;
+      left: -380px;
+      width: 350px;
+      height: 100vh;
+      z-index: 1000;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.35);
+      transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      color: #fff;
+    }
+    .comments-drawer.open {
+      left: 0;
+    }
+    
+    .comments-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 14px;
+    }
+    .comments-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .comments-close-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .comments-close-btn:hover {
+      color: #ef4444;
+    }
+
+    .comment-input-box {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .comment-textarea {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      resize: none;
+      height: 70px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .comment-textarea:focus {
+      outline: none;
+      border-color: rgba(167, 139, 250, 0.5);
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.15);
+    }
+    .comment-post-btn {
+      background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      color: #000;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      align-self: flex-end;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .comment-post-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
+    .comments-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 4px;
+    }
+    .comments-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .comments-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .comments-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+    
+    .comment-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      position: relative;
+    }
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .comment-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .comment-author-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .comment-author-link {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .comment-author-link:hover {
+      color: #a78bfa;
+    }
+    .comment-author-display {
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .comment-content {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .comment-date {
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.35);
+      margin-top: 6px;
+    }
+    .comment-delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: color 0.15s;
+      padding: 2px;
+    }
+    .comment-delete-btn:hover {
+      color: #ef4444;
+    }
   </style>
   <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
 <body class="profile-page" id="body">
+
+  <!-- Comments Toggle Button -->
+  <button id="comments-toggle-btn" class="comments-toggle-btn" style="display:none;" title="View Comments">
+    <i class="fa-solid fa-comments"></i>
+  </button>
+
+  <!-- Comments Drawer -->
+  <div id="comments-drawer" class="comments-drawer">
+    <div class="comments-header">
+      <div class="comments-title">
+        <i class="fa-solid fa-comments"></i> Comments <span id="comments-count" style="font-size:0.75rem; background:rgba(255,255,255,0.08); padding:2px 8px; border-radius:10px; color:rgba(255,255,255,0.6);">0</span>
+      </div>
+      <button id="comments-close-btn" class="comments-close-btn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Write Comment Box -->
+    <div class="comment-input-box" id="comment-input-area">
+      <!-- Dynamically filled -->
+    </div>
+
+    <!-- Scrollable Comments List -->
+    <div class="comments-list" id="comments-list-container">
+      <!-- Dynamically filled -->
+    </div>
+  </div>
 
   <!-- Loading State -->
   <div id="state-loading" class="profile-loading">
@@ -1107,6 +1344,154 @@
       });
     }
 
+    // --- Comments Section Logic ---
+    function initComments(username, profile) {
+      const toggleBtn = document.getElementById('comments-toggle-btn');
+      const closeBtn = document.getElementById('comments-close-btn');
+      const drawer = document.getElementById('comments-drawer');
+      const inputArea = document.getElementById('comment-input-area');
+
+      if (!toggleBtn || !drawer) return;
+
+      // Make toggle button visible
+      toggleBtn.style.display = 'flex';
+
+      // Toggle drawer
+      toggleBtn.addEventListener('click', () => {
+        drawer.classList.toggle('open');
+      });
+
+      // Close drawer
+      closeBtn?.addEventListener('click', () => {
+        drawer.classList.remove('open');
+      });
+
+      // Render comment posting box
+      const currentUser = API.getUser();
+      if (API.isLoggedIn() && currentUser) {
+        inputArea.innerHTML = `
+          <textarea id="comment-text-input" class="comment-textarea" placeholder="Add a comment... (max 300 chars)" maxlength="300"></textarea>
+          <button id="btn-post-comment" class="comment-post-btn"><i class="fa-solid fa-paper-plane"></i> Post</button>
+        `;
+
+        const postBtn = document.getElementById('btn-post-comment');
+        const textInput = document.getElementById('comment-text-input');
+
+        postBtn?.addEventListener('click', async () => {
+          const content = textInput.value.trim();
+          if (!content) return;
+          postBtn.disabled = true;
+          postBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Posting...';
+          
+          try {
+            await API.postComment(username, content);
+            textInput.value = '';
+            await loadComments(username, profile);
+          } catch (err) {
+            alert(err.error || 'Failed to post comment');
+          } finally {
+            postBtn.disabled = false;
+            postBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Post';
+          }
+        });
+
+      } else {
+        inputArea.innerHTML = `
+          <div style="font-size:0.8rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:12px; border-radius:12px; text-align:center; color:rgba(255,255,255,0.45); width:100%;">
+            <a href="/login" style="color:#a78bfa; text-decoration:none; font-weight:600;">Log in</a> to leave a comment.
+          </div>
+        `;
+      }
+
+      // Initial load
+      loadComments(username, profile);
+    }
+
+    async function loadComments(username, profile) {
+      const listContainer = document.getElementById('comments-list-container');
+      const countEl = document.getElementById('comments-count');
+      if (!listContainer) return;
+
+      try {
+        const res = await API.getComments(username);
+        const comments = res.comments || [];
+        
+        if (countEl) countEl.textContent = comments.length;
+
+        if (comments.length === 0) {
+          listContainer.innerHTML = `
+            <div style="text-align:center; padding:40px 20px; color:rgba(255,255,255,0.3); font-size:0.85rem; font-style:italic;">
+              No comments yet. Be the first to say hi!
+            </div>
+          `;
+          return;
+        }
+
+        const currentUser = API.getUser();
+
+        listContainer.innerHTML = comments.map(c => {
+          const isAuthor = currentUser && currentUser.username.toLowerCase() === c.author.username.toLowerCase();
+          const isProfileOwner = currentUser && currentUser.username.toLowerCase() === username.toLowerCase();
+          const canDelete = isAuthor || isProfileOwner;
+
+          const deleteBtn = canDelete 
+            ? `<button class="comment-delete-btn" data-id="${c.id}" title="Delete comment"><i class="fa-solid fa-trash"></i></button>`
+            : '';
+
+          const avatar = c.author.avatarUrl || '/pfp.jpg';
+          const dispName = c.author.displayName || c.author.username;
+          const timeStr = formatCommentDate(c.createdAt);
+
+          return `
+            <div class="comment-card">
+              <img class="comment-avatar" src="${esc(avatar)}" onerror="this.src='/pfp.jpg'" />
+              <div class="comment-body">
+                <div class="comment-author-row">
+                  <a href="/${esc(c.author.username)}" class="comment-author-link" target="_blank">${esc(c.author.username)}</a>
+                  ${dispName !== c.author.username ? `<span class="comment-author-display">${esc(dispName)}</span>` : ''}
+                </div>
+                <div class="comment-content">${esc(c.content)}</div>
+                <div class="comment-date">${timeStr}</div>
+              </div>
+              ${deleteBtn}
+            </div>
+          `;
+        }).join('');
+
+        // Hook up delete buttons
+        listContainer.querySelectorAll('.comment-delete-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const commentId = btn.dataset.id;
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+            try {
+              await API.deleteComment(commentId);
+              await loadComments(username, profile);
+            } catch (err) {
+              alert(err.error || 'Failed to delete comment');
+            }
+          });
+        });
+
+      } catch (err) {
+        console.error('Failed to load comments:', err);
+        listContainer.innerHTML = `
+          <div style="text-align:center; padding:20px; color:#ef4444; font-size:0.8rem;">
+            Failed to load comments.
+          </div>
+        `;
+      }
+    }
+
+    function formatCommentDate(isoStr) {
+      if (!isoStr) return '';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } catch {
+        return '';
+      }
+    }
+
     // --- Main entry ---
     async function init() {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -1133,6 +1518,7 @@
         if (res && (res.success !== false)) {
           const profile = res.data || res.profile || res.user || res;
           renderProfile(profile);
+          initComments(username, profile);
         } else {
           showState('state-404');
         }
