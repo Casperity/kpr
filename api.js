@@ -1,5 +1,5 @@
 /* ============================================================
-   kpr.lol — Shared API Client & Toast System
+   kpr.lol — Shared API Client & Toast System meow
    ============================================================ */
 
 const API = {
