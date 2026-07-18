@@ -70,6 +70,25 @@
       transform: scale(1) !important;
     }
 
+    .product-status-badge {
+      position: absolute !important;
+      top: 12px !important;
+      left: 12px !important;
+      background: rgba(10, 10, 15, 0.85) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      border: 1px solid var(--status-color, #fb923c) !important;
+      color: var(--status-color, #fb923c) !important;
+      padding: 4px 8px !important;
+      border-radius: 8px !important;
+      font-size: 0.65rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px !important;
+      text-transform: uppercase !important;
+      z-index: 2 !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+    }
+
     /* --- Enter Overlay --- */
     #enter-overlay {
       position: fixed;
@@ -1295,6 +1314,7 @@
                           <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
                         `}
                         ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
+                        ${p.status_text ? `<span class="product-status-badge" style="--status-color: ${esc(p.status_color || '#fb923c')}">${esc(p.status_text)}</span>` : ''}
                         
                         ${p.images && p.images.length > 1 ? `
                           <button class="product-image-nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
