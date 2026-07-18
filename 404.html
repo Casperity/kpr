@@ -1383,6 +1383,8 @@
         const tooltip = document.getElementById('shop-tooltip');
         if (tooltip) {
           tooltip.classList.remove('show');
+          tooltip.style.top = '-9999px';
+          tooltip.style.left = '-9999px';
         }
       });
 
@@ -1390,6 +1392,11 @@
         const el = document.createElement('div');
         el.id = 'shop-tooltip';
         el.className = 'shop-tooltip';
+        el.style.position = 'fixed';
+        el.style.pointerEvents = 'none';
+        el.style.zIndex = '999999';
+        el.style.top = '-9999px';
+        el.style.left = '-9999px';
         document.body.appendChild(el);
         return el;
       }
