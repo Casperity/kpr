@@ -1222,11 +1222,18 @@
 
                   return `
                     <div class="product-card" ${isOutOfStock ? 'style="opacity: 0.8;"' : ''}>
-                      <div class="product-image-container">
-                        ${p.image ? `<img class="product-image" src="${esc(p.image)}" alt="${esc(p.title)}" />` : `
+                      <div class="product-image-container" data-current-index="0" data-images="${esc(JSON.stringify(p.images || []))}">
+                        ${p.images && p.images.length > 0 ? `
+                          <img class="product-image" src="${esc(p.images[0])}" alt="${esc(p.title)}" />
+                        ` : `
                           <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
                         `}
                         ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
+                        
+                        ${p.images && p.images.length > 1 ? `
+                          <button class="product-image-nav-btn prev-btn" onclick="navigateProductImage(this, -1, event)"><i class="fas fa-chevron-left"></i></button>
+                          <button class="product-image-nav-btn next-btn" onclick="navigateProductImage(this, 1, event)"><i class="fas fa-chevron-right"></i></button>
+                        ` : ''}
                       </div>
                       <div class="product-details">
                         <h3 class="product-title">${esc(p.title)}</h3>
@@ -1286,6 +1293,29 @@
           }
         });
       }
+
+      // Global function to slide between product images
+      window.navigateProductImage = function(btn, dir, event) {
+        if (event) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
+        const container = btn.closest('.product-image-container');
+        if (!container) return;
+        
+        const images = JSON.parse(container.getAttribute('data-images') || '[]');
+        if (images.length <= 1) return;
+        
+        let currentIndex = parseInt(container.getAttribute('data-current-index') || '0', 10);
+        currentIndex = (currentIndex + dir + images.length) % images.length;
+        
+        container.setAttribute('data-current-index', currentIndex);
+        
+        const imgEl = container.querySelector('.product-image');
+        if (imgEl) {
+          imgEl.src = images[currentIndex];
+        }
+      };
 
       // -- Init music player --
       const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
