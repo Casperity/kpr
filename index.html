@@ -115,12 +115,44 @@
     }
     .nav-link:hover { color:#fff; background:rgba(255,255,255,0.07); }
     .nav-btn {
-      font-size:0.875rem; font-weight:600; color:#010409; text-decoration:none;
-      padding:9px 22px; border-radius:10px;
-      background:linear-gradient(135deg,#00c8ff,#0af);
-      transition:opacity 0.15s;
+      display: inline-block !important;
+      position: relative !important;
+      text-decoration: none !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 0.85rem !important;
+      font-weight: 700 !important;
+      border: none !important;
+      cursor: pointer !important;
+      background: #5b21b6 !important;
+      border-radius: 0.6em !important;
+      padding: 0 !important;
+      transition: none !important;
     }
-    .nav-btn:hover { opacity:0.8; }
+
+    .nav-btn .button_top {
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-sizing: border-box !important;
+      border: 1.5px solid #7c3aed !important;
+      border-radius: 0.6em !important;
+      padding: 0.5em 1.2em !important;
+      background: #181824 !important;
+      color: #fff !important;
+      transform: translateY(-0.2em) !important;
+      transition: transform 0.1s ease !important;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.12) !important;
+    }
+
+    .nav-btn:hover .button_top {
+      transform: translateY(-0.28em) !important;
+      box-shadow: 0 0 12px rgba(124, 58, 237, 0.25) !important;
+    }
+
+    .nav-btn:active .button_top {
+      transform: translateY(0) !important;
+      box-shadow: none !important;
+    }
 
     /* ── Hero ─────────────────────────────── */
     main { position:relative; z-index:1; }
@@ -131,9 +163,9 @@
     }
     .hero-badge {
       display:inline-flex; align-items:center; gap:8px;
-      background:rgba(0,180,255,0.07); border:1px solid rgba(0,180,255,0.22);
+      background:rgba(167,139,250,0.07); border:1px solid rgba(167,139,250,0.22);
       border-radius:100px; padding:6px 16px;
-      font-size:0.78rem; font-weight:600; color:#00c8ff;
+      font-size:0.78rem; font-weight:600; color:#a78bfa;
       letter-spacing:0.04em; text-transform:uppercase;
       margin-bottom:32px;
     }
@@ -155,13 +187,44 @@
       display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center;
     }
     .btn-primary {
-      display:inline-flex; align-items:center; gap:10px;
-      font-family:'Poppins',sans-serif; font-size:0.95rem; font-weight:700;
-      color:#010409; text-decoration:none; padding:14px 32px; border-radius:14px;
-      background:linear-gradient(135deg,#00c8ff,#0af);
-      transition:opacity 0.15s;
+      display: inline-block !important;
+      position: relative !important;
+      text-decoration: none !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      border: none !important;
+      cursor: pointer !important;
+      background: #5b21b6 !important;
+      border-radius: 0.75em !important;
+      padding: 0 !important;
+      transition: none !important;
     }
-    .btn-primary:hover { opacity:0.85; }
+
+    .btn-primary .button_top {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      box-sizing: border-box !important;
+      border: 2px solid #7c3aed !important;
+      border-radius: 0.75em !important;
+      padding: 0.75em 1.5em !important;
+      background: #181824 !important;
+      color: #fff !important;
+      transform: translateY(-0.25em) !important;
+      transition: transform 0.1s ease !important;
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.15) !important;
+    }
+
+    .btn-primary:hover .button_top {
+      transform: translateY(-0.38em) !important;
+      box-shadow: 0 0 15px rgba(124, 58, 237, 0.3) !important;
+    }
+
+    .btn-primary:active .button_top {
+      transform: translateY(0) !important;
+      box-shadow: none !important;
+    }
     .btn-secondary {
       display:inline-flex; align-items:center; gap:10px;
       font-family:'Poppins',sans-serif; font-size:0.95rem; font-weight:500;
@@ -295,7 +358,9 @@
     <a href="/" class="nav-brand">kpr<span>.lol</span></a>
     <div class="nav-actions">
       <a href="/login" class="nav-link" id="nav-login">Log in</a>
-      <a href="/signup" class="nav-btn" id="nav-signup">Get Started</a>
+      <a href="/signup" class="nav-btn" id="nav-signup">
+        <span class="button_top">Get Started</span>
+      </a>
     </div>
   </nav>
 
@@ -323,8 +388,10 @@
 
       <div class="hero-actions">
         <a href="/signup" class="btn-primary" id="hero-cta-main">
-          <i class="fas fa-user-plus"></i>
-          Sign up
+          <span class="button_top">
+            <i class="fas fa-user-plus"></i>
+            Sign up
+          </span>
         </a>
       </div>
       <p class="hero-login-link">Already have an account? <a href="/login" id="hero-cta-sub">Log in</a></p>
@@ -428,8 +495,10 @@
         <p class="cta-sub">Got an invite code? You're already in. Create your account and make it yours.</p>
         <div class="cta-actions">
           <a href="/signup" class="btn-primary" id="cta-main">
-            <i class="fas fa-user-plus"></i>
-            Sign up
+            <span class="button_top">
+              <i class="fas fa-user-plus"></i>
+              Sign up
+            </span>
           </a>
         </div>
         <p class="cta-note" id="cta-sub-note">
