@@ -14,8 +14,62 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="profile.css" />
+  <link rel="stylesheet" href="/profile.css" />
   <style>
+    /* Custom Scrollbars for Shop Modal */
+    .shop-products-grid::-webkit-scrollbar {
+      width: 8px !important;
+      height: 8px !important;
+    }
+
+    .shop-products-grid::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border-radius: 10px !important;
+    }
+
+    .shop-products-grid::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.28) !important;
+      border-radius: 10px !important;
+      border: 1px solid transparent !important;
+    }
+
+    .shop-products-grid::-webkit-scrollbar-thumb:hover {
+      background: var(--accent, #6366f1) !important;
+    }
+
+    /* Custom CSS Tooltip for Option Descriptions */
+    .shop-tooltip {
+      position: fixed !important;
+      background: rgba(15, 15, 22, 0.85) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #fff !important;
+      padding: 8px 12px !important;
+      border-radius: 10px !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 0.75rem !important;
+      font-weight: 500 !important;
+      white-space: normal !important;
+      width: max-content !important;
+      max-width: 220px !important;
+      line-height: 1.4 !important;
+      text-align: center !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      transform: scale(0.95) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1) !important;
+      z-index: 1000000 !important;
+    }
+
+    .shop-tooltip.show {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: scale(1) !important;
+    }
+
     /* --- Enter Overlay --- */
     #enter-overlay {
       position: fixed;
@@ -751,7 +805,7 @@
     </div>
   </div>
 
-  <script src="api.js"></script>
+  <script src="/api.js"></script>
   <script>
     /* =============================================
        kpr.lol — Profile Renderer / 404 Handler
