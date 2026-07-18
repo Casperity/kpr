@@ -715,8 +715,8 @@
           return; // stop loading the rest
         }
 
-        // Gallery (VIP/Admin only)
-        if (isVipOrAdmin) {
+        // Gallery (Admin only)
+        if (user.isAdmin) {
           galleryItems = (res.gallery || []).map(g => ({ url: g.url || '', type: g.type || 'image' }));
           renderGalleryList();
         } else {
@@ -725,8 +725,8 @@
             body.innerHTML = `
               <div style="text-align: center; padding: 24px 16px; color: rgba(255,255,255,0.4); display: flex; flex-direction: column; align-items: center; gap: 8px;">
                 <i class="fas fa-lock" style="font-size: 1.8rem; color: #a78bfa; margin-bottom: 4px;"></i>
-                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">VIP Feature</div>
-                <div style="font-size: 0.8rem; line-height: 1.4;">The gallery feature is restricted to VIP users.</div>
+                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Admin Feature</div>
+                <div style="font-size: 0.8rem; line-height: 1.4;">The gallery feature is restricted to Admin users.</div>
               </div>
             `;
           }
@@ -1385,8 +1385,8 @@
         // Active badges
         await API.updateActiveBadges(activeBadges);
 
-        // Gallery (VIP/Admin only)
-        if (currentUser?.isAdmin || currentUser?.isVip) {
+        // Gallery (Admin only)
+        if (currentUser?.isAdmin) {
           const validGalleryItems = galleryItems
             .filter(g => g.url && g.url.trim())
             .map((g, i) => ({ url: g.url.trim(), type: detectMediaType(g.url) || 'image', displayOrder: i }));
