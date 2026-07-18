@@ -263,6 +263,10 @@
         </div>
         <div class="dash-section-body">
           <div class="form-hint" style="margin-bottom:14px;">Add photos and videos to your profile gallery. Drag to reorder. Only GitHub URLs allowed for media.</div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 10px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;">
+            <input type="checkbox" id="input-disable-gallery" style="width: 16px; height: 16px; cursor: pointer;">
+            <label for="input-disable-gallery" style="font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.7); cursor: pointer; user-select: none;">Disable gallery showcase on profile (hides items without deleting them)</label>
+          </div>
           <div id="gallery-list" style="display:flex;flex-direction:column;gap:8px;"></div>
           <button class="btn-add-link" id="btn-add-gallery-item" style="margin-top:10px;">
             <i class="fas fa-plus"></i> Add Item
@@ -543,6 +547,7 @@
     const inputMusicTitle = document.getElementById('input-music-title');
     const inputMusicArtist = document.getElementById('input-music-artist');
     const inputMusicAutoplay = document.getElementById('input-music-autoplay');
+    const inputDisableGallery = document.getElementById('input-disable-gallery');
     const btnSave = document.getElementById('btn-save');
     const btnLogout = document.getElementById('btn-logout');
     const navViewProfile = document.getElementById('nav-view-profile');
@@ -774,6 +779,9 @@
         inputMusicTitle.value = settings.musicTitle || '';
         inputMusicArtist.value = settings.musicArtist || '';
         inputMusicAutoplay.checked = !!(settings.musicAutoplay || settings.music_autoplay);
+        if (inputDisableGallery) {
+          inputDisableGallery.checked = !!settings.disableGallery;
+        }
         syncToggle(inputMusicAutoplay);
         syncToggle(inputBgBlur);
         syncToggle(inputBgVideoMuted);
@@ -1355,7 +1363,8 @@
           musicAutoplay: inputMusicAutoplay.checked,
           musicUrl: inputMusicUrl.value.trim(),
           musicTitle: inputMusicTitle.value.trim(),
-          musicArtist: inputMusicArtist.value.trim()
+          musicArtist: inputMusicArtist.value.trim(),
+          disableGallery: inputDisableGallery ? inputDisableGallery.checked : false
         };
         // VIP/Admin playlist — send even if empty (null clears it)
         if (currentUser?.isAdmin || currentUser?.isVip) {

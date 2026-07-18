@@ -1157,7 +1157,7 @@
       const galleryData = data.gallery || [];
 
       // -- Build card --
-      const hasGallery = galleryData.length > 0;
+      const hasGallery = galleryData.length > 0 && (!data.settings || data.settings.disableGallery !== true);
       const showTabs = hasGallery; // only show tabs if there's a gallery
 
       // Build gallery carousel HTML (paginated into 3 columns, 2 rows max per page)
