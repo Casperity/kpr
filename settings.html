@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -256,43 +256,6 @@
       </div>
     </div>
 
-    <!-- Minecraft Cosmetics Integration -->
-    <div class="settings-card">
-      <div class="settings-card-title">Minecraft Cosmetics Integration</div>
-      <div class="form-group">
-        <label class="form-label">Minecraft Username</label>
-        <input type="text" class="form-input" id="input-mc-username" placeholder="MinecraftUsername" />
-      </div>
-      <div class="form-group" style="margin-top:16px;">
-        <label class="form-label">Minecraft UUID</label>
-        <input type="text" class="form-input" id="input-mc-uuid" placeholder="87e8adf4-0000-0000-0000-000000000000" />
-      </div>
-      <div class="form-group" style="margin-top:16px;">
-        <label class="form-label">Equipped Custom Cosmetics (JSON List)</label>
-        <textarea class="form-input" id="input-mc-cosmetics" rows="6" placeholder='[
-  {
-    "id": "twerk",
-    "slot": "EMOTE",
-    "tier": "EPIC",
-    "displayNames": {
-      "en_us": "Twerk"
-    },
-    "files": {
-      "animations.json": {
-        "url": "https://kpr.lol/assets/twerk/animations.json",
-        "checksum": "41CD9F0C71B08352C166849D59C25D4A9502A871494EE4A7A5F0E42DF3B14278"
-      }
-    }
-  }
-]' style="font-family: monospace; font-size: 0.82rem; background: rgba(0,0,0,0.2); color: #fff;"></textarea>
-      </div>
-
-      <div class="settings-divider" style="margin-top:28px; margin-bottom:24px;"></div>
-
-      <button class="btn-settings-primary" id="btn-update-mc">
-        <i class="fas fa-gamepad"></i> Save Minecraft Config
-      </button>
-    </div>
 
     <!-- Change Password -->
     <div class="settings-card">
@@ -379,7 +342,7 @@
       }
       loadUserData();
 
-      // ── Change Username ────────────────────────────────────────
+      // â”€â”€ Change Username â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       btnChangeUsername?.addEventListener('click', async () => {
         const username = inputUsername.value.trim();
         if (!username) {
@@ -425,69 +388,13 @@
         }
       });
 
-      // ── Minecraft Cosmetics link ───────────────────────────────
-      const inputMcUsername = document.getElementById('input-mc-username');
-      const inputMcUuid = document.getElementById('input-mc-uuid');
-      const inputMcCosmetics = document.getElementById('input-mc-cosmetics');
-      const btnUpdateMc = document.getElementById('btn-update-mc');
-
-      async function loadMinecraftLink() {
-        try {
-          const res = await API.getMinecraft();
-          if (res.linked) {
-            if (inputMcUsername) inputMcUsername.value = res.minecraftUsername || '';
-            if (inputMcUuid) inputMcUuid.value = res.minecraftUuid || '';
-            if (inputMcCosmetics) inputMcCosmetics.value = JSON.stringify(res.cosmetics, null, 2) || '[]';
-          }
-        } catch (err) {
-          console.error('Failed to load Minecraft link:', err);
-        }
-      }
-      loadMinecraftLink();
-
-      btnUpdateMc?.addEventListener('click', async () => {
-        const mcUsername = inputMcUsername.value.trim();
-        const mcUuid = inputMcUuid.value.trim();
-        let cosmeticsList = [];
-
-        if (!mcUsername || !mcUuid) {
-          return Toast.show('Minecraft Username and UUID are required.', 'error');
-        }
-
-        try {
-          const val = inputMcCosmetics.value.trim();
-          if (val) {
-            cosmeticsList = JSON.parse(val);
-          }
-        } catch (e) {
-          return Toast.show('Invalid JSON format in Equipped Custom Cosmetics.', 'error');
-        }
-
-        btnUpdateMc.disabled = true;
-        btnUpdateMc.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-        try {
-          const res = await API.updateMinecraft(mcUuid, mcUsername, cosmeticsList);
-          if (res.success) {
-            Toast.show('Minecraft cosmetics updated successfully!', 'success');
-          } else {
-            Toast.show(res.error || 'Failed to update Minecraft cosmetics', 'error');
-          }
-        } catch (err) {
-          Toast.show(err.error || err.message || 'Failed to update Minecraft cosmetics', 'error');
-        } finally {
-          btnUpdateMc.disabled = false;
-          btnUpdateMc.innerHTML = '<i class="fas fa-gamepad"></i> Save Minecraft Config';
-        }
-      });
-
       // Logout
       document.getElementById('btn-logout').addEventListener('click', () => {
         API.logout();
         window.location.href = '/login';
       });
 
-      // ── Change Password ────────────────────────────────────────
+      // â”€â”€ Change Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       document.getElementById('btn-change-pw').addEventListener('click', async () => {
         const currentPw = document.getElementById('input-current-pw').value;
         const newPw     = document.getElementById('input-new-pw').value;
@@ -500,14 +407,14 @@
 
         const btn = document.getElementById('btn-change-pw');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating…';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updatingâ€¦';
 
         try {
           await API.request('/api/user/password', {
             method: 'PUT',
             body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw })
           });
-          Toast.show('Password updated! Logging you out…', 'success');
+          Toast.show('Password updated! Logging you outâ€¦', 'success');
           document.getElementById('input-current-pw').value = '';
           document.getElementById('input-new-pw').value = '';
           document.getElementById('input-confirm-pw').value = '';
@@ -519,7 +426,7 @@
         }
       });
 
-      // ── Delete Account ─────────────────────────────────────────
+      // â”€â”€ Delete Account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       document.getElementById('btn-delete-account').addEventListener('click', async () => {
         const pw = document.getElementById('input-delete-pw').value;
         if (!pw) return Toast.show('Enter your password to confirm deletion.', 'error');
@@ -531,7 +438,7 @@
 
         const btn = document.getElementById('btn-delete-account');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deletingâ€¦';
 
         try {
           await API.request('/api/user/account', {

@@ -138,17 +138,6 @@ const API = {
     });
   },
 
-  getMinecraft() {
-    return this.request('/api/user/minecraft');
-  },
-
-  updateMinecraft(minecraftUuid, minecraftUsername, cosmetics) {
-    return this.request('/api/user/minecraft', {
-      method: 'PUT',
-      body: JSON.stringify({ minecraftUuid, minecraftUsername, cosmetics })
-    });
-  },
-
   /* ── Admin endpoints ──────────────────────────────────── */
   getInvites() {
     return this.request('/api/admin/invites');
