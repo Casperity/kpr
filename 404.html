@@ -77,8 +77,8 @@
       background: rgba(10, 10, 15, 0.85) !important;
       backdrop-filter: blur(8px) !important;
       -webkit-backdrop-filter: blur(8px) !important;
-      border: 1px solid var(--status-color, #fb923c) !important;
-      color: var(--status-color, #fb923c) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #fff !important;
       padding: 4px 8px !important;
       border-radius: 8px !important;
       font-size: 0.65rem !important;
@@ -87,6 +87,18 @@
       text-transform: uppercase !important;
       z-index: 2 !important;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+
+    .product-status-badge .status-dot {
+      width: 6px !important;
+      height: 6px !important;
+      background: var(--status-color, #fb923c) !important;
+      border-radius: 50% !important;
+      display: inline-block !important;
+      box-shadow: 0 0 6px var(--status-color, #fb923c) !important;
     }
 
     /* --- Enter Overlay --- */
@@ -1314,7 +1326,7 @@
                           <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
                         `}
                         ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
-                        ${p.status_text ? `<span class="product-status-badge" style="--status-color: ${esc(p.status_color || '#fb923c')}">${esc(p.status_text)}</span>` : ''}
+                        ${p.status_text ? `<span class="product-status-badge" style="--status-color: ${esc(p.status_color || '#fb923c')}"><span class="status-dot"></span>${esc(p.status_text)}</span>` : ''}
                         
                         ${p.images && p.images.length > 1 ? `
                           <button class="product-image-nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
