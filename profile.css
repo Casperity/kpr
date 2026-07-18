@@ -1152,40 +1152,9 @@ body.profile-page.has-bg-image::before {
   right: 8px;
 }
 
-.shop-products-grid::-webkit-scrollbar-thumb:hover {
-  background: var(--accent, #6366f1);
-}
-
-/* Custom CSS Tooltip for Option Descriptions */
-.shop-tooltip {
-  position: fixed;
-  background: rgba(10, 10, 15, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
-  padding: 6px 10.5px;
-  border-radius: 8px;
-  font-size: 0.72rem;
-  font-weight: 500;
-  white-space: normal;
-  width: max-content;
-  max-width: 220px;
-  line-height: 1.4;
-  text-align: center;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.12s ease, transform 0.12s ease;
-  transform: scale(0.92);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  z-index: 10000;
-}
-
-.shop-tooltip.show {
-  opacity: 1;
-  visibility: visible;
-  transform: scale(1);
+/* Custom Scrollbars for Shop Modal */
+.shop-products-grid::-webkit-scrollbar {
+  width: 6px;
 }
 
 .shop-products-grid::-webkit-scrollbar-track {
@@ -1201,4 +1170,37 @@ body.profile-page.has-bg-image::before {
 
 .shop-products-grid::-webkit-scrollbar-thumb:hover {
   background: var(--accent, #6366f1);
+}
+
+/* Custom CSS Tooltip for Option Descriptions */
+.shop-tooltip {
+  position: fixed;
+  background: rgba(15, 15, 22, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: normal;
+  width: max-content;
+  max-width: 220px;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.95);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1);
+  z-index: 100000;
+}
+
+.shop-tooltip.show {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
 }
