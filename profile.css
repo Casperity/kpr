@@ -1151,3 +1151,23 @@ body.profile-page.has-bg-image::before {
 .product-image-nav-btn.next-btn {
   right: 8px;
 }
+
+/* Custom Scrollbars for Shop Modal */
+.shop-products-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shop-products-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+
+.shop-products-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.shop-products-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--accent, #6366f1);
+}
