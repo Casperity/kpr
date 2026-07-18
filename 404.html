@@ -1268,12 +1268,23 @@
                 const productsList = shopData.products;
                 shopProductsContainer.innerHTML = productsList.map((p, idx) => {
                   const isOutOfStock = p.stock === 0;
-                  const stockText = p.stock === null
-                    ? '<i class="fas fa-circle-check"></i> In Stock'
-                    : (isOutOfStock
-                      ? '<i class="fas fa-circle-xmark"></i> Out of Stock'
-                      : `<i class="fas fa-circle-check"></i> ${p.stock} in stock`);
-                  const stockColor = isOutOfStock ? '#f87171' : '#4ade80';
+                  const isLowStock = p.stock !== null && p.stock > 0 && p.stock <= 5;
+                  
+                  let stockText = '';
+                  let stockColor = '#4ade80';
+                  
+                  if (isOutOfStock) {
+                    stockText = '<i class="fas fa-circle-xmark"></i> Out of Stock';
+                    stockColor = '#f87171';
+                  } else if (isLowStock) {
+                    stockText = `<i class="fas fa-triangle-exclamation"></i> Almost Out of Stock (${p.stock} left)`;
+                    stockColor = '#fb923c';
+                  } else {
+                    stockText = p.stock === null
+                      ? '<i class="fas fa-circle-check"></i> In Stock'
+                      : `<i class="fas fa-circle-check"></i> ${p.stock} in stock`;
+                    stockColor = '#4ade80';
+                  }
 
                   return `
                     <div class="product-card" ${isOutOfStock ? 'style="opacity: 0.8;"' : ''}>
