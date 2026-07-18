@@ -524,9 +524,19 @@
   <script>
     // If already logged in, update nav to point to dashboard
     if (typeof API !== 'undefined' && API.isLoggedIn()) {
-      document.getElementById('nav-login').style.display = 'none';
-      document.getElementById('nav-signup').textContent = 'Go to Dashboard';
-      document.getElementById('nav-signup').href = '/dashboard';
+      const navLogin = document.getElementById('nav-login');
+      if (navLogin) navLogin.style.display = 'none';
+      
+      const navSignup = document.getElementById('nav-signup');
+      if (navSignup) {
+        navSignup.href = '/dashboard';
+        const topSpan = navSignup.querySelector('.button_top');
+        if (topSpan) {
+          topSpan.textContent = 'Go to Dashboard';
+        } else {
+          navSignup.textContent = 'Go to Dashboard';
+        }
+      }
     }
 
     // Scroll-in animation
