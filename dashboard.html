@@ -418,6 +418,36 @@
         </div>
       </div>
 
+      <!-- SellAuth Shop Integration -->
+      <div class="dash-section" id="section-sellauth">
+        <div class="dash-section-header" onclick="toggleSection('section-sellauth')">
+          <div class="dash-section-title">
+            <i class="fas fa-store"></i> SellAuth Shop
+          </div>
+          <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+        <div class="dash-section-body">
+          <div id="sellauth-status" style="margin-bottom:14px; display:none;">
+            <span id="sellauth-status-badge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; background:rgba(74,222,128,0.12); color:#4ade80; border:1px solid rgba(74,222,128,0.25);">
+              <i class="fas fa-circle-check"></i>
+              <span>Linked — Shop ID: <span id="sellauth-shop-id-display"></span></span>
+            </span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">SellAuth API Key</label>
+            <input type="password" class="form-input" id="input-sellauth-key" placeholder="5949303|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+            <div class="form-hint">Find this at <strong>dash.sellauth.com/api</strong> — paste the full key including the numbers before the pipe.</div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+            <button class="btn-add-link" id="btn-save-sellauth" style="margin:0;">
+              <i class="fas fa-link"></i> Link Store
+            </button>
+            <button class="btn-add-link" id="btn-remove-sellauth" style="margin:0; background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.3); color:#f87171; display:none;">
+              <i class="fas fa-unlink"></i> Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
       <!-- Save -->
       <div class="dash-save-area">
         <button class="btn-save" id="btn-save">
@@ -1399,8 +1429,78 @@
       window.location.href = '/login';
     });
 
+    // --- SellAuth Integration ---
+    const inputSellauthKey = document.getElementById('input-sellauth-key');
+    const btnSaveSellauth = document.getElementById('btn-save-sellauth');
+    const btnRemoveSellauth = document.getElementById('btn-remove-sellauth');
+    const sellauthStatus = document.getElementById('sellauth-status');
+    const sellauthShopIdDisplay = document.getElementById('sellauth-shop-id-display');
+
+    async function loadSellauth() {
+      try {
+        const res = await API.getSellauth();
+        if (res.linked) {
+          sellauthStatus.style.display = 'block';
+          sellauthShopIdDisplay.textContent = res.shopId || '';
+          btnRemoveSellauth.style.display = 'inline-flex';
+          btnSaveSellauth.innerHTML = '<i class="fas fa-arrows-rotate"></i> Update Link';
+          inputSellauthKey.value = ''; // Don't show the secret key
+        } else {
+          sellauthStatus.style.display = 'none';
+          btnRemoveSellauth.style.display = 'none';
+          btnSaveSellauth.innerHTML = '<i class="fas fa-link"></i> Link Store';
+          inputSellauthKey.value = '';
+        }
+      } catch (err) {
+        console.error('Failed to load SellAuth config:', err);
+      }
+    }
+
+    btnSaveSellauth?.addEventListener('click', async () => {
+      const apiKey = inputSellauthKey.value.trim();
+      if (!apiKey) {
+        return Toast.show('Please enter your SellAuth API key', 'error');
+      }
+
+      btnSaveSellauth.disabled = true;
+      btnSaveSellauth.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+      try {
+        const res = await API.updateSellauth(apiKey);
+        if (res.success) {
+          Toast.show('SellAuth store linked successfully!', 'success');
+          await loadSellauth();
+        } else {
+          Toast.show(res.error || 'Failed to link SellAuth store', 'error');
+        }
+      } catch (err) {
+        Toast.show(err.error || err.message || 'Failed to link SellAuth store', 'error');
+      } finally {
+        btnSaveSellauth.disabled = false;
+      }
+    });
+
+    btnRemoveSellauth?.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to disconnect your SellAuth store?')) return;
+      btnRemoveSellauth.disabled = true;
+      try {
+        const res = await API.deleteSellauth();
+        if (res.success) {
+          Toast.show('SellAuth store disconnected.', 'success');
+          await loadSellauth();
+        } else {
+          Toast.show(res.error || 'Failed to disconnect', 'error');
+        }
+      } catch (err) {
+        Toast.show(err.message || 'Failed to disconnect', 'error');
+      } finally {
+        btnRemoveSellauth.disabled = false;
+      }
+    });
+
     // --- Init ---
     loadProfile();
+    loadSellauth();
     
   </script>
 </body>

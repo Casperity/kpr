@@ -1,22 +1,22 @@
-/* ============================================================
-   kpr.lol — Shared API Client & Toast System meow
+﻿/* ============================================================
+   kpr.lol â€” Shared API Client & Toast System meow
    ============================================================ */
 
 const API = {
   BASE: 'https://api.kpr.lol',
 
-  /* ── Token management ─────────────────────────────────── */
+  /* â”€â”€ Token management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   getToken()  { return localStorage.getItem('kpr_token'); },
   setToken(t) { localStorage.setItem('kpr_token', t); },
   clearToken() { localStorage.removeItem('kpr_token'); },
   isLoggedIn() { return !!this.getToken(); },
 
-  /* ── User info cache ──────────────────────────────────── */
+  /* â”€â”€ User info cache â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   getUser()  { return JSON.parse(localStorage.getItem('kpr_user') || 'null'); },
   setUser(u) { localStorage.setItem('kpr_user', JSON.stringify(u)); },
   clearUser() { localStorage.removeItem('kpr_user'); },
 
-  /* ── Core request helper ──────────────────────────────── */
+  /* â”€â”€ Core request helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   async request(endpoint, options = {}) {
     const url = this.BASE + endpoint;
     const headers = {
@@ -45,13 +45,13 @@ const API = {
     } catch (err) {
       /* Network error (not HTTP error) */
       if (!err.status) {
-        throw { status: 0, message: 'Network error — check your connection.' };
+        throw { status: 0, message: 'Network error â€” check your connection.' };
       }
       throw err;
     }
   },
 
-  /* ── Auth endpoints ───────────────────────────────────── */
+  /* â”€â”€ Auth endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   signup(username, password, inviteCode, referredBy) {
     return this.request('/api/auth/signup', {
       method: 'POST',
@@ -66,7 +66,7 @@ const API = {
     });
   },
 
-  /* ── Profile / User endpoints ─────────────────────────── */
+  /* â”€â”€ Profile / User endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   getProfile(username) {
     return this.request('/api/profile/' + encodeURIComponent(username));
   },
@@ -138,7 +138,27 @@ const API = {
     });
   },
 
-  /* ── Admin endpoints ──────────────────────────────────── */
+  /* -- SellAuth shop endpoints --------------------------------- */
+  getSellauth() {
+    return this.request('/api/user/sellauth');
+  },
+
+  updateSellauth(apiKey) {
+    return this.request('/api/user/sellauth', {
+      method: 'PUT',
+      body: JSON.stringify({ apiKey })
+    });
+  },
+
+  deleteSellauth() {
+    return this.request('/api/user/sellauth', { method: 'DELETE' });
+  },
+
+  getShop(username) {
+    return this.request('/api/profile/' + encodeURIComponent(username) + '/shop');
+  },
+
+  /* â”€â”€ Admin endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   getInvites() {
     return this.request('/api/admin/invites');
   },
@@ -160,7 +180,7 @@ const API = {
     return this.request('/api/admin/users');
   },
 
-  /* ── Logout ───────────────────────────────────────────── */
+  /* â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   logout() {
     this.clearToken();
     this.clearUser();

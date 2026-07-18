@@ -701,6 +701,19 @@
     </div>
   </div>
 
+  <!-- Shop Modal Overlay -->
+  <div id="shop-modal" class="shop-modal-overlay">
+    <div class="shop-modal-content">
+      <div class="shop-modal-header">
+        <h2 class="shop-modal-title"><i class="fas fa-store"></i> Shop</h2>
+        <button id="shop-modal-close" class="shop-modal-close-btn"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div id="shop-products-container" class="shop-products-grid">
+        <!-- Products dynamically filled -->
+      </div>
+    </div>
+  </div>
+
   <!-- Loading State -->
   <div id="state-loading" class="profile-loading">
     <div class="loading-spinner"></div>
@@ -1117,14 +1130,23 @@
           ${musicHtml}
           ${viewsHtml}
           
-          ${hasGallery ? `
-            <div class="gallery-expand-container" style="margin-top: 24px; width: 100%;">
+          ${(hasGallery || data.hasShop) ? `
+          <div class="profile-buttons-wrapper" style="display: flex; gap: 10px; width: 100%; margin-top: 24px; justify-content: center; flex-wrap: wrap;">
+            ${hasGallery ? `
               <button id="toggle-gallery-btn" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; padding: 10px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                 <i class="fas fa-images"></i> <span>View Gallery</span>
-              </button>
-              <div id="gallery-expand-body" class="gallery-expand-body">
-                ${galleryGridHtml}
-              </div>
+              </button>` : ''
+            }
+            ${data.hasShop ? `
+              <button id="view-shop-btn" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; padding: 10px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <i class="fas fa-store"></i> <span>Shop</span>
+              </button>` : ''
+            }
+          </div>` : ''}
+          
+          ${hasGallery ? `
+            <div id="gallery-expand-body" class="gallery-expand-body" style="width: 100%;">
+              ${galleryGridHtml}
             </div>` : ''
           }
           ${cornerLinksHtml}
@@ -1164,6 +1186,91 @@
           toggleGalleryBtn.querySelector('span').textContent = isExpanded ? 'Hide Gallery' : 'View Gallery';
           toggleGalleryBtn.style.background = isExpanded ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)';
           toggleGalleryBtn.style.borderColor = isExpanded ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)';
+        });
+      }
+
+      // --- Shop Modal controller ---
+      const viewShopBtn = document.getElementById('view-shop-btn');
+      const shopModal = document.getElementById('shop-modal');
+      const shopModalClose = document.getElementById('shop-modal-close');
+      const shopProductsContainer = document.getElementById('shop-products-container');
+
+      if (viewShopBtn && shopModal && shopProductsContainer) {
+        let productsLoaded = false;
+
+        const openShop = async () => {
+          shopModal.classList.add('open');
+          shopModal.style.display = 'flex';
+          
+          if (!productsLoaded) {
+            // Render skeleton loading items
+            shopProductsContainer.innerHTML = Array(3).fill(0).map(() => `
+              <div class="product-skeleton"></div>
+            `).join('');
+
+            try {
+              const shopData = await API.getShop(data.username);
+              if (shopData.linked && shopData.products && shopData.products.length > 0) {
+                shopProductsContainer.innerHTML = shopData.products.map(p => `
+                  <div class="product-card">
+                    <div class="product-image-container">
+                      ${p.image ? `<img class="product-image" src="${esc(p.image)}" alt="${esc(p.title)}" />` : `
+                        <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
+                      `}
+                      ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
+                    </div>
+                    <div class="product-details">
+                      <h3 class="product-title">${esc(p.title)}</h3>
+                      <p class="product-description">${esc(p.description || 'No description available.')}</p>
+                      <a href="${esc(p.url)}" target="_blank" class="product-buy-btn">
+                        <i class="fas fa-shopping-cart"></i> Buy Now
+                      </a>
+                    </div>
+                  </div>
+                `).join('');
+                productsLoaded = true;
+              } else {
+                shopProductsContainer.innerHTML = `
+                  <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: rgba(255,255,255,0.4);">
+                    <i class="fas fa-folder-open" style="font-size: 2.5rem; margin-bottom: 12px; display: block; opacity: 0.5;"></i>
+                    No products found in this store.
+                  </div>
+                `;
+              }
+            } catch (err) {
+              console.error('Failed to load shop products:', err);
+              shopProductsContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: #f87171;">
+                  <i class="fas fa-exclamation-circle" style="font-size: 2.5rem; margin-bottom: 12px; display: block;"></i>
+                  Failed to load products. Please try again later.
+                </div>
+              `;
+            }
+          }
+        };
+
+        const closeShop = () => {
+          shopModal.classList.remove('open');
+          setTimeout(() => {
+            if (!shopModal.classList.contains('open')) {
+              shopModal.style.display = 'none';
+            }
+          }, 300);
+        };
+
+        viewShopBtn.addEventListener('click', openShop);
+        if (shopModalClose) shopModalClose.addEventListener('click', closeShop);
+        
+        // Close on overlay backdrop click
+        shopModal.addEventListener('click', (e) => {
+          if (e.target === shopModal) closeShop();
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && shopModal.classList.contains('open')) {
+            closeShop();
+          }
         });
       }
 
