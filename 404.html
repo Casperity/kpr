@@ -1231,8 +1231,8 @@
                         ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
                         
                         ${p.images && p.images.length > 1 ? `
-                          <button class="product-image-nav-btn prev-btn" onclick="navigateProductImage(this, -1, event)"><i class="fas fa-chevron-left"></i></button>
-                          <button class="product-image-nav-btn next-btn" onclick="navigateProductImage(this, 1, event)"><i class="fas fa-chevron-right"></i></button>
+                          <button class="product-image-nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                          <button class="product-image-nav-btn next-btn"><i class="fas fa-chevron-right"></i></button>
                         ` : ''}
                       </div>
                       <div class="product-details">
@@ -1249,6 +1249,25 @@
                   `;
                 }).join('');
                 productsLoaded = true;
+
+                // Wire up product image slider navigation dynamically (bypasses Content Security Policy block on inline click handlers)
+                shopProductsContainer.querySelectorAll('.product-image-container').forEach(containerEl => {
+                  const prevBtn = containerEl.querySelector('.prev-btn');
+                  const nextBtn = containerEl.querySelector('.next-btn');
+                  if (prevBtn && nextBtn) {
+                    prevBtn.addEventListener('click', (e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      slideProductImage(containerEl, -1);
+                    });
+                    nextBtn.addEventListener('click', (e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      slideProductImage(containerEl, 1);
+                    });
+                  }
+                });
+
               } else {
                 shopProductsContainer.innerHTML = `
                   <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: rgba(255,255,255,0.4);">
@@ -1292,30 +1311,23 @@
             closeShop();
           }
         });
-      }
 
-      // Global function to slide between product images
-      window.navigateProductImage = function(btn, dir, event) {
-        if (event) {
-          event.stopPropagation();
-          event.preventDefault();
+        // Local function to transition product images
+        function slideProductImage(container, dir) {
+          const images = JSON.parse(container.getAttribute('data-images') || '[]');
+          if (images.length <= 1) return;
+          
+          let currentIndex = parseInt(container.getAttribute('data-current-index') || '0', 10);
+          currentIndex = (currentIndex + dir + images.length) % images.length;
+          
+          container.setAttribute('data-current-index', currentIndex);
+          
+          const imgEl = container.querySelector('.product-image');
+          if (imgEl) {
+            imgEl.src = images[currentIndex];
+          }
         }
-        const container = btn.closest('.product-image-container');
-        if (!container) return;
-        
-        const images = JSON.parse(container.getAttribute('data-images') || '[]');
-        if (images.length <= 1) return;
-        
-        let currentIndex = parseInt(container.getAttribute('data-current-index') || '0', 10);
-        currentIndex = (currentIndex + dir + images.length) % images.length;
-        
-        container.setAttribute('data-current-index', currentIndex);
-        
-        const imgEl = container.querySelector('.product-image');
-        if (imgEl) {
-          imgEl.src = images[currentIndex];
-        }
-      };
+      }
 
       // -- Init music player --
       const hasMusic = !!(data.settings?.musicPlaylist?.length || data.settings?.musicUrl || data.settings?.music_url);
