@@ -991,6 +991,9 @@ body.profile-page.has-bg-image::before {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
   max-height: calc(80vh - 80px);
+  /* Firefox Scrollbar Support */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.02);
 }
 
 /* Product Card */
@@ -1154,7 +1157,8 @@ body.profile-page.has-bg-image::before {
 
 /* Custom Scrollbars for Shop Modal */
 .shop-products-grid::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .shop-products-grid::-webkit-scrollbar-track {
@@ -1163,7 +1167,7 @@ body.profile-page.has-bg-image::before {
 }
 
 .shop-products-grid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.28);
   border-radius: 10px;
   border: 1px solid transparent;
 }
