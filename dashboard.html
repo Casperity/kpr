@@ -716,20 +716,13 @@
         }
 
         // Gallery (Admin only)
+        const gallerySection = document.getElementById('section-gallery');
         if (user.isAdmin) {
+          if (gallerySection) gallerySection.style.display = '';
           galleryItems = (res.gallery || []).map(g => ({ url: g.url || '', type: g.type || 'image' }));
           renderGalleryList();
         } else {
-          const body = document.querySelector('#section-gallery .dash-section-body');
-          if (body) {
-            body.innerHTML = `
-              <div style="text-align: center; padding: 24px 16px; color: rgba(255,255,255,0.4); display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                <i class="fas fa-lock" style="font-size: 1.8rem; color: #a78bfa; margin-bottom: 4px;"></i>
-                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Admin Feature</div>
-                <div style="font-size: 0.8rem; line-height: 1.4;">The gallery feature is restricted to Admin users.</div>
-              </div>
-            `;
-          }
+          if (gallerySection) gallerySection.style.display = 'none';
         }
 
         // Social links
