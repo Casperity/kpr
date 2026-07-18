@@ -1211,23 +1211,36 @@
             try {
               const shopData = await API.getShop(data.username);
               if (shopData.linked && shopData.products && shopData.products.length > 0) {
-                shopProductsContainer.innerHTML = shopData.products.map(p => `
-                  <div class="product-card">
-                    <div class="product-image-container">
-                      ${p.image ? `<img class="product-image" src="${esc(p.image)}" alt="${esc(p.title)}" />` : `
-                        <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
-                      `}
-                      ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
+                shopProductsContainer.innerHTML = shopData.products.map(p => {
+                  const isOutOfStock = p.stock === 0;
+                  const stockText = p.stock === null
+                    ? '<i class="fas fa-circle-check"></i> In Stock'
+                    : (isOutOfStock
+                      ? '<i class="fas fa-circle-xmark"></i> Out of Stock'
+                      : `<i class="fas fa-circle-check"></i> ${p.stock} in stock`);
+                  const stockColor = isOutOfStock ? '#f87171' : '#4ade80';
+
+                  return `
+                    <div class="product-card" ${isOutOfStock ? 'style="opacity: 0.8;"' : ''}>
+                      <div class="product-image-container">
+                        ${p.image ? `<img class="product-image" src="${esc(p.image)}" alt="${esc(p.title)}" />` : `
+                          <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
+                        `}
+                        ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
+                      </div>
+                      <div class="product-details">
+                        <h3 class="product-title">${esc(p.title)}</h3>
+                        <p class="product-description">${esc(p.description || 'No description available.')}</p>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: ${stockColor}; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                          ${stockText}
+                        </div>
+                        <a href="${isOutOfStock ? '#' : esc(p.url)}" target="${isOutOfStock ? '_self' : '_blank'}" class="product-buy-btn" ${isOutOfStock ? 'style="opacity: 0.5; cursor: not-allowed; background: #4b5563;"' : ''}>
+                          <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Out of Stock' : 'Buy Now'}
+                        </a>
+                      </div>
                     </div>
-                    <div class="product-details">
-                      <h3 class="product-title">${esc(p.title)}</h3>
-                      <p class="product-description">${esc(p.description || 'No description available.')}</p>
-                      <a href="${esc(p.url)}" target="_blank" class="product-buy-btn">
-                        <i class="fas fa-shopping-cart"></i> Buy Now
-                      </a>
-                    </div>
-                  </div>
-                `).join('');
+                  `;
+                }).join('');
                 productsLoaded = true;
               } else {
                 shopProductsContainer.innerHTML = `
