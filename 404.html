@@ -1453,6 +1453,11 @@
         const target = e.target.closest('[data-tooltip]');
         if (!target) return;
         
+        // Ignore elements that already have CSS tooltips built-in to avoid duplication!
+        if (target.classList.contains('profile-badge-icon') || target.classList.contains('bio-badge')) {
+          return;
+        }
+        
         const text = target.getAttribute('data-tooltip');
         if (!text) return;
         
@@ -1476,6 +1481,11 @@
       document.addEventListener('mouseout', (e) => {
         const target = e.target.closest('[data-tooltip]');
         if (!target) return;
+        
+        // Ignore elements that already have CSS tooltips built-in
+        if (target.classList.contains('profile-badge-icon') || target.classList.contains('bio-badge')) {
+          return;
+        }
         
         const tooltip = document.getElementById('shop-tooltip');
         if (tooltip) {
