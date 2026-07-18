@@ -1211,7 +1211,8 @@
             try {
               const shopData = await API.getShop(data.username);
               if (shopData.linked && shopData.products && shopData.products.length > 0) {
-                shopProductsContainer.innerHTML = shopData.products.map(p => {
+                const productsList = shopData.products;
+                shopProductsContainer.innerHTML = productsList.map((p, idx) => {
                   const isOutOfStock = p.stock === 0;
                   const stockText = p.stock === null
                     ? '<i class="fas fa-circle-check"></i> In Stock'
@@ -1222,7 +1223,7 @@
 
                   return `
                     <div class="product-card" ${isOutOfStock ? 'style="opacity: 0.8;"' : ''}>
-                      <div class="product-image-container" data-current-index="0" data-images="${esc(JSON.stringify(p.images || []))}">
+                      <div class="product-image-container" data-index="${idx}" data-current-index="0">
                         ${p.images && p.images.length > 0 ? `
                           <img class="product-image" src="${esc(p.images[0])}" alt="${esc(p.title)}" />
                         ` : `
@@ -1252,6 +1253,13 @@
 
                 // Wire up product image slider navigation dynamically (bypasses Content Security Policy block on inline click handlers)
                 shopProductsContainer.querySelectorAll('.product-image-container').forEach(containerEl => {
+                  const idx = parseInt(containerEl.getAttribute('data-index'), 10);
+                  const p = productsList[idx];
+                  if (!p) return;
+                  
+                  // Attach raw image array directly to DOM element object to prevent HTML string escaping/parsing issues!
+                  containerEl._images = p.images || [];
+
                   const prevBtn = containerEl.querySelector('.prev-btn');
                   const nextBtn = containerEl.querySelector('.next-btn');
                   if (prevBtn && nextBtn) {
@@ -1314,7 +1322,7 @@
 
         // Local function to transition product images
         function slideProductImage(container, dir) {
-          const images = JSON.parse(container.getAttribute('data-images') || '[]');
+          const images = container._images || [];
           if (images.length <= 1) return;
           
           let currentIndex = parseInt(container.getAttribute('data-current-index') || '0', 10);
