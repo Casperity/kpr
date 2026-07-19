@@ -1287,6 +1287,16 @@
           shopModal.classList.add('open');
           shopModal.style.display = 'flex';
           
+          let isProfileOwner = false;
+          try {
+            const currentUser = API.getUser();
+            if (currentUser && currentUser.username && data.username && currentUser.username.toLowerCase() === data.username.toLowerCase()) {
+              isProfileOwner = true;
+            }
+          } catch (e) {
+            console.error(e);
+          }
+          
           if (!productsLoaded) {
             // Render skeleton loading items
             shopProductsContainer.innerHTML = Array(3).fill(0).map(() => `
@@ -1327,6 +1337,18 @@
                         `}
                         ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
                         ${p.status_text ? `<span class="product-status-badge" style="--status-color: ${esc(p.status_color || '#fb923c')}"><span class="status-dot"></span>${esc(p.status_text)}</span>` : ''}
+                        
+                        ${p.is_pinned ? `
+                          <span class="product-pinned-badge" style="position: absolute; top: 10px; left: 10px; background: #7c3aed; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; z-index: 5; box-shadow: 0 0 10px rgba(124,58,237,0.3); border: 1px solid rgba(255,255,255,0.15);">
+                            <i class="fas fa-thumbtack"></i> Pinned
+                          </span>
+                        ` : ''}
+                        
+                        ${isProfileOwner ? `
+                          <button class="product-pin-btn" data-product-id="${p.id}" data-pinned="${p.is_pinned ? 'true' : 'false'}" style="position: absolute; top: 10px; right: 10px; background: ${p.is_pinned ? '#7c3aed' : 'rgba(0,0,0,0.5)'}; border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; z-index: 6; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='${p.is_pinned ? '#6d28d9' : 'rgba(0,0,0,0.7)'}'" onmouseout="this.style.transform='scale(1)'; this.style.background='${p.is_pinned ? '#7c3aed' : 'rgba(0,0,0,0.5)'}'">
+                            <i class="fas fa-thumbtack"></i>
+                          </button>
+                        ` : ''}
                         
                         ${p.images && p.images.length > 1 ? `
                           <button class="product-image-nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
@@ -1385,6 +1407,48 @@
                     });
                   }
                 });
+
+                // Wire up product pin buttons if profile owner
+                if (isProfileOwner) {
+                  shopProductsContainer.querySelectorAll('.product-pin-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      
+                      const productId = btn.getAttribute('data-product-id');
+                      const isCurrentlyPinned = btn.getAttribute('data-pinned') === 'true';
+                      
+                      btn.disabled = true;
+                      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                      
+                      try {
+                        if (!data.settings) data.settings = {};
+                        let currentPins = data.settings.pinnedProducts || [];
+                        currentPins = currentPins.map(String);
+                        
+                        if (isCurrentlyPinned) {
+                          currentPins = currentPins.filter(id => id !== String(productId));
+                        } else {
+                          currentPins.push(String(productId));
+                        }
+                        
+                        await API.updateSettings({ pinnedProducts: currentPins });
+                        data.settings.pinnedProducts = currentPins;
+                        
+                        productsLoaded = false;
+                        await openShop();
+                        
+                        Toast.show(isCurrentlyPinned ? 'Product unpinned successfully.' : 'Product pinned to top!', 'success');
+                      } catch (err) {
+                        console.error('Failed to pin/unpin product:', err);
+                        Toast.show(err.message || 'Failed to update pins', 'error');
+                        btn.innerHTML = '<i class="fas fa-thumbtack"></i>';
+                      } finally {
+                        btn.disabled = false;
+                      }
+                    });
+                  });
+                }
 
               } else {
                 shopProductsContainer.innerHTML = `
