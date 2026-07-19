@@ -450,6 +450,11 @@
               <i class="fas fa-unlink"></i> Disconnect
             </button>
           </div>
+          <div id="sellauth-products-manager" style="margin-top:20px; display:none; border-top:1px solid rgba(255,255,255,0.06); padding-top:16px;">
+            <label class="form-label" style="margin-bottom:10px;"><i class="fas fa-thumbtack"></i> Pin Products to Top</label>
+            <div class="form-hint" style="margin-bottom:12px;">Toggle pins next to products to sort them to the top of your public profile store.</div>
+            <div id="sellauth-products-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+          </div>
         </div>
       </div>
       <!-- Save -->
@@ -512,6 +517,7 @@
     let activeBadges = [];
     let playlist = [];
     let currentUser = null;
+    let pinnedProducts = [];
 
     // --- Auth check ---
     if (!API.isLoggedIn()) {
@@ -548,6 +554,8 @@
     const inputMusicArtist = document.getElementById('input-music-artist');
     const inputMusicAutoplay = document.getElementById('input-music-autoplay');
     const inputDisableGallery = document.getElementById('input-disable-gallery');
+    const sellauthProductsManager = document.getElementById('sellauth-products-manager');
+    const sellauthProductsList = document.getElementById('sellauth-products-list');
     const btnSave = document.getElementById('btn-save');
     const btnLogout = document.getElementById('btn-logout');
     const navViewProfile = document.getElementById('nav-view-profile');
@@ -762,6 +770,7 @@
 
         // Theme
         const settings = res.settings || {};
+        pinnedProducts = settings.pinnedProducts || [];
         const accent = settings.accentColor || '#a78bfa';
         const bg = settings.bgColor || '#0a0a0f';
         inputAccent.value = accent;
@@ -1447,15 +1456,84 @@
           btnRemoveSellauth.style.display = 'inline-flex';
           btnSaveSellauth.innerHTML = '<i class="fas fa-arrows-rotate"></i> Update Link';
           inputSellauthKey.value = ''; // Don't show the secret key
+
+          // Fetch products for pinning list
+          if (currentUser && currentUser.username) {
+            try {
+              const shopRes = await API.getShop(currentUser.username);
+              if (shopRes.linked && shopRes.products && shopRes.products.length > 0) {
+                if (sellauthProductsManager) sellauthProductsManager.style.display = 'block';
+                renderSellauthProducts(shopRes.products);
+              } else {
+                if (sellauthProductsManager) sellauthProductsManager.style.display = 'none';
+              }
+            } catch (err) {
+              console.error('Failed to load shop products:', err);
+              if (sellauthProductsManager) sellauthProductsManager.style.display = 'none';
+            }
+          }
         } else {
           sellauthStatus.style.display = 'none';
           btnRemoveSellauth.style.display = 'none';
           btnSaveSellauth.innerHTML = '<i class="fas fa-link"></i> Link Store';
           inputSellauthKey.value = '';
+          if (sellauthProductsManager) sellauthProductsManager.style.display = 'none';
         }
       } catch (err) {
         console.error('Failed to load SellAuth config:', err);
       }
+    }
+
+    function renderSellauthProducts(products) {
+      if (!sellauthProductsList) return;
+      
+      sellauthProductsList.innerHTML = products.map(p => {
+        const isPinned = pinnedProducts.map(String).includes(String(p.id));
+        return `
+          <div class="form-input" style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06); border-radius:12px;">
+            <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+              ${p.image ? `<img src="${p.image}" style="width:28px; height:28px; border-radius:6px; object-fit:cover; flex-shrink:0;" />` : `<div style="width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;"><i class="fas fa-box"></i></div>`}
+              <span style="font-size:0.85rem; font-weight:500; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; color:rgba(255,255,255,0.9);">${p.title}</span>
+            </div>
+            <button class="btn-pin-product" data-product-id="${p.id}" data-pinned="${isPinned ? 'true' : 'false'}" style="background:none; border:none; color:${isPinned ? 'var(--accent, #6366f1)' : 'rgba(255,255,255,0.25)'}; cursor:pointer; font-size:0.95rem; padding:6px; transition:color 0.2s, transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+              <i class="fas fa-thumbtack" style="${isPinned ? '' : 'transform:rotate(-45deg);'}"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      // Wire up pin button click listeners
+      sellauthProductsList.querySelectorAll('.btn-pin-product').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const productId = btn.getAttribute('data-product-id');
+          const isCurrentlyPinned = btn.getAttribute('data-pinned') === 'true';
+
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+          try {
+            let currentPins = pinnedProducts.map(String);
+            if (isCurrentlyPinned) {
+              currentPins = currentPins.filter(id => id !== String(productId));
+            } else {
+              currentPins.push(String(productId));
+            }
+
+            await API.updateSettings({ pinnedProducts: currentPins });
+            pinnedProducts = currentPins;
+            
+            // Re-render the pin UI row order
+            renderSellauthProducts(products);
+            Toast.show(isCurrentlyPinned ? 'Product unpinned successfully.' : 'Product pinned to top!', 'success');
+          } catch (err) {
+            console.error('Failed to pin/unpin product:', err);
+            Toast.show(err.message || 'Failed to update pin', 'error');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
     }
 
     btnSaveSellauth?.addEventListener('click', async () => {
