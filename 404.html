@@ -1529,12 +1529,12 @@
                         <p class="product-description">${esc(p.description || 'No description available.')}</p>
                         
                         ${p.variants && p.variants.length > 1 ? `
-                          <div class="product-variants-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem; border: 1px solid rgba(255,255,255,0.08); padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.02); width: 100%;">
-                            <span style="font-weight: 600; color: rgba(255,255,255,0.4); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block; text-align: left;">Options</span>
+                          <div class="product-variants-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; border: 1px solid rgba(255,255,255,0.05); padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.01);">
+                            <span style="font-weight: 600; color: rgba(255,255,255,0.4); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Options</span>
                             ${p.variants.map(v => `
-                              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); width: 100%; border-bottom: 1px solid rgba(255,255,255,0.04); padding: 4px 0;">
-                                <span style="text-align: left; font-weight: 500;" ${v.description ? `data-tooltip="${esc(v.description)}"` : ''}>${esc(v.name)}</span>
-                                <span style="font-weight: 700; color: var(--accent, #6366f1); white-space: nowrap;">$${v.price} ${esc(p.currency)}</span>
+                              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; color: rgba(255,255,255,0.7); width: 100%;">
+                                <span style="text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; ${v.description ? 'border-bottom: 1px dotted rgba(255,255,255,0.4); cursor: help;' : ''}" title="${v.description ? esc(v.description) : ''}">${esc(v.name)}</span>
+                                <span style="font-weight: 700; color: var(--accent, #6366f1); white-space: nowrap; margin-left: 8px;">$${v.price} ${esc(p.currency)}</span>
                               </div>
                             `).join('')}
                           </div>
