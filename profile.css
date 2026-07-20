@@ -1297,3 +1297,80 @@ body.profile-page.has-bg-image::before {
     font-size: 0.8rem !important;
   }
 }
+
+/* --- Shop Extra-Small Mobile (≤480px) --- */
+@media (max-width: 480px) {
+  .shop-products-grid {
+    padding: 10px;
+    gap: 12px;
+    grid-template-columns: 1fr;
+  }
+
+  .product-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    border-radius: 12px;
+  }
+
+  .product-image-container {
+    aspect-ratio: 1/1;
+    border-radius: 12px 0 0 12px;
+    min-height: 120px;
+  }
+
+  .product-image {
+    border-radius: 12px 0 0 12px;
+  }
+
+  .product-details {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .product-title {
+    font-size: 0.82rem;
+    margin-bottom: 3px;
+  }
+
+  .product-description {
+    font-size: 0.7rem;
+    margin-bottom: 8px;
+    height: auto;
+    max-height: 34px;
+    -webkit-line-clamp: 2;
+  }
+
+  .product-buy-btn {
+    padding: 7px 10px;
+    font-size: 0.72rem;
+    border-radius: 8px;
+  }
+
+  .product-price-badge {
+    top: 6px;
+    right: 6px;
+    padding: 2px 6px;
+    font-size: 0.65rem;
+  }
+
+  .product-image-nav-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 0.6rem;
+  }
+
+  .product-image-nav-btn.prev-btn {
+    left: 4px;
+  }
+
+  .product-image-nav-btn.next-btn {
+    right: 4px;
+  }
+
+  .profile-buttons-wrapper button {
+    flex: 1 1 0 !important;
+    justify-content: center !important;
+  }
+}
