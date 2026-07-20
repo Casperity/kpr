@@ -1373,4 +1373,16 @@ body.profile-page.has-bg-image::before {
     flex: 1 1 0 !important;
     justify-content: center !important;
   }
+
+  .product-variants-container {
+    grid-column: 1 / -1;
+    padding: 10px 12px;
+  }
+}
+
+.product-variants-container {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.12);
+  padding: 12px 16px;
+  width: 100%;
 }
