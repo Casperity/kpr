@@ -1404,10 +1404,16 @@
 
       if (viewShopBtn && shopModal && shopProductsContainer) {
         let productsLoaded = false;
+        let shopNameCache = null;
 
         const openShop = async () => {
           shopModal.classList.add('open');
           shopModal.style.display = 'flex';
+          
+          const shopModalTitle = shopModal.querySelector('.shop-modal-title');
+          if (shopModalTitle) {
+            shopModalTitle.innerHTML = `<i class="fas fa-store"></i> Shop${shopNameCache ? ` | ${esc(shopNameCache)}` : ''}`;
+          }
           
           let isProfileOwner = false;
           try {
@@ -1427,6 +1433,10 @@
 
             try {
               const shopData = await API.getShop(data.username);
+              shopNameCache = shopData.shopName || null;
+              if (shopModalTitle) {
+                shopModalTitle.innerHTML = `<i class="fas fa-store"></i> Shop${shopNameCache ? ` | ${esc(shopNameCache)}` : ''}`;
+              }
               if (shopData.linked && shopData.products && shopData.products.length > 0) {
                 const productsList = shopData.products;
                 shopProductsContainer.innerHTML = productsList.map((p, idx) => {
