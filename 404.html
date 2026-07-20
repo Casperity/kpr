@@ -1508,7 +1508,7 @@
                         ` : `
                           <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
                         `}
-                        ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
+                        ${p.price !== null ? `<span class="product-price-badge product-price-badge-dynamic">${p.price} ${esc(p.currency)}</span>` : ''}
                         ${p.status_text ? `<span class="product-status-badge" style="--status-color: ${esc(p.status_color || '#fb923c')}"><span class="status-dot"></span>${esc(p.status_text)}</span>` : ''}
                         
                         ${p.is_pinned ? `
@@ -1529,14 +1529,13 @@
                         <p class="product-description">${esc(p.description || 'No description available.')}</p>
                         
                         ${p.variants && p.variants.length > 1 ? `
-                          <div class="product-variants-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; border: 1px solid rgba(255,255,255,0.05); padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.01);">
-                            <span style="font-weight: 600; color: rgba(255,255,255,0.4); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Options</span>
-                            ${p.variants.map(v => `
-                              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; color: rgba(255,255,255,0.7); width: 100%;">
-                                <span style="text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; ${v.description ? 'border-bottom: 1px dotted rgba(255,255,255,0.4); cursor: help;' : ''}" title="${v.description ? esc(v.description) : ''}">${esc(v.name)}</span>
-                                <span style="font-weight: 700; color: var(--accent, #6366f1); white-space: nowrap; margin-left: 8px;">$${v.price} ${esc(p.currency)}</span>
-                              </div>
-                            `).join('')}
+                          <div style="margin-bottom: 0; display: flex; flex-direction: column; gap: 4px; width: 100%;">
+                            <label style="font-weight: 600; color: rgba(255,255,255,0.4); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Options</label>
+                            <select class="product-variants-select">
+                              ${p.variants.map(v => `
+                                <option value="${v.price}">${esc(v.name)} — $${v.price} ${esc(p.currency)}</option>
+                              `).join('')}
+                            </select>
                           </div>
                         ` : ''}
 
@@ -1577,7 +1576,22 @@
                   }
                 });
 
+                // Wire up product variant selectors dynamically
+                shopProductsContainer.querySelectorAll('.product-variants-select').forEach(selectEl => {
+                  const cardEl = selectEl.closest('.product-card');
+                  const imgContainer = cardEl.querySelector('.product-image-container');
+                  const idx = parseInt(imgContainer.getAttribute('data-index'), 10);
+                  const p = productsList[idx];
+                  if (!p) return;
 
+                  selectEl.addEventListener('change', (e) => {
+                    const price = selectEl.value;
+                    const priceBadge = cardEl.querySelector('.product-price-badge-dynamic');
+                    if (priceBadge) {
+                      priceBadge.textContent = `${price} ${p.currency}`;
+                    }
+                  });
+                });
 
 
 
