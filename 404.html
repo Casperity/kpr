@@ -1114,6 +1114,22 @@
       container.style.setProperty('--accent', accent);
       container.style.setProperty('--accent-rgb', hexToRgb(accent));
 
+      // -- Custom Fonts --
+      const fontName = data.settings?.fontName || null;
+      const fontBio = data.settings?.fontBio || null;
+      if (fontName || fontBio) {
+        let fontFaceCSS = '';
+        if (fontName) {
+          fontFaceCSS += `@font-face { font-family: 'CustomNameFont'; src: url('${fontName}'); font-display: swap; }\n`;
+        }
+        if (fontBio) {
+          fontFaceCSS += `@font-face { font-family: 'CustomBioFont'; src: url('${fontBio}'); font-display: swap; }\n`;
+        }
+        const fontStyleEl = document.createElement('style');
+        fontStyleEl.textContent = fontFaceCSS;
+        document.head.appendChild(fontStyleEl);
+      }
+
       // -- OG tags --
       document.title = `${data.displayName || data.display_name || data.username} | kpr.lol`;
       const ogTitle = document.querySelector('meta[property="og:title"]');
@@ -1312,10 +1328,10 @@
       container.innerHTML = `
         <div class="profile-card" ${cornerLinksHtml ? 'style="padding-bottom: 64px;"' : ''}>
           <img class="profile-avatar" src="${esc(avatarUrl)}" alt="${esc(data.displayName || data.display_name || data.username)}" onerror="this.style.display='none'" />
-          <h1 class="profile-name">${esc(data.displayName || data.display_name || data.username)}</h1>
+          <h1 class="profile-name" ${fontName ? 'style="font-family: \'CustomNameFont\', Poppins, sans-serif;"' : ''}>${esc(data.displayName || data.display_name || data.username)}</h1>
           ${userBadgesHtml}
           ${badgesHtml}
-          ${data.bio ? `<p class="profile-bio">${esc(data.bio)}</p>` : ''}
+          ${data.bio ? `<p class="profile-bio" ${fontBio ? 'style="font-family: \'CustomBioFont\', Poppins, sans-serif;"' : ''}>${esc(data.bio)}</p>` : ''}
           ${musicHtml}
           ${viewsHtml}
           

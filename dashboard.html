@@ -330,6 +330,16 @@
             <div class="form-hint">Only GitHub URLs allowed — direct link to a looping background video</div>
           </div>
           <div class="form-group">
+            <label class="form-label">Display Name Font URL <span style="opacity:0.4;">(optional)</span></label>
+            <input type="url" class="form-input" id="input-font-name" placeholder="https://raw.githubusercontent.com/...font.woff2" />
+            <div class="form-hint">Only GitHub URLs — link to a <strong>.woff2</strong>, <strong>.woff</strong>, or <strong>.ttf</strong> font file</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bio Font URL <span style="opacity:0.4;">(optional)</span></label>
+            <input type="url" class="form-input" id="input-font-bio" placeholder="https://raw.githubusercontent.com/...font.woff2" />
+            <div class="form-hint">Only GitHub URLs — link to a <strong>.woff2</strong>, <strong>.woff</strong>, or <strong>.ttf</strong> font file</div>
+          </div>
+          <div class="form-group">
             <label class="form-label">Music URL <span style="opacity:0.4;">(optional)</span></label>
             <input type="url" class="form-input" id="input-music-url" placeholder="https://raw.githubusercontent.com/..." />
           </div>
@@ -554,6 +564,8 @@
     const inputMusicArtist = document.getElementById('input-music-artist');
     const inputMusicAutoplay = document.getElementById('input-music-autoplay');
     const inputDisableGallery = document.getElementById('input-disable-gallery');
+    const inputFontName = document.getElementById('input-font-name');
+    const inputFontBio = document.getElementById('input-font-bio');
     const sellauthProductsManager = document.getElementById('sellauth-products-manager');
     const sellauthProductsList = document.getElementById('sellauth-products-list');
     const btnSave = document.getElementById('btn-save');
@@ -788,6 +800,8 @@
         inputMusicTitle.value = settings.musicTitle || '';
         inputMusicArtist.value = settings.musicArtist || '';
         inputMusicAutoplay.checked = !!(settings.musicAutoplay || settings.music_autoplay);
+        if (inputFontName) inputFontName.value = settings.fontName || '';
+        if (inputFontBio) inputFontBio.value = settings.fontBio || '';
         if (inputDisableGallery) {
           inputDisableGallery.checked = !!settings.disableGallery;
         }
@@ -1373,7 +1387,9 @@
           musicUrl: inputMusicUrl.value.trim(),
           musicTitle: inputMusicTitle.value.trim(),
           musicArtist: inputMusicArtist.value.trim(),
-          disableGallery: inputDisableGallery ? inputDisableGallery.checked : false
+          disableGallery: inputDisableGallery ? inputDisableGallery.checked : false,
+          fontName: inputFontName ? inputFontName.value.trim() : '',
+          fontBio: inputFontBio ? inputFontBio.value.trim() : ''
         };
         // VIP/Admin playlist — send even if empty (null clears it)
         if (currentUser?.isAdmin || currentUser?.isVip) {
