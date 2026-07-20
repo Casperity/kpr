@@ -1455,10 +1455,12 @@
               if (shopModalStats && shopData.linked) {
                 const rating = parseFloat(shopData.averageRating || 0);
                 const sales = parseInt(shopData.productsSold || 0);
+                const buyers = parseInt(shopData.totalCustomers || 0);
                 const ratingsCount = parseInt(shopData.totalFeedbacks || 0);
 
                 let statsHtml = `
                   <span style="display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-shopping-basket" style="color: var(--accent);"></i> <strong>${sales}</strong> sales</span>
+                  <span style="display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-users" style="color: var(--accent);"></i> <strong>${buyers}</strong> buyers</span>
                 `;
 
                 if (ratingsCount > 0) {
@@ -1506,7 +1508,7 @@
                         ` : `
                           <div class="product-image-placeholder"><i class="fas fa-box"></i></div>
                         `}
-                        ${p.price !== null ? `<span class="product-price-badge">${p.price} ${esc(p.currency)}</span>` : ''}
+                        ${p.price !== null ? `<span class="product-price-badge product-price-badge-dynamic">${p.price} ${esc(p.currency)}</span>` : ''}
                         ${p.status_text ? `<span class="product-status-badge" style="--status-color: ${esc(p.status_color || '#fb923c')}"><span class="status-dot"></span>${esc(p.status_text)}</span>` : ''}
                         
                         ${p.is_pinned ? `
@@ -1527,14 +1529,13 @@
                         <p class="product-description">${esc(p.description || 'No description available.')}</p>
                         
                         ${p.variants && p.variants.length > 1 ? `
-                          <div class="product-variants-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; border: 1px solid rgba(255,255,255,0.05); padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.01);">
-                            <span style="font-weight: 600; color: rgba(255,255,255,0.4); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Options</span>
-                            ${p.variants.map(v => `
-                              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; color: rgba(255,255,255,0.7);">
-                                <span style="display: inline-block; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; vertical-align: middle;" ${v.description ? `data-tooltip="${esc(v.description)}"` : ''}>${esc(v.name)}</span>
-                                <span style="font-weight: 700; color: var(--accent, #6366f1); white-space: nowrap;">$${v.price} ${esc(p.currency)}</span>
-                              </div>
-                            `).join('')}
+                          <div class="product-variants-select-container" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; width: 100%;">
+                            <label style="font-weight: 600; color: rgba(255,255,255,0.4); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Options</label>
+                            <select class="product-variants-select" style="width: 100%; background: rgba(15,15,20,0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; color: #fff; outline: none; cursor: pointer; transition: border-color 0.2s; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right%2012px%20top%2050%25; background-size:%2010px%20auto; padding-right: 30px;">
+                              ${p.variants.map(v => `
+                                <option value="${v.price}" style="background: #0a0a0f; color: #fff;">${esc(v.name)} - $${v.price} ${esc(p.currency)}</option>
+                              `).join('')}
+                            </select>
                           </div>
                         ` : ''}
 
@@ -1573,6 +1574,23 @@
                       slideProductImage(containerEl, 1);
                     });
                   }
+                });
+
+                // Wire up product variant selectors dynamically
+                shopProductsContainer.querySelectorAll('.product-variants-select').forEach(selectEl => {
+                  const cardEl = selectEl.closest('.product-card');
+                  const imgContainer = cardEl.querySelector('.product-image-container');
+                  const idx = parseInt(imgContainer.getAttribute('data-index'), 10);
+                  const p = productsList[idx];
+                  if (!p) return;
+
+                  selectEl.addEventListener('change', (e) => {
+                    const price = selectEl.value;
+                    const priceBadge = cardEl.querySelector('.product-price-badge-dynamic');
+                    if (priceBadge) {
+                      priceBadge.textContent = `${price} ${p.currency}`;
+                    }
+                  });
                 });
 
 
