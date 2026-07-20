@@ -48,7 +48,8 @@
 
     .pinned-indicator-container .tooltip {
       position: absolute;
-      left: 42px;
+      top: 42px;
+      left: 50%;
       opacity: 0;
       background-color: rgb(15, 15, 20);
       border: 1px solid rgba(0, 200, 255, 0.25);
@@ -63,7 +64,7 @@
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.5px;
-      transform: translateX(-6px);
+      transform: translate(-50%, -6px);
       white-space: nowrap;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
@@ -75,15 +76,15 @@
       height: 6px;
       background-color: rgb(15, 15, 20);
       border-left: 1px solid rgba(0, 200, 255, 0.25);
-      border-bottom: 1px solid rgba(0, 200, 255, 0.25);
+      border-top: 1px solid rgba(0, 200, 255, 0.25);
       transform: rotate(45deg);
-      left: -4px;
-      top: calc(50% - 3px);
+      left: calc(50% - 3px);
+      top: -4px;
     }
 
     .pinned-indicator-container:hover .tooltip {
       opacity: 1;
-      transform: translateX(0);
+      transform: translate(-50%, 0);
     }
 
     .pinned-indicator-container:hover {
