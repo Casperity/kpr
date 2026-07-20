@@ -1,5 +1,3 @@
-
-
 /* --- Reset & Base --- */
 *,
 *::before,
@@ -1309,13 +1307,17 @@ body.profile-page.has-bg-image::before {
   .product-card {
     display: grid;
     grid-template-columns: 120px 1fr;
+    align-items: start;
     border-radius: 12px;
   }
 
   .product-image-container {
+    width: 120px;
+    height: 120px;
     aspect-ratio: 1/1;
     border-radius: 12px 0 0 12px;
     min-height: 120px;
+    align-self: start;
   }
 
   .product-image {
