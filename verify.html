@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Account | kpr.lol</title>
+  <meta name="description" content="Verify your account | premium bio-link platform" />
+  <meta name="theme-color" content="#03050f" />
+  <meta property="og:title" content="Verify Account | kpr.lol" />
+  <meta property="og:description" content="Verify your email" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kpr.lol/verify" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="auth.css" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  
+  <style>
+    /* Verification code specific input styling */
+    .code-input {
+      letter-spacing: 6px;
+      font-size: 1.4rem !important;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    
+    .cooldown-text {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 14px;
+      display: block;
+    }
+
+    .resend-btn {
+      color: #a78bfa;
+      background: none;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+      padding: 0;
+      font-size: 0.82rem;
+    }
+
+    .resend-btn:hover {
+      opacity: 0.85;
+      text-decoration: underline;
+    }
+
+    .resend-btn:disabled {
+      color: rgba(255, 255, 255, 0.3) !important;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="auth-bg">
+    <div class="noise"></div>
+  </div>
+
+  <!-- Floating Particles -->
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <div class="auth-brand">
+        <span class="logo-text">kpr<span class="logo-dot">.lol</span></span>
+      </div>
+
+      <div class="auth-heading">
+        <h1>Verify Email</h1>
+        <p>Enter the 6-digit code sent to your email</p>
+      </div>
+
+      <form id="verify-form" autocomplete="off" novalidate>
+        
+        <!-- Username (Hidden or Read-Only display) -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Username"
+              autocomplete="off"
+              readonly
+              required
+              style="opacity: 0.7; background: rgba(255, 255, 255, 0.02); cursor: not-allowed;"
+            />
+          </div>
+        </div>
+
+        <!-- Verification Code -->
+        <div class="form-group">
+          <label for="code">Verification Code</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-key input-icon"></i>
+            <input
+              type="text"
+              id="code"
+              name="code"
+              placeholder="123456"
+              maxlength="6"
+              class="code-input"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="auth-btn" id="verify-btn">
+          <span class="btn-text">
+            <i class="fa-solid fa-circle-check"></i>
+            Verify Account
+          </span>
+          <span class="btn-spinner">
+            <span class="spinner"></span>
+            Verifying…
+          </span>
+        </button>
+
+      </form>
+
+      <!-- Footer / Resend trigger -->
+      <div class="auth-footer" style="margin-top: 24px;">
+        Didn't receive the code? 
+        <button type="button" class="resend-btn" id="btn-resend">Resend Code</button>
+        <span id="cooldown-notice" class="cooldown-text" style="display: none;">You can resend in <span id="cooldown-seconds">60</span>s</span>
+      </div>
+
+      <div class="auth-footer" style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
+        Back to <a href="/login">Log in</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="api.js"></script>
+  <script>
+    (function() {
+      'use strict';
+
+      /* DOM refs */
+      const form = document.getElementById('verify-form');
+      const btn = document.getElementById('verify-btn');
+      const userInput = document.getElementById('username');
+      const codeInput = document.getElementById('code');
+      const resendBtn = document.getElementById('btn-resend');
+      const cooldownNotice = document.getElementById('cooldown-notice');
+      const cooldownSeconds = document.getElementById('cooldown-seconds');
+
+      // Pre-fill username from URL query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const usernameParam = urlParams.get('username') || '';
+      if (usernameParam) {
+        userInput.value = usernameParam.trim();
+      } else {
+        // If no username parameter, allow editing username field
+        userInput.removeAttribute('readonly');
+        userInput.style.opacity = '1';
+        userInput.style.background = '';
+        userInput.style.cursor = 'text';
+      }
+
+      function setLoading(loading) {
+        btn.classList.toggle('loading', loading);
+        btn.disabled = loading;
+        userInput.disabled = loading;
+        codeInput.disabled = loading;
+        resendBtn.disabled = loading;
+      }
+
+      // 60 seconds cooldown for resend button
+      let cooldownTimer = null;
+      function startCooldown() {
+        resendBtn.disabled = true;
+        cooldownNotice.style.display = 'block';
+        let secondsLeft = 60;
+        cooldownSeconds.textContent = secondsLeft;
+
+        if (cooldownTimer) clearInterval(cooldownTimer);
+        cooldownTimer = setInterval(() => {
+          secondsLeft--;
+          cooldownSeconds.textContent = secondsLeft;
+          if (secondsLeft <= 0) {
+            clearInterval(cooldownTimer);
+            resendBtn.disabled = false;
+            cooldownNotice.style.display = 'none';
+          }
+        }, 1000);
+      }
+
+      /* Form submission */
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = userInput.value.trim();
+        const code = codeInput.value.trim();
+
+        if (!username) {
+          Toast.show('Please enter your username.', 'error');
+          userInput.focus();
+          return;
+        }
+        if (!code) {
+          Toast.show('Please enter the 6-digit verification code.', 'error');
+          codeInput.focus();
+          return;
+        }
+        if (code.length !== 6) {
+          Toast.show('Verification code must be exactly 6 digits.', 'error');
+          codeInput.focus();
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          const data = await API.verify(username, code);
+
+          if (data.token) API.setToken(data.token);
+          if (data.user) API.setUser(data.user);
+
+          Toast.show('Account verified successfully!', 'success', 2000);
+
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 800);
+
+        } catch (err) {
+          setLoading(false);
+          const msg = err.message || err.error || 'Verification failed. Please try again.';
+          Toast.show(msg, 'error');
+
+          const card = document.querySelector('.auth-card');
+          card.style.animation = 'none';
+          card.offsetHeight;
+          card.style.animation = 'shake 0.5s ease';
+        }
+      });
+
+      /* Resend trigger */
+      resendBtn.addEventListener('click', async () => {
+        const username = userInput.value.trim();
+        if (!username) {
+          Toast.show('Please fill in your username first.', 'error');
+          userInput.focus();
+          return;
+        }
+
+        resendBtn.disabled = true;
+
+        try {
+          const data = await API.resendVerification(username);
+          Toast.show(data.message || 'Verification email resent.', 'success');
+          startCooldown();
+        } catch (err) {
+          resendBtn.disabled = false;
+          const msg = err.message || err.error || 'Failed to resend code. Please try again.';
+          Toast.show(msg, 'error');
+        }
+      });
+
+    })();
+  </script>
+
+  <!-- Shake animation for errors -->
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+  </style>
+
+</body>
+</html>

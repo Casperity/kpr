@@ -81,6 +81,23 @@
           <div class="validation-hint" id="username-hint">2–20 characters, lowercase letters, numbers & underscores</div>
         </div>
 
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email address"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="validation-hint" id="email-hint">Used for account verification</div>
+        </div>
+
         <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
@@ -197,6 +214,7 @@
       const form          = document.getElementById('signup-form');
       const btn           = document.getElementById('signup-btn');
       const userInput     = document.getElementById('username');
+      const emailInput    = document.getElementById('email');
       const passInput     = document.getElementById('password');
       const confirmInput  = document.getElementById('confirm-password');
       const inviteInput   = document.getElementById('invite-code');
@@ -338,6 +356,7 @@
         btn.classList.toggle('loading', loading);
         btn.disabled = loading;
         userInput.disabled = loading;
+        if (emailInput) emailInput.disabled = loading;
         passInput.disabled = loading;
         confirmInput.disabled = loading;
         inviteInput.disabled = loading;
@@ -348,6 +367,7 @@
         e.preventDefault();
 
         const username   = userInput.value.trim();
+        const email      = emailInput ? emailInput.value.trim() : '';
         const password   = passInput.value;
         const confirm    = confirmInput.value;
         const inviteCode = inviteInput.value.trim();
@@ -361,6 +381,17 @@
         if (!usernameRegex.test(username)) {
           Toast.show('Username must be 2–20 chars: lowercase letters, numbers & underscores only.', 'error');
           userInput.focus();
+          return;
+        }
+        if (!email) {
+          Toast.show('Please enter your email address.', 'error');
+          if (emailInput) emailInput.focus();
+          return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          Toast.show('Please enter a valid email address.', 'error');
+          if (emailInput) emailInput.focus();
           return;
         }
         if (!password) {
@@ -387,7 +418,15 @@
         setLoading(true);
 
         try {
-          const data = await API.signup(username, password, inviteCode, refParam);
+          const data = await API.signup(username, password, email, inviteCode, refParam);
+
+          if (data.needsVerification && data.username) {
+            Toast.show(data.message || 'Please verify your email address.', 'success', 3000);
+            setTimeout(() => {
+              window.location.href = `/verify.html?username=${encodeURIComponent(data.username)}`;
+            }, 1200);
+            return;
+          }
 
           /* Store auth data */
           if (data.token) API.setToken(data.token);

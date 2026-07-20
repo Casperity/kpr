@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    kpr.lol â€” Shared API Client & Toast System meow
    ============================================================ */
 
@@ -52,10 +52,24 @@ const API = {
   },
 
   /* â”€â”€ Auth endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-  signup(username, password, inviteCode, referredBy) {
+  signup(username, password, email, inviteCode, referredBy) {
     return this.request('/api/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ username, password, inviteCode, referredBy })
+      body: JSON.stringify({ username, password, email, inviteCode, referredBy })
+    });
+  },
+
+  verify(username, code) {
+    return this.request('/api/auth/verify', {
+      method: 'POST',
+      body: JSON.stringify({ username, code })
+    });
+  },
+
+  resendVerification(username) {
+    return this.request('/api/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ username })
     });
   },
 
