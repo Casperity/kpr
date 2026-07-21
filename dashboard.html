@@ -193,6 +193,43 @@
       <!-- Main Content Area -->
       <div class="dash-content-body">
 
+        <!-- Welcome Hero Banner -->
+        <div class="dash-welcome-card">
+          <div>
+            <h2 class="dash-welcome-title">Welcome back, <span id="welcome-username">User</span>! ✨</h2>
+            <p class="dash-welcome-sub">Customize your profile page, manage your social links, media, and shop settings.</p>
+          </div>
+          <div class="dash-welcome-actions">
+            <a href="#" id="welcome-view-profile" target="_blank" class="dash-welcome-btn dash-welcome-btn-primary">
+              <i class="fas fa-external-link-alt"></i>
+              <span>View Profile</span>
+            </a>
+            <button class="dash-welcome-btn dash-welcome-btn-secondary" onclick="copyProfileLink()">
+              <i class="fas fa-copy"></i>
+              <span>Copy Link</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter / Quick Category Tabs Bar -->
+        <div class="dash-tabs-bar">
+          <button class="dash-tab-btn active" data-tab="all" onclick="switchCategoryTab('all')">
+            <i class="fas fa-border-all"></i> All Sections
+          </button>
+          <button class="dash-tab-btn" data-tab="profile" onclick="switchCategoryTab('profile')">
+            <i class="fas fa-user"></i> Profile & Bio
+          </button>
+          <button class="dash-tab-btn" data-tab="links" onclick="switchCategoryTab('links')">
+            <i class="fas fa-link"></i> Social & Media
+          </button>
+          <button class="dash-tab-btn" data-tab="theme" onclick="switchCategoryTab('theme')">
+            <i class="fas fa-palette"></i> Appearance & Music
+          </button>
+          <button class="dash-tab-btn" data-tab="monetization" onclick="switchCategoryTab('monetization')">
+            <i class="fas fa-store"></i> Shop & Rewards
+          </button>
+        </div>
+
         <!-- Ban Notice (hidden by default) -->
         <div id="ban-notice" style="display:none; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.35); border-radius: 16px; padding: 24px 28px; margin-bottom: 24px;">
           <div style="display:flex; align-items:center; gap:14px;">
@@ -767,12 +804,14 @@
       return `${r}, ${g}, ${b}`;
     }
 
-    // --- Sidebar User Card Helper ---
+    // --- Sidebar & Hero User Card Helper ---
     function updateSidebarUserInfo(u) {
       if (!u) return;
       const sidebarName = document.getElementById('sidebar-name');
       const sidebarHandle = document.getElementById('sidebar-handle');
       const sidebarAvatar = document.getElementById('sidebar-avatar');
+      const welcomeName = document.getElementById('welcome-username');
+      const welcomeView = document.getElementById('welcome-view-profile');
 
       const displayName = (u.displayName || u.display_name || u.username || 'User').trim();
       const username = (u.username || '').trim();
@@ -780,6 +819,8 @@
 
       if (sidebarName) sidebarName.textContent = displayName || username || 'User';
       if (sidebarHandle) sidebarHandle.textContent = username ? '@' + username : '';
+      if (welcomeName) welcomeName.textContent = displayName || username || 'User';
+      if (welcomeView) welcomeView.href = '/' + (username || '');
       if (sidebarAvatar) {
         sidebarAvatar.src = avatarUrl || '/pfp.jpg';
         sidebarAvatar.onerror = () => { sidebarAvatar.src = '/pfp.jpg'; };
@@ -789,8 +830,59 @@
     // Immediate initial population from cached user info
     updateSidebarUserInfo(API.getUser());
 
+    // --- Category Tab Switching Helper ---
+    window.switchCategoryTab = function(category) {
+      document.querySelectorAll('.dash-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === category);
+      });
+
+      const sections = {
+        profile: ['section-basic', 'section-badges'],
+        links: ['section-gallery', 'section-links'],
+        theme: ['section-theme', 'section-playlist'],
+        monetization: ['section-sellauth', 'section-referrals']
+      };
+
+      document.querySelectorAll('.dash-section').forEach(sec => {
+        if (category === 'all') {
+          if (sec.id === 'section-badges' && (!ownedBadges || ownedBadges.length === 0)) {
+            sec.style.display = 'none';
+          } else {
+            sec.style.display = '';
+          }
+        } else {
+          const allowed = sections[category] || [];
+          if (allowed.includes(sec.id)) {
+            if (sec.id === 'section-badges' && (!ownedBadges || ownedBadges.length === 0)) {
+              sec.style.display = 'none';
+            } else {
+              sec.style.display = '';
+              sec.classList.remove('collapsed');
+            }
+          } else {
+            sec.style.display = 'none';
+          }
+        }
+      });
+    };
+
+    window.copyProfileLink = function() {
+      const url = window.location.origin + '/' + (currentUser?.username || '');
+      navigator.clipboard.writeText(url).then(() => {
+        Toast.show('Profile link copied to clipboard!', 'success');
+      }).catch(() => {
+        Toast.show('Failed to copy link', 'error');
+      });
+    };
+
     // --- Sidebar & Section Helpers ---
     window.jumpToSection = function(sectionId) {
+      // If a category tab is filtering, switch back to 'all' so target section is visible
+      const activeTabBtn = document.querySelector('.dash-tab-btn.active');
+      if (activeTabBtn && activeTabBtn.dataset.tab !== 'all') {
+        switchCategoryTab('all');
+      }
+
       const el = document.getElementById(sectionId);
       if (!el) return;
       if (el.classList.contains('collapsed')) {
