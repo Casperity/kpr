@@ -100,20 +100,70 @@
   </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="dash-nav">
-    <a href="/" class="dash-nav-brand">kpr<span>.lol</span></a>
-    <div class="dash-nav-actions">
-      <a href="/dashboard" class="dash-nav-link">Dashboard</a>
-      <a href="/admin" class="dash-nav-link active">Admin</a>
-      <button class="btn-logout" id="btn-logout">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </button>
-    </div>
-  </nav>
+  <!-- Sidebar App Layout -->
+  <div class="dash-layout">
 
-  <!-- Main Content -->
-  <div class="dash-content" style="max-width: 1000px; margin: 0 auto; display: block;">
+    <!-- Mobile Header Bar -->
+    <header class="dash-mobile-header">
+      <a href="/" class="dash-sidebar-brand">kpr<span>.lol</span></a>
+      <button class="dash-sidebar-toggle" id="dash-sidebar-toggle" aria-label="Toggle Navigation Menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </header>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="dash-sidebar-overlay" id="dash-sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" id="dash-sidebar">
+      <div class="dash-sidebar-header">
+        <a href="/" class="dash-sidebar-brand">kpr<span>.lol</span></a>
+      </div>
+
+      <!-- Quick User Card -->
+      <div class="dash-sidebar-user">
+        <div class="dash-sidebar-avatar-wrap">
+          <img id="sidebar-avatar" src="/pfp.jpg" alt="Avatar" class="dash-sidebar-avatar" />
+        </div>
+        <div class="dash-sidebar-user-info">
+          <span id="sidebar-name" class="dash-sidebar-name">Admin</span>
+          <span id="sidebar-handle" class="dash-sidebar-handle">@admin</span>
+        </div>
+      </div>
+
+      <!-- Sidebar Navigation Links -->
+      <nav class="dash-sidebar-menu">
+        <div class="dash-sidebar-label">NAVIGATION</div>
+        <a href="/dashboard" class="dash-sidebar-link">
+          <i class="fas fa-sliders"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" id="nav-view-profile" class="dash-sidebar-link" target="_blank">
+          <i class="fas fa-external-link-alt"></i>
+          <span>View Profile</span>
+        </a>
+        <a href="/admin" id="nav-admin" class="dash-sidebar-link active" style="color:#fb923c;">
+          <i class="fas fa-shield-halved"></i>
+          <span>Admin Panel</span>
+        </a>
+        <a href="/settings" class="dash-sidebar-link">
+          <i class="fas fa-gear"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="dash-sidebar-footer">
+        <button class="btn-logout" id="btn-logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <main class="dash-main">
+      <div class="admin-content" style="padding: 32px 36px; max-width: 1100px; margin: 0 auto; width: 100%;">
     
     <div class="dash-section" id="section-invites" style="margin-bottom: 2rem;">
       <div class="dash-section-header collapsed">
@@ -169,12 +219,49 @@
       </div>
     </div>
 
+      </div>
+    </main>
   </div>
 
   <script src="/api.js"></script>
   <script>
     if (!API.isLoggedIn()) {
       window.location.href = '/login';
+    }
+
+    // Populate sidebar user card
+    async function loadAdminUser() {
+      try {
+        const res = await API.getMe();
+        const user = res.user || res;
+        const sidebarName = document.getElementById('sidebar-name');
+        const sidebarHandle = document.getElementById('sidebar-handle');
+        const sidebarAvatar = document.getElementById('sidebar-avatar');
+        const navViewProfile = document.getElementById('nav-view-profile');
+        if (sidebarName) sidebarName.textContent = user.displayName || user.username || 'Admin';
+        if (sidebarHandle) sidebarHandle.textContent = '@' + (user.username || '');
+        if (sidebarAvatar && user.avatarUrl) sidebarAvatar.src = user.avatarUrl;
+        if (navViewProfile) navViewProfile.href = '/' + (user.username || '');
+      } catch (err) {
+        console.error('Failed to load admin profile info', err);
+      }
+    }
+    loadAdminUser();
+
+    // Mobile sidebar toggle
+    const sidebarToggle = document.getElementById('dash-sidebar-toggle');
+    const sidebarEl = document.getElementById('dash-sidebar');
+    const sidebarOverlay = document.getElementById('dash-sidebar-overlay');
+
+    if (sidebarToggle && sidebarEl && sidebarOverlay) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebarEl.classList.toggle('open');
+        sidebarOverlay.classList.toggle('open');
+      });
+      sidebarOverlay.addEventListener('click', () => {
+        sidebarEl.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+      });
     }
 
     // Nav

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -215,25 +215,72 @@
 </head>
 <body>
 
-  <!-- Nav -->
-  <nav class="dash-nav">
-    <a href="/" class="dash-nav-brand">kpr<span>.lol</span></a>
-    <div class="dash-nav-actions">
-      <a href="/dashboard" class="dash-nav-link">
-        <i class="fas fa-arrow-left" style="margin-right:4px;font-size:0.75rem;"></i> Dashboard
-      </a>
-      <a href="/settings" class="dash-nav-link active">
-        <i class="fas fa-gear" style="margin-right:4px;"></i> Settings
-      </a>
-      <button class="btn-logout" id="btn-logout">
-        <i class="fas fa-sign-out-alt" style="margin-right:4px;"></i> Logout
-      </button>
-    </div>
-  </nav>
+  <!-- Sidebar App Layout -->
+  <div class="dash-layout">
 
-  <div class="settings-wrap">
-    <div class="settings-heading">Account Settings</div>
-    <div class="settings-sub">Manage your password and account.</div>
+    <!-- Mobile Header Bar -->
+    <header class="dash-mobile-header">
+      <a href="/" class="dash-sidebar-brand">kpr<span>.lol</span></a>
+      <button class="dash-sidebar-toggle" id="dash-sidebar-toggle" aria-label="Toggle Navigation Menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </header>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="dash-sidebar-overlay" id="dash-sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" id="dash-sidebar">
+      <div class="dash-sidebar-header">
+        <a href="/" class="dash-sidebar-brand">kpr<span>.lol</span></a>
+      </div>
+
+      <!-- Quick User Card -->
+      <div class="dash-sidebar-user">
+        <div class="dash-sidebar-avatar-wrap">
+          <img id="sidebar-avatar" src="/pfp.jpg" alt="Avatar" class="dash-sidebar-avatar" />
+        </div>
+        <div class="dash-sidebar-user-info">
+          <span id="sidebar-name" class="dash-sidebar-name">Loading...</span>
+          <span id="sidebar-handle" class="dash-sidebar-handle">@...</span>
+        </div>
+      </div>
+
+      <!-- Sidebar Navigation Links -->
+      <nav class="dash-sidebar-menu">
+        <div class="dash-sidebar-label">NAVIGATION</div>
+        <a href="/dashboard" class="dash-sidebar-link">
+          <i class="fas fa-sliders"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" id="nav-view-profile" class="dash-sidebar-link" target="_blank">
+          <i class="fas fa-external-link-alt"></i>
+          <span>View Profile</span>
+        </a>
+        <a href="/admin" id="nav-admin" class="dash-sidebar-link" style="display:none; color:#fb923c;">
+          <i class="fas fa-shield-halved"></i>
+          <span>Admin Panel</span>
+        </a>
+        <a href="/settings" class="dash-sidebar-link active">
+          <i class="fas fa-gear"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="dash-sidebar-footer">
+        <button class="btn-logout" id="btn-logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <main class="dash-main">
+      <div class="settings-wrap" style="padding-top: 36px; padding-bottom: 60px;">
+        <div class="settings-heading">Account Settings</div>
+        <div class="settings-sub">Manage your password and account details</div>
 
     <!-- Change Username -->
     <div class="settings-card">
@@ -305,7 +352,8 @@
         <i class="fas fa-trash-can"></i> Delete My Account
       </button>
     </div>
-  </div>
+  </main>
+</div>
 
   <!-- Toast container (injected by api.js) -->
 
@@ -331,7 +379,19 @@
           const res = await API.getMe();
           userData = res.user || res;
           if (inputUsername) inputUsername.value = userData.username || '';
-          if (currentUsernameText) currentUsernameText.textContent = userData.username || '';
+          // Populate sidebar
+          const sidebarName = document.getElementById('sidebar-name');
+          const sidebarHandle = document.getElementById('sidebar-handle');
+          const sidebarAvatar = document.getElementById('sidebar-avatar');
+          const navViewProfile = document.getElementById('nav-view-profile');
+          const navAdmin = document.getElementById('nav-admin');
+
+          if (sidebarName) sidebarName.textContent = userData.displayName || userData.username || 'User';
+          if (sidebarHandle) sidebarHandle.textContent = '@' + (userData.username || '');
+          if (sidebarAvatar && userData.avatarUrl) sidebarAvatar.src = userData.avatarUrl;
+          if (navViewProfile) navViewProfile.href = '/' + (userData.username || '');
+          if (navAdmin && userData.isAdmin) navAdmin.style.display = '';
+
         } catch (err) {
           console.error(err);
           const cached = API.getUser() || {};
@@ -341,6 +401,22 @@
         }
       }
       loadUserData();
+
+      // Mobile sidebar toggle
+      const sidebarToggle = document.getElementById('dash-sidebar-toggle');
+      const sidebarEl = document.getElementById('dash-sidebar');
+      const sidebarOverlay = document.getElementById('dash-sidebar-overlay');
+
+      if (sidebarToggle && sidebarEl && sidebarOverlay) {
+        sidebarToggle.addEventListener('click', () => {
+          sidebarEl.classList.toggle('open');
+          sidebarOverlay.classList.toggle('open');
+        });
+        sidebarOverlay.addEventListener('click', () => {
+          sidebarEl.classList.remove('open');
+          sidebarOverlay.classList.remove('open');
+        });
+      }
 
       // â”€â”€ Change Username â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       btnChangeUsername?.addEventListener('click', async () => {
