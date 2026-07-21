@@ -474,10 +474,18 @@
                     <input type="checkbox" id="input-bg-video-muted" class="uiverse-toggle-checkbox" />
                     <label for="input-bg-video-muted" class="uiverse-toggle-label"></label>
                   </div>
+                <!-- Force fit video -->
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
+                  <div>
+                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Force fit video</div>
+                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Letterbox the video so it never gets cropped — adds black bars to fill empty space</div>
+                  </div>
+                  <div class="uiverse-toggle-container">
+                    <input type="checkbox" id="input-bg-video-fit" class="uiverse-toggle-checkbox" />
+                    <label for="input-bg-video-fit" class="uiverse-toggle-label"></label>
+                  </div>
                 </div>
 
-                <!-- Divider -->
-                <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
               </div>
             </div>
           </div>
@@ -918,13 +926,13 @@
         swatchBg.style.background = bg;
         inputBgImage.value = settings.bgImageUrl || '';
         inputBgVideo.value = settings.bgVideoUrl || settings.bg_video_url || '';
-        inputBgBlur.checked = settings.bgBlur !== false; // default true
-        inputBgVideoMuted.checked = settings.bgVideoMuted !== false; // default true
-        inputBgVideoFit.checked = !!(settings.bgVideoFit);
+        if (inputBgBlur) inputBgBlur.checked = settings.bgBlur !== false; // default true
+        if (inputBgVideoMuted) inputBgVideoMuted.checked = settings.bgVideoMuted !== false; // default true
+        if (inputBgVideoFit) inputBgVideoFit.checked = !!(settings.bgVideoFit);
         inputMusicUrl.value = settings.musicUrl || '';
         inputMusicTitle.value = settings.musicTitle || '';
         inputMusicArtist.value = settings.musicArtist || '';
-        inputMusicAutoplay.checked = !!(settings.musicAutoplay || settings.music_autoplay);
+        if (inputMusicAutoplay) inputMusicAutoplay.checked = !!(settings.musicAutoplay || settings.music_autoplay);
         if (inputFontName) inputFontName.value = settings.fontName || '';
         if (inputFontBio) inputFontBio.value = settings.fontBio || '';
         if (inputDisableGallery) {
@@ -1505,10 +1513,10 @@
           bgColor: inputBg.value.trim() || '#0a0a0f',
           bgImageUrl: inputBgImage.value.trim(),
           bgVideoUrl: inputBgVideo.value.trim(),
-          bgBlur: inputBgBlur.checked,
-          bgVideoMuted: inputBgVideoMuted.checked,
-          bgVideoFit: inputBgVideoFit.checked,
-          musicAutoplay: inputMusicAutoplay.checked,
+          bgBlur: inputBgBlur ? inputBgBlur.checked : true,
+          bgVideoMuted: inputBgVideoMuted ? inputBgVideoMuted.checked : true,
+          bgVideoFit: inputBgVideoFit ? inputBgVideoFit.checked : false,
+          musicAutoplay: inputMusicAutoplay ? inputMusicAutoplay.checked : false,
           musicUrl: inputMusicUrl.value.trim(),
           musicTitle: inputMusicTitle.value.trim(),
           musicArtist: inputMusicArtist.value.trim(),
@@ -1577,10 +1585,10 @@
         thumb.style.transform = 'translateX(0)';
       }
     }
-    inputMusicAutoplay.addEventListener('change', () => syncToggle(inputMusicAutoplay));
-    inputBgBlur.addEventListener('change', () => syncToggle(inputBgBlur));
-    inputBgVideoMuted.addEventListener('change', () => syncToggle(inputBgVideoMuted));
-    inputBgVideoFit.addEventListener('change', () => { syncToggle(inputBgVideoFit); updatePreview(); });
+    inputMusicAutoplay?.addEventListener('change', () => syncToggle(inputMusicAutoplay));
+    inputBgBlur?.addEventListener('change', () => syncToggle(inputBgBlur));
+    inputBgVideoMuted?.addEventListener('change', () => syncToggle(inputBgVideoMuted));
+    inputBgVideoFit?.addEventListener('change', () => { syncToggle(inputBgVideoFit); if (typeof updatePreview === 'function') updatePreview(); });
 
     // --- Logout --- yuh
     btnLogout.addEventListener('click', () => {
