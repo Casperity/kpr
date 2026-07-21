@@ -182,17 +182,11 @@
     <!-- Main Content Wrapper -->
     <main class="dash-main">
 
-      <!-- Main Action Header -->
+      <!-- Main Header -->
       <header class="dash-main-header">
         <div class="dash-main-title-wrap">
           <h1 class="dash-main-title">Profile Editor</h1>
           <p class="dash-main-sub">Manage and customize your bio link profile</p>
-        </div>
-        <div class="dash-main-actions">
-          <button class="btn-save-header" onclick="document.getElementById('btn-save').click();">
-            <i class="fas fa-save"></i>
-            <span>Save Changes</span>
-          </button>
         </div>
       </header>
 
@@ -760,6 +754,28 @@
       return `${r}, ${g}, ${b}`;
     }
 
+    // --- Sidebar User Card Helper ---
+    function updateSidebarUserInfo(u) {
+      if (!u) return;
+      const sidebarName = document.getElementById('sidebar-name');
+      const sidebarHandle = document.getElementById('sidebar-handle');
+      const sidebarAvatar = document.getElementById('sidebar-avatar');
+
+      const displayName = (u.displayName || u.display_name || u.username || 'User').trim();
+      const username = (u.username || '').trim();
+      const avatarUrl = (u.avatarUrl || u.avatar_url || '').trim();
+
+      if (sidebarName) sidebarName.textContent = displayName || username || 'User';
+      if (sidebarHandle) sidebarHandle.textContent = username ? '@' + username : '';
+      if (sidebarAvatar) {
+        sidebarAvatar.src = avatarUrl || '/pfp.jpg';
+        sidebarAvatar.onerror = () => { sidebarAvatar.src = '/pfp.jpg'; };
+      }
+    }
+
+    // Immediate initial population from cached user info
+    updateSidebarUserInfo(API.getUser());
+
     // --- Sidebar & Section Helpers ---
     window.jumpToSection = function(sectionId) {
       const el = document.getElementById(sectionId);
@@ -795,6 +811,7 @@
         const res = await API.getMe();
         const user = res.user || res;
         currentUser = user;
+        API.setUser(user);
 
         loadReferrals();
 
@@ -804,12 +821,7 @@
           document.getElementById('nav-admin').style.display = '';
         }
 
-        const sidebarName = document.getElementById('sidebar-name');
-        const sidebarHandle = document.getElementById('sidebar-handle');
-        const sidebarAvatar = document.getElementById('sidebar-avatar');
-        if (sidebarName) sidebarName.textContent = user.displayName || user.username || 'User';
-        if (sidebarHandle) sidebarHandle.textContent = '@' + (user.username || '');
-        if (sidebarAvatar && user.avatarUrl) sidebarAvatar.src = user.avatarUrl;
+        updateSidebarUserInfo(user);
         
         const isVipOrAdmin = !!(user.isAdmin || user.isVip);
 
@@ -1531,6 +1543,13 @@
             .filter(g => g.url && g.url.trim())
             .map((g, i) => ({ url: g.url.trim(), type: detectMediaType(g.url) || 'image', displayOrder: i }));
           await API.updateGallery(validGalleryItems);
+        }
+
+        if (currentUser) {
+          currentUser.displayName = inputName.value.trim();
+          currentUser.avatarUrl = inputAvatar.value.trim();
+          updateSidebarUserInfo(currentUser);
+          API.setUser(currentUser);
         }
 
         Toast.show('Profile saved successfully!', 'success');

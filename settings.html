@@ -373,31 +373,46 @@
       const btnChangeUsername = document.getElementById('btn-change-username');
       let userData = null;
 
+      function updateSidebarUserInfo(u) {
+        if (!u) return;
+        const sidebarName = document.getElementById('sidebar-name');
+        const sidebarHandle = document.getElementById('sidebar-handle');
+        const sidebarAvatar = document.getElementById('sidebar-avatar');
+        const navViewProfile = document.getElementById('nav-view-profile');
+        const navAdmin = document.getElementById('nav-admin');
+
+        const displayName = (u.displayName || u.display_name || u.username || 'User').trim();
+        const username = (u.username || '').trim();
+        const avatarUrl = (u.avatarUrl || u.avatar_url || '').trim();
+
+        if (sidebarName) sidebarName.textContent = displayName || username || 'User';
+        if (sidebarHandle) sidebarHandle.textContent = username ? '@' + username : '';
+        if (sidebarAvatar) {
+          sidebarAvatar.src = avatarUrl || '/pfp.jpg';
+          sidebarAvatar.onerror = () => { sidebarAvatar.src = '/pfp.jpg'; };
+        }
+        if (navViewProfile) navViewProfile.href = '/' + (username || '');
+        if (navAdmin && u.isAdmin) navAdmin.style.display = '';
+      }
+
+      updateSidebarUserInfo(API.getUser());
+
       // Load user data
       async function loadUserData() {
         try {
           const res = await API.getMe();
           userData = res.user || res;
+          API.setUser(userData);
           if (inputUsername) inputUsername.value = userData.username || '';
-          // Populate sidebar
-          const sidebarName = document.getElementById('sidebar-name');
-          const sidebarHandle = document.getElementById('sidebar-handle');
-          const sidebarAvatar = document.getElementById('sidebar-avatar');
-          const navViewProfile = document.getElementById('nav-view-profile');
-          const navAdmin = document.getElementById('nav-admin');
-
-          if (sidebarName) sidebarName.textContent = userData.displayName || userData.username || 'User';
-          if (sidebarHandle) sidebarHandle.textContent = '@' + (userData.username || '');
-          if (sidebarAvatar && userData.avatarUrl) sidebarAvatar.src = userData.avatarUrl;
-          if (navViewProfile) navViewProfile.href = '/' + (userData.username || '');
-          if (navAdmin && userData.isAdmin) navAdmin.style.display = '';
-
+          if (currentUsernameText) currentUsernameText.textContent = userData.username || '';
+          updateSidebarUserInfo(userData);
         } catch (err) {
           console.error(err);
           const cached = API.getUser() || {};
           userData = cached;
           if (inputUsername) inputUsername.value = cached.username || '';
           if (currentUsernameText) currentUsernameText.textContent = cached.username || '';
+          updateSidebarUserInfo(cached);
         }
       }
       loadUserData();

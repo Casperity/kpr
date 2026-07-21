@@ -229,19 +229,35 @@
       window.location.href = '/login';
     }
 
+    function updateSidebarUserInfo(u) {
+      if (!u) return;
+      const sidebarName = document.getElementById('sidebar-name');
+      const sidebarHandle = document.getElementById('sidebar-handle');
+      const sidebarAvatar = document.getElementById('sidebar-avatar');
+      const navViewProfile = document.getElementById('nav-view-profile');
+
+      const displayName = (u.displayName || u.display_name || u.username || 'Admin').trim();
+      const username = (u.username || '').trim();
+      const avatarUrl = (u.avatarUrl || u.avatar_url || '').trim();
+
+      if (sidebarName) sidebarName.textContent = displayName || username || 'Admin';
+      if (sidebarHandle) sidebarHandle.textContent = username ? '@' + username : '';
+      if (sidebarAvatar) {
+        sidebarAvatar.src = avatarUrl || '/pfp.jpg';
+        sidebarAvatar.onerror = () => { sidebarAvatar.src = '/pfp.jpg'; };
+      }
+      if (navViewProfile) navViewProfile.href = '/' + (username || '');
+    }
+
+    updateSidebarUserInfo(API.getUser());
+
     // Populate sidebar user card
     async function loadAdminUser() {
       try {
         const res = await API.getMe();
         const user = res.user || res;
-        const sidebarName = document.getElementById('sidebar-name');
-        const sidebarHandle = document.getElementById('sidebar-handle');
-        const sidebarAvatar = document.getElementById('sidebar-avatar');
-        const navViewProfile = document.getElementById('nav-view-profile');
-        if (sidebarName) sidebarName.textContent = user.displayName || user.username || 'Admin';
-        if (sidebarHandle) sidebarHandle.textContent = '@' + (user.username || '');
-        if (sidebarAvatar && user.avatarUrl) sidebarAvatar.src = user.avatarUrl;
-        if (navViewProfile) navViewProfile.href = '/' + (user.username || '');
+        API.setUser(user);
+        updateSidebarUserInfo(user);
       } catch (err) {
         console.error('Failed to load admin profile info', err);
       }
