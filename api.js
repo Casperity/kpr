@@ -194,7 +194,65 @@ const API = {
     return this.request('/api/admin/users');
   },
 
-  /* â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  getAuditLogs() {
+    return this.request('/api/admin/audit-logs');
+  },
+
+  banUser(userId, banned, reason = '') {
+    return this.request('/api/admin/users/' + encodeURIComponent(userId) + '/ban', {
+      method: 'PUT',
+      body: JSON.stringify({ banned: !!banned, reason })
+    });
+  },
+
+  toggleVip(userId, isVip, expiresAt = null) {
+    return this.request('/api/admin/users/' + encodeURIComponent(userId) + '/vip', {
+      method: 'PUT',
+      body: JSON.stringify({ isVip: !!isVip, expiresAt })
+    });
+  },
+
+  setBadges(userId, badges = []) {
+    return this.request('/api/admin/users/' + encodeURIComponent(userId) + '/badges', {
+      method: 'PUT',
+      body: JSON.stringify({ badges })
+    });
+  },
+
+  deleteUser(userId) {
+    return this.request('/api/admin/users/' + encodeURIComponent(userId), {
+      method: 'DELETE'
+    });
+  },
+
+  wipeComments(userId) {
+    return this.request('/api/admin/users/' + encodeURIComponent(userId) + '/comments', {
+      method: 'DELETE'
+    });
+  },
+
+  bulkDeleteInvites(codes = []) {
+    return this.request('/api/admin/invites/bulk-delete', {
+      method: 'POST',
+      body: JSON.stringify({ codes })
+    });
+  },
+
+  bulkToggleVip(userIds = [], isVip = true) {
+    return this.request('/api/admin/users/bulk-vip', {
+      method: 'POST',
+      body: JSON.stringify({ userIds, isVip })
+    });
+  },
+
+  bulkWipeComments(userIds = []) {
+    return this.request('/api/admin/users/bulk-wipe-comments', {
+      method: 'POST',
+      body: JSON.stringify({ userIds })
+    });
+  },
+
+  /* ── Logout ────────────────────────────────────────────── */
   logout() {
     this.clearToken();
     this.clearUser();

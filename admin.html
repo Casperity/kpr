@@ -14,31 +14,26 @@
   <style>
     #users-search:focus {
       outline: none;
-      border-color: rgba(167, 139, 250, 0.4) !important;
+      border-color: rgba(52, 194, 122, 0.5) !important;
     }
     #users-load-more:hover {
       background: rgba(255, 255, 255, 0.08) !important;
       color: #fff !important;
     }
     
-    /* --- Uiverse Actions Menu Card --- */
+    /* --- Actions Menu Card --- */
     .card {
       width: 160px;
-      background-color: rgba(30, 32, 40, 0.98);
-      background-image: linear-gradient(
-        139deg,
-        rgba(30, 32, 40, 1) 0%,
-        rgba(30, 32, 40, 1) 0%,
-        rgba(35, 25, 38, 1) 100%
-      );
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: rgba(20, 24, 22, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       padding: 8px 0px;
       display: flex;
       flex-direction: column;
       gap: 4px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
     .card .separator {
@@ -58,7 +53,7 @@
     .card .list .element {
       display: flex;
       align-items: center;
-      color: #7e8590;
+      color: #8B9089;
       gap: 8px;
       transition: all 0.2s ease-out;
       padding: 6px 10px;
@@ -81,25 +76,47 @@
     }
 
     .card .list .element:hover {
-      background-color: #5353ff;
-      color: #ffffff;
-      transform: translate(1px, -1px);
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #ECEEE9;
+      transform: translateX(2px);
     }
 
     .card .list .element:hover i {
-      color: #ffffff;
+      color: #ECEEE9;
     }
 
     .card .list .delete:hover {
-      background-color: #ef4444;
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
     }
 
-    .card .list .element:active {
-      transform: scale(0.98);
+    .action-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: monospace;
+      letter-spacing: 0.3px;
     }
   </style>
 </head>
 <body>
+  <!-- Custom In-UI Modal Overlay for Confirm & Prompt -->
+  <div id="admin-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:rgba(20,24,22,0.95); border:1px solid rgba(255,255,255,0.12); border-radius:20px; width:100%; max-width:440px; padding:28px; box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+      <div id="admin-modal-title" style="font-size:1.15rem; font-weight:700; color:#ECEEE9; margin-bottom:10px;">Modal Title</div>
+      <div id="admin-modal-desc" style="font-size:0.875rem; color:#8B9089; line-height:1.5; margin-bottom:20px;">Modal message goes here</div>
+      <div id="admin-modal-input-wrap" style="display:none; margin-bottom:20px;">
+        <input type="text" id="admin-modal-input" class="form-input" style="width:100%; box-sizing:border-box;" />
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button id="admin-modal-cancel" style="padding:10px 20px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#8B9089; font-weight:600; cursor:pointer;">Cancel</button>
+        <button id="admin-modal-confirm" style="padding:10px 22px; background:#F3EFE2; border:none; border-radius:12px; color:#0E1210; font-weight:600; cursor:pointer;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Sidebar App Layout -->
   <div class="dash-layout">
 
@@ -142,7 +159,7 @@
           <i class="fas fa-external-link-alt"></i>
           <span>View Profile</span>
         </a>
-        <a href="/admin" id="nav-admin" class="dash-sidebar-link active" style="color:#fb923c;">
+        <a href="/admin" id="nav-admin" class="dash-sidebar-link active" style="color:#34C27A;">
           <i class="fas fa-shield-halved"></i>
           <span>Admin Panel</span>
         </a>
@@ -165,23 +182,35 @@
     <main class="dash-main">
       <div class="admin-content" style="padding: 32px 36px; max-width: 1100px; margin: 0 auto; width: 100%;">
     
+    <!-- Invite Codes Panel -->
     <div class="dash-section" id="section-invites" style="margin-bottom: 2rem;">
-      <div class="dash-section-header collapsed">
+      <div class="dash-section-header">
         <div class="dash-section-title">
-          <i class="fas fa-ticket-alt"></i> Invite Codes
+          <i class="fas fa-ticket-alt" style="color:#34C27A;"></i> Invite Codes
         </div>
       </div>
       <div class="dash-section-body" style="display: block;">
         
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items:center;">
           <input type="number" id="invite-count" class="form-input" value="1" min="1" max="50" style="width: 100px;">
-          <button id="btn-generate" class="btn-save" style="width: auto;">Generate Codes</button>
+          <button id="btn-generate" class="btn-generate" style="width: auto;">Generate Codes</button>
+        </div>
+
+        <!-- Bulk Invites Bar -->
+        <div id="invites-bulk-bar" style="display:none; align-items:center; justify-content:space-between; background:rgba(52,194,122,0.1); border:1px solid rgba(52,194,122,0.3); padding:10px 16px; border-radius:12px; margin-bottom:12px;">
+          <span id="invites-bulk-count" style="font-size:0.85rem; color:#ECEEE9; font-weight:600;">0 selected</span>
+          <button id="btn-bulk-delete-invites" style="padding:6px 14px; background:#ef4444; border:none; border-radius:8px; color:#fff; font-size:0.8rem; font-weight:600; cursor:pointer;">
+            <i class="fas fa-trash"></i> Delete Selected
+          </button>
         </div>
 
         <div style="overflow-x: auto;">
           <table style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color:#8B9089; font-size:0.85rem;">
+                <th style="padding: 1rem; width: 40px;">
+                  <input type="checkbox" id="select-all-invites" style="cursor:pointer;" />
+                </th>
                 <th style="padding: 1rem;">Code</th>
                 <th style="padding: 1rem;">Status</th>
                 <th style="padding: 1rem;">Used By</th>
@@ -197,10 +226,11 @@
       </div>
     </div>
 
+    <!-- Users & Badges Panel -->
     <div class="dash-section" id="section-users" style="margin-bottom: 2rem;">
       <div class="dash-section-header">
         <div class="dash-section-title">
-          <i class="fas fa-users"></i> Users & Badges
+          <i class="fas fa-users" style="color:#34C27A;"></i> Users & Badges
         </div>
       </div>
       <div class="dash-section-body" style="display: block;">
@@ -208,6 +238,22 @@
         <div style="margin-bottom: 16px; position: relative;">
           <input type="text" id="users-search" placeholder="Search by username or display name..." style="width: 100%; padding: 12px 16px 12px 40px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; font-family: inherit; font-size: 0.875rem; box-sizing: border-box; transition: border-color 0.2s;" />
           <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3); font-size: 0.85rem;"></i>
+        </div>
+
+        <!-- Bulk Users Bar -->
+        <div id="users-bulk-bar" style="display:none; align-items:center; justify-content:space-between; background:rgba(52,194,122,0.1); border:1px solid rgba(52,194,122,0.3); padding:10px 16px; border-radius:12px; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <span id="users-bulk-count" style="font-size:0.85rem; color:#ECEEE9; font-weight:600;">0 selected</span>
+          <div style="display:flex; gap:8px;">
+            <button id="btn-bulk-vip" style="padding:6px 14px; background:#34C27A; border:none; border-radius:8px; color:#0E1210; font-size:0.8rem; font-weight:600; cursor:pointer;">
+              <i class="fas fa-crown"></i> Give VIP
+            </button>
+            <button id="btn-bulk-unvip" style="padding:6px 14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#ECEEE9; font-size:0.8rem; font-weight:600; cursor:pointer;">
+              <i class="fas fa-times"></i> Remove VIP
+            </button>
+            <button id="btn-bulk-wipe-comments" style="padding:6px 14px; background:#f59e0b; border:none; border-radius:8px; color:#0E1210; font-size:0.8rem; font-weight:600; cursor:pointer;">
+              <i class="fas fa-comments"></i> Wipe Comments
+            </button>
+          </div>
         </div>
 
         <div id="users-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
@@ -219,6 +265,36 @@
       </div>
     </div>
 
+    <!-- Audit Logs Panel -->
+    <div class="dash-section" id="section-audit-logs" style="margin-bottom: 2rem;">
+      <div class="dash-section-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="dash-section-title">
+          <i class="fas fa-history" style="color:#34C27A;"></i> Admin Audit Logs
+        </div>
+        <button id="btn-refresh-audit" style="background:none; border:none; color:#34C27A; cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px;">
+          <i class="fas fa-rotate"></i> Refresh
+        </button>
+      </div>
+      <div class="dash-section-body" style="display: block;">
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color:#8B9089; font-size:0.85rem;">
+                <th style="padding: 1rem;">Timestamp</th>
+                <th style="padding: 1rem;">Admin</th>
+                <th style="padding: 1rem;">Action</th>
+                <th style="padding: 1rem;">Target User</th>
+                <th style="padding: 1rem;">Details</th>
+              </tr>
+            </thead>
+            <tbody id="audit-logs-tbody">
+              <tr><td colspan="5" style="padding: 1rem; text-align: center; color: rgba(255,255,255,0.4);">Loading audit logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
       </div>
     </main>
   </div>
@@ -227,6 +303,52 @@
   <script>
     if (!API.isLoggedIn()) {
       window.location.href = '/login';
+    }
+
+    /* ── Custom In-UI Modal System ── */
+    function showConfirmModal(title, desc) {
+      return new Promise((resolve) => {
+        document.getElementById('admin-modal-title').textContent = title;
+        document.getElementById('admin-modal-desc').textContent = desc;
+        document.getElementById('admin-modal-input-wrap').style.display = 'none';
+        document.getElementById('admin-modal-overlay').style.display = 'flex';
+        
+        document.getElementById('admin-modal-confirm').onclick = () => {
+          closeModal();
+          resolve(true);
+        };
+        document.getElementById('admin-modal-cancel').onclick = () => {
+          closeModal();
+          resolve(false);
+        };
+      });
+    }
+
+    function showPromptModal(title, desc, placeholder = '', defaultValue = '') {
+      return new Promise((resolve) => {
+        document.getElementById('admin-modal-title').textContent = title;
+        document.getElementById('admin-modal-desc').textContent = desc;
+        const input = document.getElementById('admin-modal-input');
+        input.placeholder = placeholder;
+        input.value = defaultValue;
+        document.getElementById('admin-modal-input-wrap').style.display = 'block';
+        document.getElementById('admin-modal-overlay').style.display = 'flex';
+        input.focus();
+
+        document.getElementById('admin-modal-confirm').onclick = () => {
+          const val = input.value;
+          closeModal();
+          resolve(val);
+        };
+        document.getElementById('admin-modal-cancel').onclick = () => {
+          closeModal();
+          resolve(null);
+        };
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('admin-modal-overlay').style.display = 'none';
     }
 
     function updateSidebarUserInfo(u) {
@@ -251,7 +373,6 @@
 
     updateSidebarUserInfo(API.getUser());
 
-    // Populate sidebar user card
     async function loadAdminUser() {
       try {
         const res = await API.getMe();
@@ -280,15 +401,15 @@
       });
     }
 
-    // Nav
+    // Logout
     document.getElementById('btn-logout').addEventListener('click', () => {
       API.logout();
       window.location.href = '/login';
     });
 
-    /* ── Badge Catalog (matches backend + profile renderer) ── */
+    /* ── Badge Catalog ── */
     const BADGE_CATALOG = {
-      dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#a78bfa' },
+      dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#34C27A' },
       og:          { icon: 'fas fa-crown',           label: 'OG',           color: '#facc15' },
       supporter:   { icon: 'fas fa-heart',           label: 'Supporter',    color: '#f472b6' },
       vip:         { icon: 'fas fa-gem',             label: 'VIP',          color: '#38bdf8' },
@@ -301,40 +422,47 @@
       bughunter:   { icon: 'fas fa-bug',             label: 'Bug Hunter',   color: '#0CE600' },
     };
 
-    // Load invites
+    /* ── Invites System ── */
+    let selectedInvites = new Set();
+    let currentInvitesList = [];
+
     async function loadInvites() {
       try {
         const data = await API.getInvites();
+        currentInvitesList = data.invites || [];
         const tbody = document.getElementById('invites-tbody');
         tbody.innerHTML = '';
+        selectedInvites.clear();
+        updateInvitesBulkBar();
 
-        if (!data.invites || data.invites.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: rgba(255,255,255,0.5);">No invite codes found</td></tr>';
+        if (!currentInvitesList || currentInvitesList.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="padding: 1rem; text-align: center; color: rgba(255,255,255,0.5);">No invite codes found</td></tr>';
           return;
         }
 
-        data.invites.forEach(inv => {
+        currentInvitesList.forEach(inv => {
           const tr = document.createElement('tr');
           tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
           
-          const statusColor = inv.isUsed ? 'rgba(255,255,255,0.3)' : '#4ade80';
+          const statusColor = inv.isUsed ? 'rgba(255,255,255,0.3)' : '#34C27A';
           const statusText = inv.isUsed ? 'Used' : 'Available';
-
-          const usedBy = inv.usedBy ? `<a href="/${inv.usedBy}" target="_blank" style="color: var(--accent);">${inv.usedBy}</a>` : '-';
-          
+          const usedBy = inv.usedBy ? `<a href="/${inv.usedBy}" target="_blank" style="color: #34C27A; font-weight:600;">${inv.usedBy}</a>` : '-';
           const date = new Date(inv.createdAt).toLocaleDateString();
 
           tr.innerHTML = `
-            <td style="padding: 1rem; font-family: monospace;">${inv.code}</td>
             <td style="padding: 1rem;">
-              <span style="background: ${statusColor}; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+              ${!inv.isUsed ? `<input type="checkbox" class="invite-checkbox" data-code="${inv.code}" style="cursor:pointer;" />` : ''}
+            </td>
+            <td style="padding: 1rem; font-family: monospace; font-weight:600; color:#ECEEE9;">${inv.code}</td>
+            <td style="padding: 1rem;">
+              <span style="background: rgba(52,194,122,0.12); color: ${statusColor}; border:1px solid rgba(52,194,122,0.2); padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
                 ${statusText}
               </span>
             </td>
             <td style="padding: 1rem;">${usedBy}</td>
-            <td style="padding: 1rem; color: rgba(255,255,255,0.5);">${date}</td>
+            <td style="padding: 1rem; color: #8B9089; font-size:0.85rem;">${date}</td>
             <td style="padding: 1rem;">
-              <button onclick="copyCode('${inv.code}')" style="background: none; border: none; color: #fff; cursor: pointer; margin-right: 10px;" title="Copy">
+              <button onclick="copyCode('${inv.code}')" style="background: none; border: none; color: #ECEEE9; cursor: pointer; margin-right: 10px;" title="Copy">
                 <i class="fas fa-copy"></i>
               </button>
               ${!inv.isUsed ? `
@@ -347,6 +475,15 @@
           tbody.appendChild(tr);
         });
 
+        // Add checkbox listeners
+        tbody.querySelectorAll('.invite-checkbox').forEach(cb => {
+          cb.addEventListener('change', () => {
+            if (cb.checked) selectedInvites.add(cb.dataset.code);
+            else selectedInvites.delete(cb.dataset.code);
+            updateInvitesBulkBar();
+          });
+        });
+
       } catch (err) {
         if (err.status === 403) {
           document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20vh;">Access Denied. Admins Only.</h1>';
@@ -356,11 +493,49 @@
       }
     }
 
+    function updateInvitesBulkBar() {
+      const bar = document.getElementById('invites-bulk-bar');
+      const countEl = document.getElementById('invites-bulk-count');
+      if (selectedInvites.size > 0) {
+        bar.style.display = 'flex';
+        countEl.textContent = `${selectedInvites.size} code(s) selected`;
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    document.getElementById('select-all-invites').addEventListener('change', (e) => {
+      const checked = e.target.checked;
+      document.querySelectorAll('.invite-checkbox').forEach(cb => {
+        cb.checked = checked;
+        if (checked) selectedInvites.add(cb.dataset.code);
+        else selectedInvites.delete(cb.dataset.code);
+      });
+      updateInvitesBulkBar();
+    });
+
+    document.getElementById('btn-bulk-delete-invites').addEventListener('click', async () => {
+      const codes = Array.from(selectedInvites);
+      if (!codes.length) return;
+      const ok = await showConfirmModal('Bulk Delete Invites', `Are you sure you want to delete ${codes.length} selected invite code(s)?`);
+      if (!ok) return;
+
+      try {
+        await API.bulkDeleteInvites(codes);
+        Toast.show(`Deleted ${codes.length} invite code(s)`, 'success');
+        loadInvites();
+        loadAuditLogs();
+      } catch (err) {
+        Toast.show(err.error || 'Failed to bulk delete invites', 'error');
+      }
+    });
+
     document.getElementById('btn-generate').addEventListener('click', async () => {
       const count = parseInt(document.getElementById('invite-count').value) || 1;
       try {
         await API.createInvites(count);
         loadInvites();
+        loadAuditLogs();
         Toast.show(`Generated ${count} code(s)`, 'success');
       } catch (err) {
         console.error(err);
@@ -374,10 +549,12 @@
     };
 
     window.deleteCode = async (code) => {
-      if (!confirm(`Delete code ${code}?`)) return;
+      const ok = await showConfirmModal('Delete Invite Code', `Delete invite code "${code}"?`);
+      if (!ok) return;
       try {
         await API.deleteInvite(code);
         loadInvites();
+        loadAuditLogs();
         Toast.show('Code deleted', 'success');
       } catch (err) {
         console.error(err);
@@ -387,8 +564,9 @@
 
     loadInvites();
 
-    /* ── Users & Badges ──────────────────────────────── */
+    /* ── Users & Badges System ── */
     let allUsers = [];
+    let selectedUsers = new Set();
     let allowedBadges = Object.keys(BADGE_CATALOG);
 
     async function loadUsers() {
@@ -405,6 +583,17 @@
 
     let visibleCount = 10;
     let searchQuery = '';
+
+    function updateUsersBulkBar() {
+      const bar = document.getElementById('users-bulk-bar');
+      const countEl = document.getElementById('users-bulk-count');
+      if (selectedUsers.size > 0) {
+        bar.style.display = 'flex';
+        countEl.textContent = `${selectedUsers.size} user(s) selected`;
+      } else {
+        bar.style.display = 'none';
+      }
+    }
 
     function renderUsers() {
       const container = document.getElementById('users-list');
@@ -426,11 +615,7 @@
       const sliced = filtered.slice(0, visibleCount);
 
       if (loadMoreBtn) {
-        if (filtered.length > visibleCount) {
-          loadMoreBtn.style.display = 'block';
-        } else {
-          loadMoreBtn.style.display = 'none';
-        }
+        loadMoreBtn.style.display = filtered.length > visibleCount ? 'block' : 'none';
       }
 
       container.innerHTML = sliced.map(u => {
@@ -442,65 +627,66 @@
         }).join('');
 
         const banBtnLabel = u.isBanned ? 'Unban' : 'Ban';
-        const banBtnColor = u.isBanned ? '#4ade80' : '#ef4444';
+        const banBtnColor = u.isBanned ? '#34C27A' : '#ef4444';
         const banBtnIcon = u.isBanned ? 'fa-lock-open' : 'fa-ban';
         const banInfo = u.isBanned
           ? `<span style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 600; margin-left: 6px;" title="Reason: ${u.banReason || 'N/A'}">BANNED</span>`
           : '';
 
+        const isChecked = selectedUsers.has(String(u.id));
+
         return `
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid ${u.isBanned ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.06)'}; border-radius: 14px; padding: 14px 18px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                <a href="/${u.username}" target="_blank" style="color: #fff; text-decoration: none; font-weight: 600;">${u.username}</a>
-                ${u.displayName ? `<span style="color: rgba(255,255,255,0.35);">${u.displayName}</span>` : ''}
-                ${u.isAdmin ? '<span style="background: #fb923c; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;">ADMIN</span>' : ''}
-                ${u.isVip ? `<span style="background: #a78bfa; color: #000; padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;" title="${u.vipExpiresAt ? 'Expires: ' + new Date(u.vipExpiresAt).toLocaleString() : 'Permanent VIP'}">VIP${u.vipExpiresAt ? ' (Temp)' : ''}</span>` : ''}
+          <div style="background: rgba(20,24,22,0.65); border: 1px solid ${u.isBanned ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.07)'}; border-radius: 16px; padding: 16px 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <input type="checkbox" class="user-checkbox" data-user="${u.id}" ${isChecked ? 'checked' : ''} style="cursor:pointer;" />
+                <a href="/${u.username}" target="_blank" style="color: #ECEEE9; text-decoration: none; font-weight: 600; font-size:1rem;">${u.username}</a>
+                ${u.displayName ? `<span style="color: #8B9089; font-size:0.88rem;">(${u.displayName})</span>` : ''}
+                ${u.isAdmin ? '<span style="background: #fb923c; color: #0E1210; padding: 1px 7px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">ADMIN</span>' : ''}
+                ${u.isVip ? `<span style="background: #34C27A; color: #0E1210; padding: 1px 7px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;" title="${u.vipExpiresAt ? 'Expires: ' + new Date(u.vipExpiresAt).toLocaleString() : 'Permanent VIP'}">VIP${u.vipExpiresAt ? ' (Temp)' : ''}</span>` : ''}
                 ${banInfo}
               </div>
-              <div style="display:flex; align-items:center; gap:8px; position:relative;">
-                  <span style="color: rgba(255,255,255,0.2); font-size: 0.72rem; margin-right: 4px;">ID: ${u.id}</span>
+              <div style="display:flex; align-items:center; gap:10px; position:relative;">
+                  <span style="color: #8B9089; font-size: 0.75rem; font-family:monospace;">ID: ${u.id}</span>
               
-                  ${
-                    !u.isAdmin
-                      ? `
-                      <button class="actions-trigger-btn" data-user="${u.id}" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-ellipsis-v"></i> Actions
-                      </button>
+                  <button class="actions-trigger-btn" data-user="${u.id}" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #ECEEE9; padding: 6px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-ellipsis-v"></i> Actions
+                  </button>
 
-                      <div class="actions-dropdown-card" id="actions-dropdown-${u.id}" style="display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                        <div class="card">
-                          <ul class="list">
-                            <li class="element vip-btn" data-user="${u.id}" data-vip="${u.isVip}">
-                              <i class="fas fa-crown" style="color: ${u.isVip ? '#ef4444' : '#a78bfa'};"></i>
-                              <p class="label">${u.isVip ? 'Remove VIP' : 'Give VIP'}</p>
-                            </li>
-                            <li class="element ban-btn" data-user="${u.id}" data-banned="${u.isBanned}">
-                              <i class="fas ${banBtnIcon}" style="color: ${banBtnColor};"></i>
-                              <p class="label">${banBtnLabel}</p>
-                            </li>
-                          </ul>
-                          <div class="separator"></div>
-                          <ul class="list">
-                            <li class="element delete-comments-btn" data-user="${u.id}" data-username="${u.username}">
-                              <i class="fas fa-comments" style="color: #f59e0b;"></i>
-                              <p class="label">Wipe Comments</p>
-                            </li>
-                            <li class="element delete-user-btn delete" data-user="${u.id}" data-username="${u.username}">
-                              <i class="fas fa-trash" style="color: #ef4444;"></i>
-                              <p class="label">Delete User</p>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      `
-                      : ""
-                  }
+                  <div class="actions-dropdown-card" id="actions-dropdown-${u.id}" style="display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 100;">
+                    <div class="card">
+                      <ul class="list">
+                        <li class="element vip-btn" data-user="${u.id}" data-vip="${u.isVip}">
+                          <i class="fas fa-crown" style="color: ${u.isVip ? '#ef4444' : '#34C27A'};"></i>
+                          <p class="label">${u.isVip ? 'Remove VIP' : 'Give VIP'}</p>
+                        </li>
+                        ${!u.isAdmin ? `
+                        <li class="element ban-btn" data-user="${u.id}" data-banned="${u.isBanned}">
+                          <i class="fas ${banBtnIcon}" style="color: ${banBtnColor};"></i>
+                          <p class="label">${banBtnLabel}</p>
+                        </li>
+                        ` : ''}
+                      </ul>
+                      <div class="separator"></div>
+                      <ul class="list">
+                        <li class="element delete-comments-btn" data-user="${u.id}" data-username="${u.username}">
+                          <i class="fas fa-comments" style="color: #f59e0b;"></i>
+                          <p class="label">Wipe Comments</p>
+                        </li>
+                        ${!u.isAdmin ? `
+                        <li class="element delete-user-btn delete" data-user="${u.id}" data-username="${u.username}">
+                          <i class="fas fa-trash" style="color: #ef4444;"></i>
+                          <p class="label">Delete User</p>
+                        </li>
+                        ` : ''}
+                      </ul>
+                    </div>
+                  </div>
               </div>
             </div>
-            ${u.isBanned && u.banReason ? `<div style="font-size:0.75rem; color: rgba(239,68,68,0.7); margin-bottom:8px;"><i class="fas fa-circle-exclamation" style="margin-right:4px;"></i>Reason: ${u.banReason}</div>` : ''}
+            ${u.isBanned && u.banReason ? `<div style="font-size:0.75rem; color: rgba(239,68,68,0.8); margin-bottom:10px;"><i class="fas fa-circle-exclamation" style="margin-right:4px;"></i>Reason: ${u.banReason}</div>` : ''}
             ${!u.isBanned && !u.isAdmin ? `
-            <div class="ban-reason-row" id="ban-reason-row-${u.id}" style="display:none; margin-bottom:10px;">
+            <div class="ban-reason-row" id="ban-reason-row-${u.id}" style="display:none; margin-bottom:12px;">
               <div style="display:flex; gap:8px;">
                 <input type="text" placeholder="Ban reason (optional)" maxlength="200" id="ban-reason-input-${u.id}" style="flex:1; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 0.8rem; font-family: inherit;">
                 <button class="confirm-ban-btn" data-user="${u.id}" style="background: #ef4444; border: none; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">Confirm</button>
@@ -512,25 +698,33 @@
             </div>
           </div>`;
       }).join('');
- 
-      // --- Ban button: show reason row or unban directly ---
+
+      // Add user checkbox event listeners
+      container.querySelectorAll('.user-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+          if (cb.checked) selectedUsers.add(String(cb.dataset.user));
+          else selectedUsers.delete(String(cb.dataset.user));
+          updateUsersBulkBar();
+        });
+      });
+
+      // --- Ban button ---
       container.querySelectorAll('.ban-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const userId = btn.dataset.user;
           const isBanned = btn.dataset.banned === 'true';
           if (isBanned) {
-            // Unban directly
-            if (!confirm('Unban this user?')) return;
+            const ok = await showConfirmModal('Unban User', 'Unban this user?');
+            if (!ok) return;
             await doBan(userId, false, '');
           } else {
-            // Show reason input
             const row = document.getElementById('ban-reason-row-' + userId);
             if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
           }
         });
       });
 
-      // --- VIP button: toggle VIP status ---
+      // --- VIP button (Supports target admins!) ---
       container.querySelectorAll('.vip-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const userId = btn.dataset.user;
@@ -539,8 +733,8 @@
 
           let expiresAt = null;
           if (targetStatus) {
-            const durationInput = prompt("Enter VIP duration in days (Enter 0 or leave empty for Permanent):", "30");
-            if (durationInput === null) return; // User cancelled
+            const durationInput = await showPromptModal('VIP Status Duration', 'Enter VIP duration in days (Enter 0 or leave empty for Permanent):', '30', '30');
+            if (durationInput === null) return;
             const days = parseInt(durationInput.trim(), 10);
             if (durationInput.trim() !== "" && !isNaN(days) && days > 0) {
               const expiryDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
@@ -550,14 +744,12 @@
               return;
             }
           } else {
-            if (!confirm(`Remove VIP status from this user?`)) return;
+            const ok = await showConfirmModal('Remove VIP Status', 'Remove VIP status from this user?');
+            if (!ok) return;
           }
 
           try {
-            const res = await API.request('/api/admin/users/' + userId + '/vip', {
-              method: 'PUT',
-              body: JSON.stringify({ isVip: targetStatus, expiresAt })
-            });
+            const res = await API.toggleVip(userId, targetStatus, expiresAt);
             if (res.success) {
               const u = allUsers.find(x => x.id == userId);
               if (u) {
@@ -572,6 +764,7 @@
                 renderUsers();
               }
               Toast.show(`VIP status updated successfully`, 'success');
+              loadAuditLogs();
             }
           } catch (err) {
             Toast.show(err.error || 'Failed to update VIP status', 'error');
@@ -579,48 +772,45 @@
         });
       });
 
+      // Wipe comments (Supports target admins!)
       container.querySelectorAll('.delete-comments-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-              const userId = btn.dataset.user;
-              const username = btn.dataset.username;
-      
-              if (!confirm(`Delete all comments posted by "${username}"?\n\nThis cannot be undone.`))
-                  return;
-      
-              try {
-                  await API.request(`/api/admin/users/${userId}/comments`, {
-                      method: "DELETE"
-                  });
-                  Toast.show(`All comments by ${username} deleted successfully`, "success");
-              } catch (err) {
-                  console.error(err);
-                  Toast.show(err.error || "Failed to delete comments", "error");
-              }
-          });
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.user;
+          const username = btn.dataset.username;
+
+          const ok = await showConfirmModal('Wipe User Comments', `Delete all comments posted by "${username}"?\n\nThis cannot be undone.`);
+          if (!ok) return;
+
+          try {
+            await API.wipeComments(userId);
+            Toast.show(`All comments by ${username} deleted successfully`, "success");
+            loadAuditLogs();
+          } catch (err) {
+            console.error(err);
+            Toast.show(err.error || "Failed to delete comments", "error");
+          }
+        });
       });
 
       container.querySelectorAll('.delete-user-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-              const userId = btn.dataset.user;
-              const username = btn.dataset.username;
-      
-              if (!confirm(`Delete "${username}"?\n\nThis cannot be undone.`))
-                  return;
-      
-              try {
-                  await API.request(`/api/admin/users/${userId}`, {
-                      method: "DELETE"
-                  });
-      
-                  allUsers = allUsers.filter(u => u.id != userId);
-                  renderUsers();
-      
-                  Toast.show(`${username} deleted successfully`, "success");
-              } catch (err) {
-                  console.error(err);
-                  Toast.show(err.error || "Failed to delete user", "error");
-              }
-          });
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.user;
+          const username = btn.dataset.username;
+
+          const ok = await showConfirmModal('Delete User Account', `Permanently delete "${username}"?\n\nThis action cannot be undone.`);
+          if (!ok) return;
+
+          try {
+            await API.deleteUser(userId);
+            allUsers = allUsers.filter(u => u.id != userId);
+            renderUsers();
+            loadAuditLogs();
+            Toast.show(`${username} deleted successfully`, "success");
+          } catch (err) {
+            console.error(err);
+            Toast.show(err.error || "Failed to delete user", "error");
+          }
+        });
       });
 
       container.querySelectorAll('.confirm-ban-btn').forEach(btn => {
@@ -639,7 +829,7 @@
         });
       });
 
-      // --- Badge pills ---
+      // Badge pills (Supports target admins!)
       container.querySelectorAll('.badge-pill').forEach(btn => {
         btn.addEventListener('click', async () => {
           const userId = btn.dataset.user;
@@ -655,12 +845,10 @@
           }
 
           try {
-            await API.request('/api/admin/users/' + userId + '/badges', {
-              method: 'PUT',
-              body: JSON.stringify({ badges })
-            });
+            await API.setBadges(userId, badges);
             user.badges = badges;
             renderUsers();
+            loadAuditLogs();
             Toast.show(`Badges updated for ${user.username}`, 'success');
           } catch (err) {
             console.error(err);
@@ -669,7 +857,7 @@
         });
       });
 
-      // --- Actions dropdown toggle ---
+      // Actions dropdown toggle
       container.querySelectorAll('.actions-trigger-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -677,7 +865,6 @@
           const dd = document.getElementById('actions-dropdown-' + userId);
           if (!dd) return;
           
-          // Close all other dropdowns
           document.querySelectorAll('.actions-dropdown-card').forEach(x => {
             if (x.id !== dd.id) x.style.display = 'none';
           });
@@ -687,18 +874,65 @@
       });
     }
 
+    /* ── Bulk Actions for Users ── */
+    document.getElementById('btn-bulk-vip').addEventListener('click', async () => {
+      const ids = Array.from(selectedUsers).map(id => parseInt(id, 10));
+      if (!ids.length) return;
+      const ok = await showConfirmModal('Bulk Grant VIP', `Grant VIP status to ${ids.length} selected user(s)?`);
+      if (!ok) return;
+      try {
+        await API.bulkToggleVip(ids, true);
+        Toast.show(`VIP granted for ${ids.length} user(s)`, 'success');
+        selectedUsers.clear();
+        loadUsers();
+        loadAuditLogs();
+      } catch (err) {
+        Toast.show(err.error || 'Bulk VIP failed', 'error');
+      }
+    });
+
+    document.getElementById('btn-bulk-unvip').addEventListener('click', async () => {
+      const ids = Array.from(selectedUsers).map(id => parseInt(id, 10));
+      if (!ids.length) return;
+      const ok = await showConfirmModal('Bulk Remove VIP', `Remove VIP status from ${ids.length} selected user(s)?`);
+      if (!ok) return;
+      try {
+        await API.bulkToggleVip(ids, false);
+        Toast.show(`VIP removed for ${ids.length} user(s)`, 'success');
+        selectedUsers.clear();
+        loadUsers();
+        loadAuditLogs();
+      } catch (err) {
+        Toast.show(err.error || 'Bulk remove VIP failed', 'error');
+      }
+    });
+
+    document.getElementById('btn-bulk-wipe-comments').addEventListener('click', async () => {
+      const ids = Array.from(selectedUsers).map(id => parseInt(id, 10));
+      if (!ids.length) return;
+      const ok = await showConfirmModal('Bulk Wipe Comments', `Wipe all authored comments for ${ids.length} selected user(s)?\n\nThis cannot be undone.`);
+      if (!ok) return;
+      try {
+        await API.bulkWipeComments(ids);
+        Toast.show(`Wiped comments for ${ids.length} user(s)`, 'success');
+        selectedUsers.clear();
+        loadUsers();
+        loadAuditLogs();
+      } catch (err) {
+        Toast.show(err.error || 'Bulk wipe comments failed', 'error');
+      }
+    });
+
     async function doBan(userId, banned, reason) {
       const user = allUsers.find(u => u.id == userId);
       try {
-        await API.request('/api/admin/users/' + userId + '/ban', {
-          method: 'PUT',
-          body: JSON.stringify({ banned, reason })
-        });
+        await API.banUser(userId, banned, reason);
         if (user) {
           user.isBanned = banned;
           user.banReason = banned ? reason || 'No reason provided.' : '';
         }
         renderUsers();
+        loadAuditLogs();
         Toast.show(`User ${banned ? 'banned' : 'unbanned'} successfully`, banned ? 'error' : 'success');
       } catch (err) {
         console.error(err);
@@ -719,10 +953,62 @@
       renderUsers();
     });
 
+    /* ── Audit Logs System ── */
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('audit-logs-tbody');
+      if (!tbody) return;
+      try {
+        const res = await API.getAuditLogs();
+        const logs = res.logs || [];
+        tbody.innerHTML = '';
+
+        if (!logs.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: rgba(255,255,255,0.4);">No audit logs recorded yet</td></tr>';
+          return;
+        }
+
+        logs.forEach(l => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+          const date = new Date(l.createdAt).toLocaleString();
+          
+          let actionColor = '#34C27A';
+          let actionBg = 'rgba(52,194,122,0.12)';
+          if (l.action.includes('DELETE') || l.action.includes('BAN')) {
+            actionColor = '#ef4444';
+            actionBg = 'rgba(239,68,68,0.12)';
+          } else if (l.action.includes('WIPE') || l.action.includes('REMOVE')) {
+            actionColor = '#f59e0b';
+            actionBg = 'rgba(245,158,11,0.12)';
+          }
+
+          const target = l.targetUsername ? `<a href="/${l.targetUsername}" target="_blank" style="color:#ECEEE9; font-weight:600;">@${l.targetUsername}</a>` : (l.targetUserId ? `ID: ${l.targetUserId}` : '-');
+
+          tr.innerHTML = `
+            <td style="padding: 1rem; color: #8B9089; font-size: 0.82rem;">${date}</td>
+            <td style="padding: 1rem; font-weight: 600; color: #ECEEE9;">@${l.adminUsername}</td>
+            <td style="padding: 1rem;">
+              <span class="action-tag" style="background:${actionBg}; color:${actionColor}; border:1px solid ${actionColor}40;">
+                ${l.action}
+              </span>
+            </td>
+            <td style="padding: 1rem;">${target}</td>
+            <td style="padding: 1rem; color: #ECEEE9; font-size: 0.85rem;">${l.details || '-'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        console.error('Failed to load audit logs:', err);
+      }
+    }
+
+    document.getElementById('btn-refresh-audit').addEventListener('click', loadAuditLogs);
+
     // Global click-away listener to close dropdowns
     document.addEventListener('click', (e) => {
       document.querySelectorAll('.actions-dropdown-card').forEach(dd => {
-        const trigger = dd.parentElement.querySelector('.actions-trigger-btn');
+        const trigger = dd.parentElement?.querySelector('.actions-trigger-btn');
         if (trigger && !trigger.contains(e.target) && !dd.contains(e.target)) {
           dd.style.display = 'none';
         }
@@ -730,6 +1016,7 @@
     });
 
     loadUsers();
+    loadAuditLogs();
   </script>
 </body>
 </html>

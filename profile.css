@@ -148,9 +148,9 @@ body.profile-page.has-bg-image::before {
 }
 
 .profile-badge-icon:hover {
-  transform: scale(1.2);
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 12px currentColor;
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
 }
 
 .profile-badge-icon::after {

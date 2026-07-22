@@ -329,8 +329,11 @@
 
       <div class="settings-divider" style="margin-top:28px; margin-bottom:24px;"></div>
 
-      <button class="btn-settings-primary" id="btn-change-pw">
-        <i class="fas fa-key"></i> Update Password
+      <button class="frutiger-button" id="btn-change-pw">
+        <div class="inner">
+          <div class="top-white"></div>
+          <span class="text">Update Password</span>
+        </div>
       </button>
     </div>
 
@@ -497,15 +500,16 @@
         if (newPw !== confirmPw) return Toast.show('Passwords do not match.', 'error');
 
         const btn = document.getElementById('btn-change-pw');
+        const textSpan = btn.querySelector('.text');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updatingâ€¦';
+        if (textSpan) textSpan.textContent = 'Updating...';
 
         try {
           await API.request('/api/user/password', {
             method: 'PUT',
             body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw })
           });
-          Toast.show('Password updated! Logging you outâ€¦', 'success');
+          Toast.show('Password updated! Logging you out...', 'success');
           document.getElementById('input-current-pw').value = '';
           document.getElementById('input-new-pw').value = '';
           document.getElementById('input-confirm-pw').value = '';
@@ -513,11 +517,11 @@
         } catch (err) {
           Toast.show(err.message || err.error || 'Failed to update password.', 'error');
           btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-key"></i> Update Password';
+          if (textSpan) textSpan.textContent = 'Update Password';
         }
       });
 
-      // â”€â”€ Delete Account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Delete Account ────────────────────────────────────────────
       document.getElementById('btn-delete-account').addEventListener('click', async () => {
         const pw = document.getElementById('input-delete-pw').value;
         if (!pw) return Toast.show('Enter your password to confirm deletion.', 'error');
