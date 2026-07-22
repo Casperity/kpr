@@ -216,18 +216,56 @@
           </div>
         </div>
 
-        <!-- Form Sections -->
-        <div class="dash-form-area">
-
-          <!-- Basic Info -->
-          <div class="dash-section" id="section-basic">
-            <div class="dash-section-header" onclick="toggleSection('section-basic')">
-              <div class="dash-section-title">
-                <i class="fas fa-user"></i> Basic Info
+        <!-- Hero Overview Banner -->
+        <div class="dash-hero-card">
+          <div class="dash-hero-inner">
+            <div class="dash-hero-user-row">
+              <div class="dash-hero-avatar-wrap">
+                <img id="hero-avatar" src="/pfp.jpg" alt="Avatar" class="dash-hero-avatar" onerror="this.src='/pfp.jpg';" />
               </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
+              <div class="dash-hero-meta">
+                <div class="dash-hero-name-row">
+                  <span id="hero-display-name" class="dash-hero-name">Loading...</span>
+                  <div id="hero-badges-strip" class="dash-hero-badges"></div>
+                </div>
+                <span id="hero-username" class="dash-hero-handle">@...</span>
+              </div>
             </div>
-            <div class="dash-section-body">
+            <a href="#" id="hero-view-profile" target="_blank" class="dash-hero-btn-profile">
+              <i class="fas fa-external-link-alt"></i> View Public Profile
+            </a>
+          </div>
+        </div>
+
+        <!-- Tabbed Segmented Switcher -->
+        <div class="dash-tabs-bar">
+          <button class="dash-tab-btn active" data-tab="profile" onclick="switchTab('profile')">
+            <i class="fas fa-user"></i>
+            <span>Profile Info</span>
+          </button>
+          <button class="dash-tab-btn" data-tab="appearance" onclick="switchTab('appearance')">
+            <i class="fas fa-palette"></i>
+            <span>Appearance</span>
+          </button>
+          <button class="dash-tab-btn" data-tab="media" onclick="switchTab('media')">
+            <i class="fas fa-link"></i>
+            <span>Socials & Media</span>
+          </button>
+          <button class="dash-tab-btn" data-tab="store" onclick="switchTab('store')">
+            <i class="fas fa-store"></i>
+            <span>Store & Perks</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: Profile Info -->
+        <div class="dash-tab-pane active" id="tab-profile">
+
+          <!-- Basic Info Panel -->
+          <div class="dash-card-panel" id="section-basic">
+            <div class="dash-card-title">
+              <i class="fas fa-id-card"></i> Profile Identity & Bio
+            </div>
+            <div class="dash-section-body" style="padding: 0;">
               <div class="form-group">
                 <label class="form-label">Display Name</label>
                 <input type="text" class="form-input" id="input-name" placeholder="Your display name" maxlength="40" />
@@ -237,15 +275,17 @@
                 <textarea class="form-textarea" id="input-bio" placeholder="Tell the world about yourself..." maxlength="500" rows="3"></textarea>
                 <div class="char-counter" id="bio-counter">0 / 500</div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Pronouns <span style="opacity:0.4;">(optional)</span></label>
-                <input type="text" class="form-input" id="input-pronouns" placeholder="e.g. he/him, she/her" maxlength="30" />
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                <div class="form-group">
+                  <label class="form-label">Pronouns <span style="opacity:0.4;">(optional)</span></label>
+                  <input type="text" class="form-input" id="input-pronouns" placeholder="e.g. he/him, she/her" maxlength="30" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Aliases <span style="opacity:0.4;">(optional)</span></label>
+                  <input type="text" class="form-input" id="input-aliases" placeholder="e.g. John, Pork" maxlength="60" />
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Aliases <span style="opacity:0.4;">(optional)</span></label>
-                <input type="text" class="form-input" id="input-aliases" placeholder="e.g. John, Pork" maxlength="60" />
-              </div>
-              <div class="form-group">
+              <div class="form-group" style="margin-top: 14px;">
                 <label class="form-label">Avatar URL</label>
                 <div class="avatar-preview-row">
                   <img class="avatar-preview-img" id="avatar-preview" src="" alt="" />
@@ -256,92 +296,146 @@
             </div>
           </div>
 
-          <!-- Badges -->
-          <div class="dash-section" id="section-badges" style="display:none;">
-            <div class="dash-section-header" onclick="toggleSection('section-badges')">
-              <div class="dash-section-title">
-                <i class="fas fa-certificate"></i> My Badges
-              </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
+          <!-- Badges Panel -->
+          <div class="dash-card-panel" id="section-badges" style="display:none;">
+            <div class="dash-card-title">
+              <i class="fas fa-certificate"></i> My Badges & Accolades
             </div>
-            <div class="dash-section-body">
+            <div class="dash-section-body" style="padding: 0;">
               <div class="form-hint" style="margin-bottom:14px;">Click a badge to toggle whether it shows on your profile. You can only show badges you own.</div>
               <div id="badge-toggle-list" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
             </div>
           </div>
 
-          <!-- Referrals -->
-          <div class="dash-section" id="section-referrals">
-            <div class="dash-section-header" onclick="toggleSection('section-referrals')">
-              <div class="dash-section-title">
-                <i class="fas fa-users"></i> Referral Program
-              </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+
+        <!-- TAB 2: Appearance -->
+        <div class="dash-tab-pane" id="tab-appearance">
+
+          <div class="dash-card-panel" id="section-theme">
+            <div class="dash-card-title">
+              <i class="fas fa-palette"></i> Theme & Custom Styling
             </div>
-            <div class="dash-section-body">
-              <div class="form-hint" style="margin-bottom: 16px;">
-                Share your referral link with others to earn rewards! Registration still requires a valid invite code.
+            <div class="dash-section-body" style="padding: 0;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                <div class="form-group">
+                  <label class="form-label">Accent Color</label>
+                  <div class="color-picker-row">
+                    <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;">
+                      <input type="color" id="input-accent-picker" value="#a78bfa" />
+                    </div>
+                    <input type="text" class="form-input" id="input-accent" value="#a78bfa" placeholder="#a78bfa" maxlength="7" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Background Color</label>
+                  <div class="color-picker-row">
+                    <div class="color-swatch" id="swatch-bg" style="background:#0a0a0f;">
+                      <input type="color" id="input-bg-picker" value="#0a0a0f" />
+                    </div>
+                    <input type="text" class="form-input" id="input-bg" value="#0a0a0f" placeholder="#0a0a0f" maxlength="7" />
+                  </div>
+                </div>
               </div>
-              
+
+              <div class="form-group" style="margin-top: 14px;">
+                <label class="form-label">Background Image URL</label>
+                <input type="url" class="form-input" id="input-bg-image" placeholder="https://raw.githubusercontent.com/..." />
+                <div class="form-hint">Only GitHub URLs allowed — leave empty for solid background color</div>
+              </div>
               <div class="form-group">
-                <label class="form-label">Your Referral Link</label>
-                <div style="display:flex; gap:10px;">
-                  <input type="text" class="form-input" id="input-ref-link" readonly style="background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.6);" />
-                  <button class="form-btn-secondary" id="btn-copy-ref" style="flex-shrink:0; padding:0 16px; border-radius:12px; background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); color:#a78bfa; font-weight:600; cursor:pointer; transition:all 0.2s;">
-                    <i class="fas fa-copy"></i>
-                  </button>
+                <label class="form-label">Background Video URL <span style="opacity:0.4;">(optional, mp4)</span></label>
+                <input type="url" class="form-input" id="input-bg-video" placeholder="https://raw.githubusercontent.com/..." />
+                <div class="form-hint">Only GitHub URLs allowed — direct link to a looping background video</div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 6px;">
+                <div class="form-group">
+                  <label class="form-label">Display Name Font URL <span style="opacity:0.4;">(optional)</span></label>
+                  <input type="url" class="form-input" id="input-font-name" placeholder="https://raw.githubusercontent.com/...font.woff2" />
+                  <div class="form-hint">Direct link to a <strong>.woff2</strong>, <strong>.woff</strong>, or <strong>.ttf</strong> font file</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Bio Font URL <span style="opacity:0.4;">(optional)</span></label>
+                  <input type="url" class="form-input" id="input-font-bio" placeholder="https://raw.githubusercontent.com/...font.woff2" />
+                  <div class="form-hint">Direct link to a <strong>.woff2</strong>, <strong>.woff</strong>, or <strong>.ttf</strong> font file</div>
                 </div>
               </div>
 
-              <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:16px; margin-bottom:20px;">
-                <div style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-bottom:4px;">Total Referrals</div>
-                <div style="font-size:2.2rem; font-weight:700; color:#fff; line-height:1;" id="ref-count-val">0</div>
+              <!-- Toggles Container Card -->
+              <div style="margin-top:20px; border:1px solid rgba(255,255,255,0.08); border-radius:16px; overflow:hidden;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
+                  <div>
+                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Auto-play music</div>
+                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Play music automatically when profile loads</div>
+                  </div>
+                  <div class="uiverse-toggle-container">
+                    <input type="checkbox" id="input-music-autoplay" class="uiverse-toggle-checkbox" />
+                    <label for="input-music-autoplay" class="uiverse-toggle-label"></label>
+                  </div>
+                </div>
+                <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
+                  <div>
+                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Blur background</div>
+                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Apply a blur to the background image or video</div>
+                  </div>
+                  <div class="uiverse-toggle-container">
+                    <input type="checkbox" id="input-bg-blur" class="uiverse-toggle-checkbox" />
+                    <label for="input-bg-blur" class="uiverse-toggle-label"></label>
+                  </div>
+                </div>
+                <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
+                  <div>
+                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Mute background video</div>
+                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Keep background video muted by default</div>
+                  </div>
+                  <div class="uiverse-toggle-container">
+                    <input type="checkbox" id="input-bg-video-muted" class="uiverse-toggle-checkbox" />
+                    <label for="input-bg-video-muted" class="uiverse-toggle-label"></label>
+                  </div>
+                </div>
+                <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
+                  <div>
+                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Force fit video</div>
+                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Letterbox the video so it never gets cropped — adds black bars to fill empty space</div>
+                  </div>
+                  <div class="uiverse-toggle-container">
+                    <input type="checkbox" id="input-bg-video-fit" class="uiverse-toggle-checkbox" />
+                    <label for="input-bg-video-fit" class="uiverse-toggle-label"></label>
+                  </div>
+                </div>
               </div>
 
-              <!-- Milestones Grid -->
-              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px;">
-                <!-- Milestone 1 -->
-                <div id="reward-milestone-10" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
-                  <div style="font-size:1.1rem; margin-bottom:4px;">👑</div>
-                  <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">5 Days VIP</div>
-                  <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">10 Referrals</div>
-                  <span class="milestone-badge" id="milestone-status-10" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
-                </div>
-                <!-- Milestone 2 -->
-                <div id="reward-milestone-25" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
-                  <div style="font-size:1.1rem; margin-bottom:4px;">💎</div>
-                  <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">Permanent VIP</div>
-                  <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">25 Referrals</div>
-                  <span class="milestone-badge" id="milestone-status-25" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
-                </div>
-                <!-- Milestone 3 -->
-                <div id="reward-milestone-50" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
-                  <div style="font-size:1.1rem; margin-bottom:4px;">⭐</div>
-                  <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">Supporter Badge</div>
-                  <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">50 Referrals</div>
-                  <span class="milestone-badge" id="milestone-status-50" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
-                </div>
-              </div>
-
-              <!-- Referred Users List -->
-              <div>
-                <label class="form-label" style="margin-bottom:8px;">Users You Referred</label>
-                <div id="referred-users-list" style="display:flex; flex-wrap:wrap; gap:8px;">
-                  <div style="font-size:0.8rem; color:rgba(255,255,255,0.3); font-style:italic;">No referrals yet.</div>
-                </div>
-              </div>
             </div>
           </div>
 
-          <!-- Gallery -->
-          <div class="dash-section" id="section-gallery">
-            <div class="dash-section-header" onclick="toggleSection('section-gallery')">
-              <div class="dash-section-title">
-                <i class="fas fa-images"></i> Gallery
-              </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
+        </div>
+
+        <!-- TAB 3: Socials & Media -->
+        <div class="dash-tab-pane" id="tab-media">
+
+          <!-- Social Links Panel -->
+          <div class="dash-card-panel" id="section-links">
+            <div class="dash-card-title">
+              <i class="fas fa-link"></i> Social Links Hub
             </div>
-            <div class="dash-section-body">
+            <div class="dash-section-body" style="padding: 0;">
+              <div id="links-list"></div>
+              <button class="btn-add-link" id="btn-add-link">
+                <i class="fas fa-plus"></i> Add Link
+              </button>
+              <div class="links-limit" id="links-limit">0 / 15 links</div>
+            </div>
+          </div>
+
+          <!-- Gallery Panel -->
+          <div class="dash-card-panel" id="section-gallery">
+            <div class="dash-card-title">
+              <i class="fas fa-images"></i> Gallery Showcase
+            </div>
+            <div class="dash-section-body" style="padding: 0;">
               <div class="form-hint" style="margin-bottom:14px;">Add photos and videos to your profile gallery. Drag to reorder. Only GitHub URLs allowed for media.</div>
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 10px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;">
                 <input type="checkbox" id="input-disable-gallery" style="width: 16px; height: 16px; cursor: pointer;">
@@ -355,173 +449,49 @@
             </div>
           </div>
 
-          <!-- Social Links -->
-          <div class="dash-section" id="section-links">
-            <div class="dash-section-header" onclick="toggleSection('section-links')">
-              <div class="dash-section-title">
-                <i class="fas fa-link"></i> Social Links
-              </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
+          <!-- Playlist Panel -->
+          <div class="dash-card-panel" id="section-playlist">
+            <div class="dash-card-title">
+              <i class="fas fa-music"></i> Audio Player & Playlist
             </div>
-            <div class="dash-section-body">
-              <div id="links-list"></div>
-              <button class="btn-add-link" id="btn-add-link">
-                <i class="fas fa-plus"></i> Add Link
-              </button>
-              <div class="links-limit" id="links-limit">0 / 15 links</div>
-            </div>
-          </div>
-
-          <!-- Theme Settings -->
-          <div class="dash-section" id="section-theme">
-            <div class="dash-section-header" onclick="toggleSection('section-theme')">
-              <div class="dash-section-title">
-                <i class="fas fa-palette"></i> Theme Settings
-              </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
-            </div>
-            <div class="dash-section-body">
-              <div class="form-group">
-                <label class="form-label">Accent Color</label>
-                <div class="color-picker-row">
-                  <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;">
-                    <input type="color" id="input-accent-picker" value="#a78bfa" />
-                  </div>
-                  <input type="text" class="form-input" id="input-accent" value="#a78bfa" placeholder="#a78bfa" maxlength="7" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Background Color</label>
-                <div class="color-picker-row">
-                  <div class="color-swatch" id="swatch-bg" style="background:#0a0a0f;">
-                    <input type="color" id="input-bg-picker" value="#0a0a0f" />
-                  </div>
-                  <input type="text" class="form-input" id="input-bg" value="#0a0a0f" placeholder="#0a0a0f" maxlength="7" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Background Image URL</label>
-                <input type="url" class="form-input" id="input-bg-image" placeholder="https://raw.githubusercontent.com/..." />
-                <div class="form-hint">Only GitHub URLs allowed — leave empty for solid background color</div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Background Video URL <span style="opacity:0.4;">(optional, mp4)</span></label>
-                <input type="url" class="form-input" id="input-bg-video" placeholder="https://raw.githubusercontent.com/..." />
-                <div class="form-hint">Only GitHub URLs allowed — direct link to a looping background video</div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Display Name Font URL <span style="opacity:0.4;">(optional)</span></label>
-                <input type="url" class="form-input" id="input-font-name" placeholder="https://raw.githubusercontent.com/...font.woff2" />
-                <div class="form-hint">Only GitHub URLs — link to a <strong>.woff2</strong>, <strong>.woff</strong>, or <strong>.ttf</strong> font file</div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Bio Font URL <span style="opacity:0.4;">(optional)</span></label>
-                <input type="url" class="form-input" id="input-font-bio" placeholder="https://raw.githubusercontent.com/...font.woff2" />
-                <div class="form-hint">Only GitHub URLs — link to a <strong>.woff2</strong>, <strong>.woff</strong>, or <strong>.ttf</strong> font file</div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Music URL <span style="opacity:0.4;">(optional)</span></label>
+            <div class="dash-section-body" style="padding: 0;">
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label">Single Track Music URL <span style="opacity:0.4;">(optional)</span></label>
                 <input type="url" class="form-input" id="input-music-url" placeholder="https://raw.githubusercontent.com/..." />
               </div>
-              <div class="form-group">
-                <label class="form-label">Music Title</label>
-                <input type="text" class="form-input" id="input-music-title" placeholder="Song title" maxlength="80" />
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                <div class="form-group">
+                  <label class="form-label">Music Title</label>
+                  <input type="text" class="form-input" id="input-music-title" placeholder="Song title" maxlength="80" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Music Artist</label>
+                  <input type="text" class="form-input" id="input-music-artist" placeholder="Artist name" maxlength="80" />
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Music Artist</label>
-                <input type="text" class="form-input" id="input-music-artist" placeholder="Artist name" maxlength="80" />
-              </div>
-              <!-- Toggle group -->
-              <div class="form-group" style="margin-top:16px; border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden;">
 
-                <!-- Auto-play music -->
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
-                  <div>
-                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Auto-play music</div>
-                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Play music automatically when profile loads</div>
-                  </div>
-                  <div class="uiverse-toggle-container">
-                    <input type="checkbox" id="input-music-autoplay" class="uiverse-toggle-checkbox" />
-                    <label for="input-music-autoplay" class="uiverse-toggle-label"></label>
-                  </div>
-                </div>
-
-                <!-- Divider -->
-                <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
-
-                <!-- Blur background -->
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
-                  <div>
-                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Blur background</div>
-                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Apply a blur to the background image or video</div>
-                  </div>
-                  <div class="uiverse-toggle-container">
-                    <input type="checkbox" id="input-bg-blur" class="uiverse-toggle-checkbox" />
-                    <label for="input-bg-blur" class="uiverse-toggle-label"></label>
-                  </div>
-                </div>
-
-                <!-- Divider -->
-                <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
-
-                <!-- Mute background video -->
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
-                  <div>
-                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Mute background video</div>
-                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Keep background video muted by default</div>
-                  </div>
-                  <div class="uiverse-toggle-container">
-                    <input type="checkbox" id="input-bg-video-muted" class="uiverse-toggle-checkbox" />
-                    <label for="input-bg-video-muted" class="uiverse-toggle-label"></label>
-                  </div>
-                </div>
-
-                <!-- Divider -->
-                <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
-
-                <!-- Force fit video -->
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; background:rgba(255,255,255,0.02);">
-                  <div>
-                    <div style="font-size:0.875rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:2px;">Force fit video</div>
-                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.38);">Letterbox the video so it never gets cropped — adds black bars to fill empty space</div>
-                  </div>
-                  <div class="uiverse-toggle-container">
-                    <input type="checkbox" id="input-bg-video-fit" class="uiverse-toggle-checkbox" />
-                    <label for="input-bg-video-fit" class="uiverse-toggle-label"></label>
-                  </div>
-                </div>
-
+              <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
+                <div class="form-hint" style="margin-bottom:14px;">Add multiple audio tracks to your profile player. Drag to reorder. Only GitHub URLs allowed for audio files.</div>
+                <div id="playlist-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                <button class="btn-add-link" id="btn-add-playlist-item" style="margin-top:10px;">
+                  <i class="fas fa-plus"></i> Add Track
+                </button>
+                <div class="links-limit" id="playlist-limit">0 / 20 tracks</div>
               </div>
             </div>
           </div>
 
-          <!-- Playlist -->
-          <div class="dash-section" id="section-playlist">
-            <div class="dash-section-header" onclick="toggleSection('section-playlist')">
-              <div class="dash-section-title">
-                <i class="fas fa-music"></i> Audio Playlist
-              </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
-            </div>
-            <div class="dash-section-body">
-              <div class="form-hint" style="margin-bottom:14px;">Add multiple audio tracks to your profile player. Drag to reorder. Only GitHub URLs allowed for audio files.</div>
-              <div id="playlist-list" style="display:flex;flex-direction:column;gap:8px;"></div>
-              <button class="btn-add-link" id="btn-add-playlist-item" style="margin-top:10px;">
-                <i class="fas fa-plus"></i> Add Track
-              </button>
-              <div class="links-limit" id="playlist-limit">0 / 20 tracks</div>
-            </div>
-          </div>
+        </div>
 
-          <!-- SellAuth Shop -->
-          <div class="dash-section" id="section-sellauth">
-            <div class="dash-section-header" onclick="toggleSection('section-sellauth')">
-              <div class="dash-section-title">
-                <i class="fas fa-store"></i> SellAuth Shop
-              </div>
-              <i class="fas fa-chevron-down dash-section-toggle"></i>
+        <!-- TAB 4: Store & Perks -->
+        <div class="dash-tab-pane" id="tab-store">
+
+          <!-- SellAuth Shop Panel -->
+          <div class="dash-card-panel" id="section-sellauth">
+            <div class="dash-card-title">
+              <i class="fas fa-store"></i> SellAuth Store Integration
             </div>
-            <div class="dash-section-body">
+            <div class="dash-section-body" style="padding: 0;">
               <div id="sellauth-status" style="margin-bottom:14px; display:none;">
                 <span id="sellauth-status-badge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; background:rgba(74,222,128,0.12); color:#4ade80; border:1px solid rgba(74,222,128,0.25);">
                   <i class="fas fa-circle-check"></i>
@@ -549,13 +519,74 @@
             </div>
           </div>
 
-          <!-- Save -->
-          <div class="dash-save-area">
-            <button class="btn-save" id="btn-save">
-              <i class="fas fa-save"></i> Save Changes
-            </button>
+          <!-- Referrals Panel -->
+          <div class="dash-card-panel" id="section-referrals">
+            <div class="dash-card-title">
+              <i class="fas fa-users"></i> Referral Rewards & Milestones
+            </div>
+            <div class="dash-section-body" style="padding: 0;">
+              <div class="form-hint" style="margin-bottom: 16px;">
+                Share your referral link with others to earn rewards! Registration still requires a valid invite code.
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Your Referral Link</label>
+                <div style="display:flex; gap:10px;">
+                  <input type="text" class="form-input" id="input-ref-link" readonly style="background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.6);" />
+                  <button class="form-btn-secondary" id="btn-copy-ref" style="flex-shrink:0; padding:0 16px; border-radius:12px; background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); color:#a78bfa; font-weight:600; cursor:pointer; transition:all 0.2s;">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:16px; margin-bottom:20px;">
+                <div style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-bottom:4px;">Total Referrals</div>
+                <div style="font-size:2.2rem; font-weight:700; color:#fff; line-height:1;" id="ref-count-val">0</div>
+              </div>
+
+              <!-- Milestones Grid -->
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px;">
+                <div id="reward-milestone-10" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
+                  <div style="font-size:1.1rem; margin-bottom:4px;">👑</div>
+                  <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">5 Days VIP</div>
+                  <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">10 Referrals</div>
+                  <span class="milestone-badge" id="milestone-status-10" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
+                </div>
+                <div id="reward-milestone-25" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
+                  <div style="font-size:1.1rem; margin-bottom:4px;">💎</div>
+                  <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">Permanent VIP</div>
+                  <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">25 Referrals</div>
+                  <span class="milestone-badge" id="milestone-status-25" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
+                </div>
+                <div id="reward-milestone-50" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px 14px; text-align:center; transition:all 0.3s;">
+                  <div style="font-size:1.1rem; margin-bottom:4px;">⭐</div>
+                  <div style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:2px;">Supporter Badge</div>
+                  <div style="font-size:0.68rem; color:rgba(255,255,255,0.45); margin-bottom:8px;">50 Referrals</div>
+                  <span class="milestone-badge" id="milestone-status-50" style="font-size:0.62rem; font-weight:700; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">LOCKED</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label" style="margin-bottom:8px;">Users You Referred</label>
+                <div id="referred-users-list" style="display:flex; flex-wrap:wrap; gap:8px;">
+                  <div style="font-size:0.8rem; color:rgba(255,255,255,0.3); font-style:italic;">No referrals yet.</div>
+                </div>
+              </div>
+            </div>
           </div>
 
+        </div>
+
+        <!-- Floating Save Changes Bar -->
+        <div class="dash-sticky-save-bar">
+          <div class="dash-sticky-save-text">
+            <i class="fas fa-sparkles"></i>
+            <span>Profile customization ready</span>
+          </div>
+          <button class="btn-save-primary" id="btn-save">
+            <i class="fas fa-save"></i>
+            <span>Save Changes</span>
+          </button>
         </div>
 
       </div>
@@ -767,12 +798,27 @@
       return `${r}, ${g}, ${b}`;
     }
 
-    // --- Sidebar User Card Helper ---
+    // --- Tab Switcher & Section Jump Helpers ---
+    window.switchTab = function(tabName) {
+      document.querySelectorAll('.dash-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.dash-tab-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.id === 'tab-' + tabName);
+      });
+    };
+
+    // --- Sidebar & Hero Card User Info Helper ---
     function updateSidebarUserInfo(u) {
       if (!u) return;
       const sidebarName = document.getElementById('sidebar-name');
       const sidebarHandle = document.getElementById('sidebar-handle');
       const sidebarAvatar = document.getElementById('sidebar-avatar');
+
+      const heroAvatar = document.getElementById('hero-avatar');
+      const heroName = document.getElementById('hero-display-name');
+      const heroUsername = document.getElementById('hero-username');
+      const heroViewProfile = document.getElementById('hero-view-profile');
 
       const displayName = (u.displayName || u.display_name || u.username || 'User').trim();
       const username = (u.username || '').trim();
@@ -784,6 +830,14 @@
         sidebarAvatar.src = avatarUrl || '/pfp.jpg';
         sidebarAvatar.onerror = () => { sidebarAvatar.src = '/pfp.jpg'; };
       }
+
+      if (heroName) heroName.textContent = displayName || username || 'User';
+      if (heroUsername) heroUsername.textContent = username ? '@' + username : '';
+      if (heroAvatar) {
+        heroAvatar.src = avatarUrl || '/pfp.jpg';
+        heroAvatar.onerror = () => { heroAvatar.src = '/pfp.jpg'; };
+      }
+      if (heroViewProfile) heroViewProfile.href = '/' + (username || '');
     }
 
     // Immediate initial population from cached user info
@@ -791,12 +845,25 @@
 
     // --- Sidebar & Section Helpers ---
     window.jumpToSection = function(sectionId) {
+      const tabMap = {
+        'section-basic': 'profile',
+        'section-badges': 'profile',
+        'section-theme': 'appearance',
+        'section-links': 'media',
+        'section-gallery': 'media',
+        'section-playlist': 'media',
+        'section-referrals': 'store',
+        'section-sellauth': 'store'
+      };
+
+      const targetTab = tabMap[sectionId] || 'profile';
+      switchTab(targetTab);
+
       const el = document.getElementById(sectionId);
-      if (!el) return;
-      if (el.classList.contains('collapsed')) {
-        el.classList.remove('collapsed');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
       const sidebar = document.getElementById('dash-sidebar');
       const overlay = document.getElementById('dash-sidebar-overlay');
       if (sidebar) sidebar.classList.remove('open');
