@@ -206,11 +206,11 @@
         </div>
 
         <!-- VIP Expiration Notice (hidden by default) -->
-        <div id="vip-notice" style="display:none; background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.35); border-radius: 16px; padding: 18px 24px; margin-bottom: 24px;">
+        <div id="vip-notice" style="display:none; background: rgba(52,194,122,0.08); border: 1px solid rgba(52,194,122,0.35); border-radius: 16px; padding: 18px 24px; margin-bottom: 24px;">
           <div style="display:flex; align-items:center; gap:14px;">
             <div style="font-size:1.5rem; flex-shrink:0;">👑</div>
             <div>
-              <div style="font-size:0.95rem; font-weight:700; color:#a78bfa; margin-bottom:4px;">Temporary VIP Status Active</div>
+              <div style="font-size:0.95rem; font-weight:700; color:#34C27A; margin-bottom:4px;">Temporary VIP Status Active</div>
               <div id="vip-notice-display" style="font-size:0.84rem; color:rgba(255,255,255,0.75);"></div>
             </div>
           </div>
@@ -321,10 +321,10 @@
                 <div class="form-group">
                   <label class="form-label">Accent Color</label>
                   <div class="color-picker-row">
-                    <div class="color-swatch" id="swatch-accent" style="background:#a78bfa;">
-                      <input type="color" id="input-accent-picker" value="#a78bfa" />
+                    <div class="color-swatch" id="swatch-accent" style="background:#34C27A;">
+                      <input type="color" id="input-accent-picker" value="#34C27A" />
                     </div>
-                    <input type="text" class="form-input" id="input-accent" value="#a78bfa" placeholder="#a78bfa" maxlength="7" />
+                    <input type="text" class="form-input" id="input-accent" value="#34C27A" placeholder="#34C27A" maxlength="7" />
                   </div>
                 </div>
                 <div class="form-group">
@@ -533,7 +533,7 @@
                 <label class="form-label">Your Referral Link</label>
                 <div style="display:flex; gap:10px;">
                   <input type="text" class="form-input" id="input-ref-link" readonly style="background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.6);" />
-                  <button class="form-btn-secondary" id="btn-copy-ref" style="flex-shrink:0; padding:0 16px; border-radius:12px; background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); color:#a78bfa; font-weight:600; cursor:pointer; transition:all 0.2s;">
+                  <button class="form-btn-secondary" id="btn-copy-ref" style="flex-shrink:0; padding:0 16px; border-radius:12px; background:rgba(52,194,122,0.1); border:1px solid rgba(52,194,122,0.3); color:#34C27A; font-weight:600; cursor:pointer; transition:all 0.2s;">
                     <i class="fas fa-copy"></i>
                   </button>
                 </div>
@@ -620,7 +620,7 @@
     ];
 
     const BADGE_CATALOG = {
-      dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#a78bfa' },
+      dev:         { icon: 'fas fa-code',            label: 'Developer',    color: '#34C27A' },
       og:          { icon: 'fas fa-crown',           label: 'OG',           color: '#facc15' },
       supporter:   { icon: 'fas fa-heart',           label: 'Supporter',    color: '#f472b6' },
       vip:         { icon: 'fas fa-gem',             label: 'VIP',          color: '#38bdf8' },
@@ -747,7 +747,7 @@
         if (refCountVal) refCountVal.textContent = res.referralCount || 0;
 
         // Render Milestones Status
-        updateMilestoneUI(10, res.rewards.vip5Days, '#a78bfa');
+        updateMilestoneUI(10, res.rewards.vip5Days, '#34C27A');
         updateMilestoneUI(25, res.rewards.vipPerma, '#38bdf8');
         updateMilestoneUI(50, res.rewards.supporterBadge, '#fb923c');
 
@@ -976,7 +976,7 @@
           if (playlistBody) {
             playlistBody.innerHTML = `
               <div style="text-align: center; padding: 24px 16px; color: rgba(255,255,255,0.4); display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                <i class="fas fa-lock" style="font-size: 1.8rem; color: #a78bfa; margin-bottom: 4px;"></i>
+                <i class="fas fa-lock" style="font-size: 1.8rem; color: #34C27A; margin-bottom: 4px;"></i>
                 <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">VIP Feature</div>
                 <div style="font-size: 0.8rem; line-height: 1.4;">The playlist feature is restricted to VIP users.</div>
               </div>
@@ -988,7 +988,7 @@
         // Theme
         const settings = res.settings || {};
         pinnedProducts = settings.pinnedProducts || [];
-        const accent = settings.accentColor || '#a78bfa';
+        const accent = settings.accentColor || '#34C27A';
         const bg = settings.bgColor || '#0a0a0f';
         inputAccent.value = accent;
         inputAccentPicker.value = accent;
@@ -1523,7 +1523,7 @@
       }
 
       // Accent
-      const accent = inputAccent.value || '#a78bfa';
+      const accent = inputAccent.value || '#34C27A';
 
       // Links
       previewLinks.innerHTML = '';
@@ -1581,7 +1581,7 @@
 
         // Settings
         const settingsPayload = {
-          accentColor: inputAccent.value.trim() || '#a78bfa',
+          accentColor: inputAccent.value.trim() || '#34C27A',
           bgColor: inputBg.value.trim() || '#0a0a0f',
           bgImageUrl: inputBgImage.value.trim(),
           bgVideoUrl: inputBgVideo.value.trim(),
@@ -1650,7 +1650,7 @@
       const thumb = label.querySelector('.toggle-thumb');
       if (!track || !thumb) return;
       if (el.checked) {
-        track.style.background = '#a78bfa';
+        track.style.background = '#34C27A';
         thumb.style.transform = 'translateX(20px)';
       } else {
         track.style.background = 'rgba(255,255,255,0.12)';
