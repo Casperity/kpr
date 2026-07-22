@@ -252,6 +252,13 @@ const API = {
     });
   },
 
+  updateUserEmail(userId, email) {
+    return this.request('/api/admin/users/' + encodeURIComponent(userId) + '/email', {
+      method: 'PUT',
+      body: JSON.stringify({ email })
+    });
+  },
+
   /* ── Logout ────────────────────────────────────────────── */
   logout() {
     this.clearToken();

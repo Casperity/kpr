@@ -635,6 +635,12 @@
 
         const isChecked = selectedUsers.has(String(u.id));
 
+        const emailTag = u.email
+          ? (u.isVerified
+              ? `<span style="background:rgba(52,194,122,0.12); border:1px solid rgba(52,194,122,0.25); color:#34C27A; padding:1px 7px; border-radius:8px; font-size:0.7rem; font-weight:600;" title="${u.email}"><i class="fas fa-circle-check" style="margin-right:4px;"></i>${u.email}</span>`
+              : `<span style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25); color:#f59e0b; padding:1px 7px; border-radius:8px; font-size:0.7rem; font-weight:600;" title="${u.email} (Unverified)"><i class="fas fa-clock" style="margin-right:4px;"></i>${u.email} (Unverified)</span>`)
+          : `<span style="color:#8B9089; font-size:0.72rem; font-style:italic;">No Email</span>`;
+
         return `
           <div style="background: rgba(20,24,22,0.65); border: 1px solid ${u.isBanned ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.07)'}; border-radius: 16px; padding: 16px 20px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
@@ -644,6 +650,7 @@
                 ${u.displayName ? `<span style="color: #8B9089; font-size:0.88rem;">(${u.displayName})</span>` : ''}
                 ${u.isAdmin ? '<span style="background: #fb923c; color: #0E1210; padding: 1px 7px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">ADMIN</span>' : ''}
                 ${u.isVip ? `<span style="background: #34C27A; color: #0E1210; padding: 1px 7px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;" title="${u.vipExpiresAt ? 'Expires: ' + new Date(u.vipExpiresAt).toLocaleString() : 'Permanent VIP'}">VIP${u.vipExpiresAt ? ' (Temp)' : ''}</span>` : ''}
+                ${emailTag}
                 ${banInfo}
               </div>
               <div style="display:flex; align-items:center; gap:10px; position:relative;">
@@ -659,6 +666,10 @@
                         <li class="element vip-btn" data-user="${u.id}" data-vip="${u.isVip}">
                           <i class="fas fa-crown" style="color: ${u.isVip ? '#ef4444' : '#34C27A'};"></i>
                           <p class="label">${u.isVip ? 'Remove VIP' : 'Give VIP'}</p>
+                        </li>
+                        <li class="element change-email-btn" data-user="${u.id}" data-username="${u.username}" data-email="${u.email || ''}">
+                          <i class="fas fa-envelope" style="color: #38bdf8;"></i>
+                          <p class="label">Change Email</p>
                         </li>
                         ${!u.isAdmin ? `
                         <li class="element ban-btn" data-user="${u.id}" data-banned="${u.isBanned}">
@@ -768,6 +779,38 @@
             }
           } catch (err) {
             Toast.show(err.error || 'Failed to update VIP status', 'error');
+          }
+        });
+      });
+
+      // --- Change email button ---
+      container.querySelectorAll('.change-email-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.user;
+          const username = btn.dataset.username;
+          const currentEmail = btn.dataset.email;
+
+          const newEmail = await showPromptModal('Change User Email', `Enter new email address for @${username}:`, 'user@example.com', currentEmail);
+          if (newEmail === null) return;
+          if (!newEmail.trim() || !newEmail.includes('@')) {
+            Toast.show('Please enter a valid email address.', 'error');
+            return;
+          }
+
+          try {
+            const res = await API.updateUserEmail(userId, newEmail.trim());
+            if (res.success) {
+              const u = allUsers.find(x => x.id == userId);
+              if (u) {
+                u.email = res.email;
+                u.isVerified = true;
+                renderUsers();
+              }
+              Toast.show(`Email updated for @${username}!`, 'success');
+              loadAuditLogs();
+            }
+          } catch (err) {
+            Toast.show(err.error || 'Failed to update user email', 'error');
           }
         });
       });
