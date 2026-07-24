@@ -259,6 +259,13 @@ const API = {
     });
   },
 
+  updateSelfEmail(email) {
+    return this.request('/api/user/email', {
+      method: 'PUT',
+      body: JSON.stringify({ email })
+    });
+  },
+
   /* ── Logout ────────────────────────────────────────────── */
   logout() {
     this.clearToken();

@@ -282,6 +282,28 @@
         <div class="settings-heading">Account Settings</div>
         <div class="settings-sub">Manage your password and account details</div>
 
+    <!-- Change Email -->
+    <div class="settings-card">
+      <div class="settings-card-title">Email Address</div>
+
+      <div class="form-group">
+        <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+          Your Email
+          <span id="email-status-badge" style="display: none; font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; font-weight: 600;"></span>
+        </label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="email" class="form-input" id="input-email" placeholder="name@example.com" style="flex: 1;" />
+          <button class="frutiger-button" id="btn-change-email">
+            <div class="inner">
+              <div class="top-white"></div>
+              <span class="text">Save Email</span>
+            </div>
+          </button>
+        </div>
+        <div class="form-hint" id="email-hint" style="margin-top: 8px;">Current email: <span id="current-email-text" style="color: #fff; font-weight: 600;">Not set</span></div>
+      </div>
+    </div>
+
     <!-- Change Username -->
     <div class="settings-card">
       <div class="settings-card-title">Change Username</div>
@@ -374,6 +396,12 @@
       const inputUsername = document.getElementById('input-username');
       const currentUsernameText = document.getElementById('current-username-text');
       const btnChangeUsername = document.getElementById('btn-change-username');
+
+      const inputEmail = document.getElementById('input-email');
+      const currentEmailText = document.getElementById('current-email-text');
+      const emailStatusBadge = document.getElementById('email-status-badge');
+      const btnChangeEmail = document.getElementById('btn-change-email');
+
       let userData = null;
 
       function updateSidebarUserInfo(u) {
@@ -398,6 +426,31 @@
         if (navAdmin && u.isAdmin) navAdmin.style.display = '';
       }
 
+      function updateEmailDisplay(u) {
+        if (!u) return;
+        const email = u.email || '';
+        if (inputEmail) inputEmail.value = email;
+        if (currentEmailText) currentEmailText.textContent = email || 'Not set';
+
+        if (emailStatusBadge) {
+          if (!email) {
+            emailStatusBadge.style.display = 'none';
+          } else if (u.isVerified) {
+            emailStatusBadge.style.display = 'inline-block';
+            emailStatusBadge.style.background = 'rgba(52, 194, 122, 0.15)';
+            emailStatusBadge.style.color = '#34C27A';
+            emailStatusBadge.style.border = '1px solid rgba(52, 194, 122, 0.3)';
+            emailStatusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Verified';
+          } else {
+            emailStatusBadge.style.display = 'inline-block';
+            emailStatusBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+            emailStatusBadge.style.color = '#f59e0b';
+            emailStatusBadge.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+            emailStatusBadge.innerHTML = '<i class="fas fa-clock"></i> Unverified';
+          }
+        }
+      }
+
       updateSidebarUserInfo(API.getUser());
 
       // Load user data
@@ -408,6 +461,7 @@
           API.setUser(userData);
           if (inputUsername) inputUsername.value = userData.username || '';
           if (currentUsernameText) currentUsernameText.textContent = userData.username || '';
+          updateEmailDisplay(userData);
           updateSidebarUserInfo(userData);
         } catch (err) {
           console.error(err);
@@ -415,10 +469,42 @@
           userData = cached;
           if (inputUsername) inputUsername.value = cached.username || '';
           if (currentUsernameText) currentUsernameText.textContent = cached.username || '';
+          updateEmailDisplay(cached);
           updateSidebarUserInfo(cached);
         }
       }
       loadUserData();
+
+      // Change Email
+      btnChangeEmail?.addEventListener('click', async () => {
+        const newEmail = inputEmail.value.trim().toLowerCase();
+        if (!newEmail || !newEmail.includes('@')) {
+          return Toast.show('Please enter a valid email address', 'error');
+        }
+
+        if (newEmail === (userData.email || '').toLowerCase()) {
+          return Toast.show('New email must be different from current email', 'error');
+        }
+
+        const textSpan = btnChangeEmail.querySelector('.text');
+        const origText = textSpan ? textSpan.textContent : 'Save Email';
+        if (textSpan) textSpan.textContent = 'Saving...';
+
+        try {
+          const res = await API.updateSelfEmail(newEmail);
+          if (res.success) {
+            userData.email = res.email;
+            userData.isVerified = !!res.isVerified;
+            API.setUser(userData);
+            updateEmailDisplay(userData);
+            Toast.show('Email updated successfully!', 'success');
+          }
+        } catch (err) {
+          Toast.show(err.error || 'Failed to update email address', 'error');
+        } finally {
+          if (textSpan) textSpan.textContent = origText;
+        }
+      });
 
       // Mobile sidebar toggle
       const sidebarToggle = document.getElementById('dash-sidebar-toggle');
