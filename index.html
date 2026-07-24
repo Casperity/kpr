@@ -86,6 +86,17 @@
       box-shadow: 0 0 0 3px var(--register-dim);
     }
     .nav-brand span { color: var(--text-dim); }
+    .nav-shop-pill {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem; font-weight: 700;
+      background: rgba(52, 194, 122, 0.12);
+      color: var(--register);
+      border: 1px solid rgba(52, 194, 122, 0.3);
+      padding: 3px 8px; border-radius: 20px;
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-left: 6px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
     .nav-actions { display: flex; align-items: center; gap: 20px; }
     .nav-link {
       font-size: 0.85rem; font-weight: 500; color: var(--text-dim);
@@ -371,7 +382,10 @@
   <div class="bg-glow"></div>
 
   <nav>
-    <a href="/" class="nav-brand"><span class="tag-dot"></span>kpr<span>.lol</span></a>
+    <a href="/" class="nav-brand">
+      <span class="tag-dot"></span>kpr<span>.lol</span>
+      <span class="nav-shop-pill"><i class="fas fa-store" style="font-size:0.65rem;"></i> Storefront</span>
+    </a>
     <div class="nav-actions">
       <a href="/login" class="nav-link" id="nav-login">Log in</a>
       <a href="/signup" class="nav-btn" id="nav-signup">
@@ -385,8 +399,9 @@
     <section class="hero">
       <div class="hero-copy">
         <div class="tag-row">
-          <span class="tag-chip live"><span class="dot"></span>SellAuth checkout — live</span>
-          <span class="tag-chip"><i class="fas fa-ticket" style="font-size:0.65rem;"></i>&nbsp;Invite only</span>
+          <span class="tag-chip live"><span class="dot"></span><i class="fas fa-store" style="font-size:0.68rem;"></i> SellAuth Storefront</span>
+          <span class="tag-chip shop-feature" style="border-color: rgba(255,90,46,0.3); color: var(--stamp);"><i class="fas fa-bag-shopping" style="font-size:0.68rem;"></i> Instant Product Checkout</span>
+          <span class="tag-chip"><i class="fas fa-ticket" style="font-size:0.65rem;"></i> Invite only</span>
         </div>
 
         <h1 class="hero-title">
