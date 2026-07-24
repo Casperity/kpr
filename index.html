@@ -77,26 +77,11 @@
     }
     .nav-brand {
       font-family: 'Space Mono', monospace;
-      font-size: 1.15rem; font-weight: 700; color: var(--text);
-      text-decoration: none; letter-spacing: -0.01em;
-      display: flex; align-items: center; gap: 8px;
+      font-size: 1.25rem; font-weight: 700; color: var(--text);
+      text-decoration: none; letter-spacing: -0.03em;
+      display: flex; align-items: center;
     }
-    .nav-brand .tag-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: var(--register);
-      box-shadow: 0 0 0 3px var(--register-dim);
-    }
-    .nav-brand span { color: var(--text-dim); }
-    .nav-shop-pill {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.68rem; font-weight: 700;
-      background: rgba(52, 194, 122, 0.12);
-      color: var(--register);
-      border: 1px solid rgba(52, 194, 122, 0.3);
-      padding: 3px 8px; border-radius: 20px;
-      display: inline-flex; align-items: center; gap: 5px;
-      margin-left: 6px;
-      text-transform: uppercase; letter-spacing: 0.04em;
-    }
+    .nav-brand span { color: var(--stamp); }
     .nav-actions { display: flex; align-items: center; gap: 20px; }
     .nav-link {
       font-size: 0.85rem; font-weight: 500; color: var(--text-dim);
@@ -151,17 +136,17 @@
     }
     .hero-copy { max-width: 560px; }
 
-    .tag-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
-    .tag-chip {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.04em;
-      padding: 6px 12px 6px 10px; border-radius: 4px;
-      border: 1px dashed var(--line); color: var(--text-dim);
-      position: relative;
+    .hero-kicker {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'Space Mono', monospace; font-size: 0.76rem; font-weight: 700;
+      color: var(--register); letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 24px; padding: 6px 14px;
+      background: rgba(52, 194, 122, 0.08);
+      border: 1px solid rgba(52, 194, 122, 0.22);
+      border-radius: 4px;
     }
-    .tag-chip.live { color: var(--register); border-color: rgba(52,194,122,0.35); background: var(--register-dim); }
-    .tag-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .hero-kicker .kicker-divider { color: var(--text-faint); margin: 0 2px; }
+    .hero-kicker .kicker-secondary { color: var(--text-dim); font-weight: 500; }
 
     .hero-title {
       font-family: 'Space Mono', monospace;
@@ -382,10 +367,7 @@
   <div class="bg-glow"></div>
 
   <nav>
-    <a href="/" class="nav-brand">
-      <span class="tag-dot"></span>kpr<span>.lol</span>
-      <span class="nav-shop-pill"><i class="fas fa-store" style="font-size:0.65rem;"></i> Storefront</span>
-    </a>
+    <a href="/" class="nav-brand">kpr<span>.lol</span></a>
     <div class="nav-actions">
       <a href="/login" class="nav-link" id="nav-login">Log in</a>
       <a href="/signup" class="nav-btn" id="nav-signup">
@@ -398,10 +380,10 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-copy">
-        <div class="tag-row">
-          <span class="tag-chip live"><span class="dot"></span><i class="fas fa-store" style="font-size:0.68rem;"></i> SellAuth Storefront</span>
-          <span class="tag-chip shop-feature" style="border-color: rgba(255,90,46,0.3); color: var(--stamp);"><i class="fas fa-bag-shopping" style="font-size:0.68rem;"></i> Instant Product Checkout</span>
-          <span class="tag-chip"><i class="fas fa-ticket" style="font-size:0.65rem;"></i> Invite only</span>
+        <div class="hero-kicker animate-in">
+          <span><i class="fas fa-store" style="font-size:0.7rem; margin-right:6px;"></i>SellAuth Storefront</span>
+          <span class="kicker-divider">/</span>
+          <span class="kicker-secondary">Invite Only</span>
         </div>
 
         <h1 class="hero-title">
