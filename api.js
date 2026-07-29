@@ -39,13 +39,19 @@ const API = {
 
       if (!res.ok) {
         const err = { status: res.status, ...(data || {}) };
+        if (res.status === 401) {
+          // Prevent infinite redirect loops if we are already on login page
+          if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+            this.logout();
+          }
+        }
         throw err;
       }
       return data;
     } catch (err) {
       /* Network error (not HTTP error) */
       if (!err.status) {
-        throw { status: 0, message: 'Network error â€” check your connection.' };
+        throw { status: 0, message: 'Network error — check your connection.' };
       }
       throw err;
     }
