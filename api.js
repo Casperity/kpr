@@ -9,7 +9,32 @@ const API = {
   getToken()  { return localStorage.getItem('kpr_token'); },
   setToken(t) { localStorage.setItem('kpr_token', t); },
   clearToken() { localStorage.removeItem('kpr_token'); },
-  isLoggedIn() { return !!this.getToken(); },
+  isTokenExpired() {
+    const token = this.getToken();
+    if (!token) return true;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      if (payload.exp && Date.now() >= payload.exp * 1000) {
+        return true;
+      }
+      return false;
+    } catch (_) {
+      return true;
+    }
+  },
+  isLoggedIn() {
+    if (!this.getToken()) return false;
+    if (this.isTokenExpired()) {
+      this.clearToken();
+      this.clearUser();
+      return false;
+    }
+    return true;
+  },
 
   /* â”€â”€ User info cache â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   getUser()  { return JSON.parse(localStorage.getItem('kpr_user') || 'null'); },
